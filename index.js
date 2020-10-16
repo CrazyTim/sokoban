@@ -33,7 +33,7 @@ let levels = [
 
 currentlevel = -1;
 
-let entityType = {
+let entity = {
   empty: 0,
   wall: 1,
   ground: 2,
@@ -70,50 +70,67 @@ window.onkeydown = (e) => {
     x += 1;
   }
 
-  // Move adjacent obj
-  let box = getAdjacent(player.pos, {x, y});
+  // Check what is in the adjacent space:
+  let adj = getAdjacent(player.pos, {x, y});
+  if (adj) {
 
-  if (box) {
+    // Cancel if its a wall:
+    if (adj === 'wall') return;
 
-    // Only move if the next space isn't a box or a wall
-    let box2 = getAdjacent(box, {x, y});
-    if (box2) {
-      return;
-    }
+    // Cancel if the next adjacent space isn't empty:
+    let adj2 = getAdjacent(adj, {x, y});
+    if (adj2) return;
 
-    box.x += x;
-    box.y += y;
+    adj.x += x;
+    adj.y += y;
 
   }
 
-  // Move player
+  // Move player:
   player.pos.x += x;
   player.pos.y += y;
 
   drawBoard();
 
+  checkWin();
+
+}
+
+function checkWin() {
+
+}
+
+function convertPosToMapIndex(pos) {
+  return pos.x + (pos.y * boardSize.width);
 }
 
 function getAdjacent(pos, offset) {
 
-  for (var i = 0; i < boxes.length; i++) {
+  // Check box:
+  for (let i = 0; i < boxes.length; i++) {
     if(boxes[i].x === pos.x + offset.x &&
        boxes[i].y === pos.y + offset.y) {
       return boxes[i];
     }
   }
 
-}
+  // Check wall:
+  let i = convertPosToMapIndex(pos);
+  let j;
+  if (offset.y == -1) {
+    j = i - boardSize.width;
+  } else if (offset.y == 1) {
+    j = i + boardSize.width;
+  } else if (offset.x == -1) {
+    j = i - 1;
+  } else if (offset.x == 1) {
+    j = i + 1;
+  }
 
-function move() {
+  if (level.map[j] === entity.wall) {
+    return 'wall';
+  }
 
-}
-
-function draw() {
-  //drawBoard();
-}
-
-function onKeyDown() {
 }
 
 function drawBoard() {
@@ -124,7 +141,7 @@ function drawBoard() {
   for (let y = 0; y < boardSize.height; y++) {
     for (let x = 0; x < boardSize.width; x++) {
 
-      let cell = level.map[ (y * boardSize.width) + x ];
+      let cell = level.map[ convertPosToMapIndex({x,y}) ];
 
       let color;
       if (cell === 0) {
