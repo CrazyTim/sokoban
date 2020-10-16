@@ -10,26 +10,66 @@ let state = {
 
   boxes: [],
 
-  currentlevel: -1,
-
 }
+
+let currentlevel = -1;
 
 let history = [];
 
 let boardSize = {
   width: 11,
-  height: 10,
+  height: 11,
 }
 
 squareSize = 30; // Pixels.
 
 let container; // The DOM node we are drawing inside of.
 
+let canInput = true;
+
 let levels = [
 
   { // Level 1
-    map: [0,0,0,1,1,1,1,0,0,0,0,1,1,1,1,2,2,1,0,0,0,0,1,2,2,2,2,2,1,1,1,1,0,1,2,2,2,1,2,2,3,2,1,1,1,2,2,1,2,2,2,3,2,2,1,1,1,2,1,2,2,1,3,2,2,1,1,1,2,2,2,2,1,1,1,1,1,1,2,2,2,1,1,1,0,0,0,0,1,2,2,2,1,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0],
-    startPos: { x:2, y:7 },
+    map: [
+      0,0,0,0,0,0,0,0,0,0,0,
+      0,0,0,0,0,0,0,0,0,0,0,
+      0,0,4,4,0,0,0,0,0,0,0,
+      0,0,1,1,1,1,1,1,0,0,0,
+      0,0,1,2,2,2,2,1,0,0,0,
+      0,0,1,2,2,2,2,1,0,0,0,
+      0,0,1,2,2,2,3,1,0,0,0,
+      0,0,1,1,1,1,1,1,0,0,0,
+      0,0,0,0,0,0,0,0,0,0,0,
+      0,0,0,0,0,0,0,0,0,0,0,
+      0,0,0,0,0,0,0,0,0,0,0,
+    ],
+    startPos: {
+      x: 3,
+      y: 5,
+    },
+    boxes: [
+      { x:4, y:5 },
+    ],
+  },
+
+  { // Level 2
+    map: [
+      0,4,4,1,1,1,1,0,0,0,0,
+      1,1,1,1,2,2,1,0,0,0,0,
+      1,2,2,2,2,2,1,1,1,1,0,
+      1,2,2,2,1,2,2,3,2,1,1,
+      1,2,2,1,2,2,2,3,2,2,1,
+      1,1,2,1,2,2,1,3,2,2,1,
+      1,1,2,2,2,2,1,1,1,1,1,
+      1,2,2,2,1,1,1,0,0,0,0,
+      1,2,2,2,1,0,0,0,0,0,0,
+      1,1,1,1,1,0,0,0,0,0,0,
+      0,0,0,0,0,0,0,0,0,0,0,
+    ],
+    startPos: {
+      x:2,
+      y:7
+    },
     boxes: [
       { x:2, y:3 },
       { x:4, y:5 },
@@ -44,23 +84,37 @@ let entity = {
   wall: 1,
   ground: 2,
   crystal: 3,
+  levelLabel: 4,
 }
 
 window.onload = () => {
   container = document.querySelector('body');
   nextlevel();
-  drawBoard();
 }
 
 function nextlevel() {
-  level = levels[++state.currentlevel];
+
+  if (currentlevel !== -1) {
+
+    // Show level complete dialog:
+    // todo...
+
+  }
+
+  canInput = true;
+  history = [];
+  level = levels[++currentlevel];
   state.player.pos = level.startPos;
   state.boxes = deepCopy(level.boxes);
+  drawBoard();
+
 }
 
 window.onkeydown = (e) => {
 
   //console.log(e);
+
+  if (!canInput) return;
 
   // Undo:
   if (e.key === 'z' && e.ctrlKey) {
@@ -117,6 +171,15 @@ window.onkeydown = (e) => {
 }
 
 function checkWin() {
+
+  for (let i = 0; i < state.boxes.length; i++) {
+    if(level.map[ convertPosToMapIndex(state.boxes[i]) ] !== entity.crystal) return;
+  }
+
+  canInput = false;
+  setTimeout(() => {
+    nextlevel();
+  }, 1000);
 
 }
 
