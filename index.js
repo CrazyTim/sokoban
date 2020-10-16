@@ -12,7 +12,7 @@ let state = {
 
 }
 
-let currentlevel = -1;
+let currentlevel = 0;
 
 let history = [];
 
@@ -33,7 +33,7 @@ let levels = [
     map: [
       0,0,0,0,0,0,0,0,0,0,0,
       0,0,0,0,0,0,0,0,0,0,0,
-      0,0,4,4,0,0,0,0,0,0,0,
+      0,0,4,0,0,0,0,0,0,0,0,
       0,0,1,1,1,1,1,1,0,0,0,
       0,0,1,2,2,2,2,1,0,0,0,
       0,0,1,2,2,2,2,1,0,0,0,
@@ -50,11 +50,20 @@ let levels = [
     boxes: [
       { x:4, y:5 },
     ],
+    labels: [
+      {
+        text: '01',
+        pos: {x:2, y:2},
+        width: 2,
+        height: 1,
+        align: 'right',
+      },
+    ],
   },
 
   { // Level 2
     map: [
-      0,4,4,1,1,1,1,0,0,0,0,
+      0,4,0,1,1,1,1,0,0,0,0,
       1,1,1,1,2,2,1,0,0,0,0,
       1,2,2,2,2,2,1,1,1,1,0,
       1,2,2,2,1,2,2,3,2,1,1,
@@ -75,6 +84,15 @@ let levels = [
       { x:4, y:5 },
       { x:5, y:5 }
     ],
+    labels: [
+      {
+        text: '02',
+        pos: {x:1, y:0},
+        width: 2,
+        height: 1,
+        align: 'right',
+      },
+    ],
   },
 
 ];
@@ -84,27 +102,26 @@ let entity = {
   wall: 1,
   ground: 2,
   crystal: 3,
-  levelLabel: 4,
+  labelH: 4,
+  labelV: 5,
 }
 
 window.onload = () => {
   container = document.querySelector('body');
-  nextlevel();
+  changeLevel(currentlevel);
 }
 
-function nextlevel() {
+function changeLevel(l) {
 
-  if (currentlevel !== -1) {
-
-    // Show level complete dialog:
+  if (!levels[l]) {
     // todo...
-
   }
 
   canInput = true;
   history = [];
-  level = levels[++currentlevel];
-  state.player.pos = level.startPos;
+  level = levels[l];
+  state.player.pos.x = level.startPos.x;
+  state.player.pos.y = level.startPos.y;
   state.boxes = deepCopy(level.boxes);
   drawBoard();
 
@@ -112,13 +129,18 @@ function nextlevel() {
 
 window.onkeydown = (e) => {
 
-  //console.log(e);
+  console.log(e);
 
   if (!canInput) return;
 
   // Undo:
-  if (e.key === 'z' && e.ctrlKey) {
+  if (e.key === 'Delete' || (e.key === 'z' && e.ctrlKey)) {
     undo();
+    return;
+  }
+
+  if (e.key === 'Escape') {
+    changeLevel(currentlevel);
     return;
   }
 
@@ -178,7 +200,7 @@ function checkWin() {
 
   canInput = false;
   setTimeout(() => {
-    nextlevel();
+    changeLevel(++currentlevel);
   }, 1000);
 
 }
@@ -233,22 +255,19 @@ function drawBoard() {
       let cell = level.map[ convertPosToMapIndex({x,y}) ];
 
       let color;
-      if (cell === 0) {
+      if (cell === entity.empty) {
         color = 'white';
-      } else if (cell === 1) {
+      } else if (cell === entity.wall) {
         color = 'green';
-      } else if (cell === 2) {
+      } else if (cell === entity.ground) {
         color = 'yellow';
-      } else if (cell === 3) {
+      } else if (cell === entity.crystal) {
         color = 'purple';
       }
 
-      //console.log({cell, x, y, color});
-
       // Draw cell:
       drawBox(
-        x,
-        y,
+        {x,y},
         color,
         squareSize,
       );
@@ -257,10 +276,9 @@ function drawBoard() {
   }
 
   // Draw boxes:
-  state.boxes.forEach(b => {
+  state.boxes.forEach(i => {
     drawBox(
-      b.x,
-      b.y,
+      i,
       'blue',
       squareSize,
     );
@@ -268,22 +286,40 @@ function drawBoard() {
 
   // Draw player:
   drawBox(
-    state.player.pos.x,
-    state.player.pos.y,
+    state.player.pos,
     'orange',
     squareSize,
   );
 
+  level.labels.forEach(i => {
+    drawLabel(i);
+  });
+
 }
 
-function drawBox(xPos, yPos, color, squareSize) {
+function drawBox(pos, color, squareSize) {
   let d = document.createElement('div');
   d.style.position = 'absolute';
   d.style.width = squareSize + 'px';
   d.style.height = squareSize + 'px';
-  d.style.left = (xPos * squareSize) + 'px';
-  d.style.top = (yPos * squareSize) + 'px';
+  d.style.left = (pos.x * squareSize) + 'px';
+  d.style.top = (pos.y * squareSize) + 'px';
   d.style.backgroundColor = color;
+  container.appendChild(d);
+}
+
+function drawLabel(label) {
+  let d = document.createElement('div');
+  d.style.position = 'absolute';
+  d.style.width = (squareSize * label.width) + 'px';
+  d.style.height = (squareSize * label.height) + 'px';
+  d.style.left = (label.pos.x * squareSize) + 'px';
+  d.style.top = (label.pos.y * squareSize) + 'px';
+  d.textContent = label.text;
+  d.style.fontSize = (squareSize - 2) + 'px';
+  d.style.lineHeight = (squareSize - 2) + 'px';
+  d.classList.add('label');
+  d.classList.add('align-' + label.align);
   container.appendChild(d);
 }
 
