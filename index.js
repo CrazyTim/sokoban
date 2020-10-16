@@ -61,7 +61,7 @@ function changeLevel(l) {
 
 window.onkeydown = (e) => {
 
-  console.log(e);
+  //console.log(e);
 
   if (!canInput) return;
 
@@ -258,7 +258,7 @@ function drawLabel(label) {
   d.style.top = (label.pos.y * squareSize) + 'px';
   d.textContent = label.text;
   d.style.fontSize = (squareSize - 2) + 'px';
-  d.style.lineHeight = (squareSize - 2) + 'px';
+  //d.style.lineHeight = (squareSize - 2) + 'px';
   d.classList.add('label');
   d.classList.add('align-' + label.align);
   container.appendChild(d);
