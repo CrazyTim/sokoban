@@ -1,12 +1,20 @@
-let player = {
-  pos: {
-    x: 0,
-    y: 0,
-  },
-  name: '',
-};
+let state = {
 
-let boxes = [];
+  player: {
+    pos: {
+      x: 0,
+      y: 0,
+    },
+    name: '',
+  },
+
+  boxes: [],
+
+  currentlevel: -1,
+
+}
+
+let history = [];
 
 let boardSize = {
   width: 11,
@@ -31,8 +39,6 @@ let levels = [
 
 ];
 
-currentlevel = -1;
-
 let entity = {
   empty: 0,
   wall: 1,
@@ -47,14 +53,20 @@ window.onload = () => {
 }
 
 function nextlevel() {
-  level = levels[++currentlevel];
-  player.pos = level.startPos;
-  boxes = deepCopy(level.boxes);
+  level = levels[++state.currentlevel];
+  state.player.pos = level.startPos;
+  state.boxes = deepCopy(level.boxes);
 }
 
 window.onkeydown = (e) => {
 
   //console.log(e);
+
+  // Undo:
+  if (e.key === 'z' && e.ctrlKey) {
+    undo();
+    return;
+  }
 
   let x = 0;
   let y = 0;
@@ -70,8 +82,10 @@ window.onkeydown = (e) => {
     x += 1;
   }
 
-  // Check what is in the adjacent space:
-  let adj = getAdjacent(player.pos, {x, y});
+  if ( x === 0 && y === 0) return; // Cancel if no movement.
+
+  // Check movement is valid:
+  let adj = getAdjacent(state.player.pos, {x, y});
   if (adj) {
 
     // Cancel if its a wall:
@@ -81,14 +95,20 @@ window.onkeydown = (e) => {
     let adj2 = getAdjacent(adj, {x, y});
     if (adj2) return;
 
+  }
+
+  // Move...
+
+  history.push(deepCopy(state));
+
+  if (adj) {
     adj.x += x;
     adj.y += y;
-
   }
 
   // Move player:
-  player.pos.x += x;
-  player.pos.y += y;
+  state.player.pos.x += x;
+  state.player.pos.y += y;
 
   drawBoard();
 
@@ -100,6 +120,12 @@ function checkWin() {
 
 }
 
+function undo() {
+  if (history.length === 0) return;
+  state = history.pop();
+  drawBoard();
+}
+
 function convertPosToMapIndex(pos) {
   return pos.x + (pos.y * boardSize.width);
 }
@@ -107,23 +133,23 @@ function convertPosToMapIndex(pos) {
 function getAdjacent(pos, offset) {
 
   // Check box:
-  for (let i = 0; i < boxes.length; i++) {
-    if(boxes[i].x === pos.x + offset.x &&
-       boxes[i].y === pos.y + offset.y) {
-      return boxes[i];
+  for (let i = 0; i < state.boxes.length; i++) {
+    if(state.boxes[i].x === pos.x + offset.x &&
+       state.boxes[i].y === pos.y + offset.y) {
+      return state.boxes[i];
     }
   }
 
   // Check wall:
   let i = convertPosToMapIndex(pos);
   let j;
-  if (offset.y == -1) {
+  if (offset.y === -1) {
     j = i - boardSize.width;
-  } else if (offset.y == 1) {
+  } else if (offset.y === 1) {
     j = i + boardSize.width;
-  } else if (offset.x == -1) {
+  } else if (offset.x === -1) {
     j = i - 1;
-  } else if (offset.x == 1) {
+  } else if (offset.x === 1) {
     j = i + 1;
   }
 
@@ -168,7 +194,7 @@ function drawBoard() {
   }
 
   // Draw boxes:
-  boxes.forEach(b => {
+  state.boxes.forEach(b => {
     drawBox(
       b.x,
       b.y,
@@ -179,8 +205,8 @@ function drawBoard() {
 
   // Draw player:
   drawBox(
-    player.pos.x,
-    player.pos.y,
+    state.player.pos.x,
+    state.player.pos.y,
     'orange',
     squareSize,
   );
