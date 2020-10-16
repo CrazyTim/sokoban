@@ -27,76 +27,6 @@ let container; // The DOM node we are drawing inside of.
 
 let canInput = true;
 
-let levels = [
-
-  { // Level 1
-    map: [
-      0,0,0,0,0,0,0,0,0,0,0,
-      0,0,0,0,0,0,0,0,0,0,0,
-      0,0,4,0,0,0,0,0,0,0,0,
-      0,0,1,1,1,1,1,1,0,0,0,
-      0,0,1,2,2,2,2,1,0,0,0,
-      0,0,1,2,2,2,2,1,0,0,0,
-      0,0,1,2,2,2,3,1,0,0,0,
-      0,0,1,1,1,1,1,1,0,0,0,
-      0,0,0,0,0,0,0,0,0,0,0,
-      0,0,0,0,0,0,0,0,0,0,0,
-      0,0,0,0,0,0,0,0,0,0,0,
-    ],
-    startPos: {
-      x: 3,
-      y: 5,
-    },
-    boxes: [
-      { x:4, y:5 },
-    ],
-    labels: [
-      {
-        text: '01',
-        pos: {x:2, y:2},
-        width: 2,
-        height: 1,
-        align: 'right',
-      },
-    ],
-  },
-
-  { // Level 2
-    map: [
-      0,4,0,1,1,1,1,0,0,0,0,
-      1,1,1,1,2,2,1,0,0,0,0,
-      1,2,2,2,2,2,1,1,1,1,0,
-      1,2,2,2,1,2,2,3,2,1,1,
-      1,2,2,1,2,2,2,3,2,2,1,
-      1,1,2,1,2,2,1,3,2,2,1,
-      1,1,2,2,2,2,1,1,1,1,1,
-      1,2,2,2,1,1,1,0,0,0,0,
-      1,2,2,2,1,0,0,0,0,0,0,
-      1,1,1,1,1,0,0,0,0,0,0,
-      0,0,0,0,0,0,0,0,0,0,0,
-    ],
-    startPos: {
-      x:2,
-      y:7
-    },
-    boxes: [
-      { x:2, y:3 },
-      { x:4, y:5 },
-      { x:5, y:5 }
-    ],
-    labels: [
-      {
-        text: '02',
-        pos: {x:1, y:0},
-        width: 2,
-        height: 1,
-        align: 'right',
-      },
-    ],
-  },
-
-];
-
 let entity = {
   empty: 0,
   wall: 1,
@@ -115,6 +45,8 @@ function changeLevel(l) {
 
   if (!levels[l]) {
     // todo...
+    alert('last level complete!');
+    return;
   }
 
   canInput = true;
@@ -195,7 +127,7 @@ window.onkeydown = (e) => {
 function checkWin() {
 
   for (let i = 0; i < state.boxes.length; i++) {
-    if(level.map[ convertPosToMapIndex(state.boxes[i]) ] !== entity.crystal) return;
+    if(!isBoxOnCrystal(state.boxes[i])) return;
   }
 
   canInput = false;
@@ -203,6 +135,10 @@ function checkWin() {
     changeLevel(++currentlevel);
   }, 1000);
 
+}
+
+function isBoxOnCrystal(box) {
+  return level.map[convertPosToMapIndex(box)] === entity.crystal;
 }
 
 function undo() {
@@ -266,7 +202,7 @@ function drawBoard() {
       }
 
       // Draw cell:
-      drawBox(
+      drawSquare(
         {x,y},
         color,
         squareSize,
@@ -277,15 +213,20 @@ function drawBoard() {
 
   // Draw boxes:
   state.boxes.forEach(i => {
-    drawBox(
+
+    let boxColor = 'blue';
+    if (isBoxOnCrystal(i)) boxColor = 'lightpink';
+
+    drawSquare(
       i,
-      'blue',
+      boxColor,
       squareSize,
     );
+
   });
 
   // Draw player:
-  drawBox(
+  drawSquare(
     state.player.pos,
     'orange',
     squareSize,
@@ -297,7 +238,7 @@ function drawBoard() {
 
 }
 
-function drawBox(pos, color, squareSize) {
+function drawSquare(pos, color, squareSize) {
   let d = document.createElement('div');
   d.style.position = 'absolute';
   d.style.width = squareSize + 'px';
