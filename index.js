@@ -37,8 +37,22 @@ let entity = {
 }
 
 window.onload = () => {
-  container = document.querySelector('body');
+  container = document.querySelector('.canvas');
   changeLevel(currentlevel);
+
+  for (let i = 0; i < levels.length; i++) {
+
+    let btn = document.createElement('button');
+    btn.classList.add('btn');
+    btn.textContent = 'level ' + i;
+    btn.onclick = e => {
+      changeLevel(i);
+    }
+    document.querySelector('.buttons').appendChild(btn);
+
+  }
+
+
 }
 
 function changeLevel(l) {
@@ -206,6 +220,7 @@ function drawBoard() {
         {x,y},
         color,
         squareSize,
+        'cell',
       );
 
     }
@@ -221,6 +236,7 @@ function drawBoard() {
       i,
       boxColor,
       squareSize,
+      'box',
     );
 
   });
@@ -230,6 +246,7 @@ function drawBoard() {
     state.player.pos,
     'orange',
     squareSize,
+    'person',
   );
 
   level.labels.forEach(i => {
@@ -238,7 +255,7 @@ function drawBoard() {
 
 }
 
-function drawSquare(pos, color, squareSize) {
+function drawSquare(pos, color, squareSize, className) {
   let d = document.createElement('div');
   d.style.position = 'absolute';
   d.style.width = squareSize + 'px';
@@ -246,6 +263,7 @@ function drawSquare(pos, color, squareSize) {
   d.style.left = (pos.x * squareSize) + 'px';
   d.style.top = (pos.y * squareSize) + 'px';
   d.style.backgroundColor = color;
+  d.classList.add(className);
   container.appendChild(d);
 }
 

@@ -1,4 +1,8 @@
-body, html {
+* {
+  box-sizing: border-box;
+}
+
+body, html, div.canvas {
   margin: 0;
   padding: 0;
   overflow: hidden;
@@ -7,6 +11,21 @@ body, html {
   background-color: lightgrey;
 }
 
+div.buttons {
+  width: 20%;
+  height: 100%;
+  background-color: white;
+  position: absolute;
+  top: 0px;
+  right: 0px;
+}
+
+.btn {
+display: block;
+height: 30px;
+width: 80%;
+margin: 10px;
+}
 
 .label.align-right {
   justify-content: flex-end;
@@ -24,6 +43,18 @@ body, html {
   background-color: green;
   color: #fff;
   padding: 0 4px;
-  box-sizing: border-box;
 }
 
+
+/* Development mode */
+div {
+  border: 0.5px solid #333;
+}
+
+div.person {
+  border-radius: 100px;
+}
+
+div.box {
+  border-radius: 5px;
+}

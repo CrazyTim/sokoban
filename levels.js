@@ -35,7 +35,7 @@ let levels = [
         align: 'left',
       },
     ],
-  },
+  }, // End level 1
 
   { // Level 2
     map: [
@@ -69,6 +69,7 @@ let levels = [
         align: 'left',
       },
     ],
-  },
+  }, // End level 2
 
-];
+
+]; // End
