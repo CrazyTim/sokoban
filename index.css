@@ -2,13 +2,19 @@
   box-sizing: border-box;
 }
 
-body, html, div.canvas {
+body, html {
   margin: 0;
   padding: 0;
   overflow: hidden;
   width: 100%;
   height: 100%;
   background-color: lightgrey;
+  position: relative;
+}
+
+div.stage {
+  margin: 100px 50px;
+  position: relative;
 }
 
 div.buttons {
@@ -16,15 +22,35 @@ div.buttons {
   height: 100%;
   background-color: white;
   position: absolute;
-  top: 0px;
+  top: 50px;
   right: 0px;
 }
 
-.btn {
-display: block;
-height: 30px;
-width: 80%;
-margin: 10px;
+div.toolbar {
+  width: 100%;
+  height: 50px;
+  background-color: white;
+  position: absolute;
+  top: 0px;
+  right: 0px;
+  left: 0px;
+}
+
+div.toolbar label {
+  margin: 10px;
+}
+
+div.buttons .btn {
+  display: block;
+  padding: 5px 0;
+  width: 80%;
+  margin: 10px;
+}
+
+div.toolbar .btn {
+  display: inline-block;
+  margin: 10px;
+  padding: 5px 15px;
 }
 
 .label.align-right {
@@ -45,12 +71,6 @@ margin: 10px;
   padding: 0 4px;
 }
 
-
-/* Development mode */
-div {
-  border: 0.5px solid #333;
-}
-
 div.person {
   border-radius: 100px;
 }
@@ -58,3 +78,15 @@ div.person {
 div.box {
   border-radius: 5px;
 }
+
+
+div.stage.gridVisible .grid {
+  visibility: visible;
+}
+
+ div.stage.gridVisible div {
+  border-right: 1px solid #333;
+  border-bottom: 1px solid #333;
+}
+
+

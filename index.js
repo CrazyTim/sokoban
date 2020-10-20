@@ -23,7 +23,7 @@ let boardSize = {
 
 squareSize = 30; // Pixels.
 
-let container; // The DOM node we are drawing inside of.
+let stage; // The DOM node we are drawing inside of.
 
 let canInput = true;
 
@@ -37,7 +37,8 @@ let entity = {
 }
 
 window.onload = () => {
-  container = document.querySelector('.canvas');
+
+  stage = document.querySelector('.stage');
   changeLevel(currentlevel);
 
   for (let i = 0; i < levels.length; i++) {
@@ -52,7 +53,37 @@ window.onload = () => {
 
   }
 
+  // Set stage size:
+  stage.style.width = boardSize.width * squareSize + 'px';
+  stage.style.height = boardSize.height * squareSize + 'px';
 
+  // Event handler for btnToggleGrid:
+  btnToggleGrid = document.querySelector('.btnToggleGrid');
+  btnToggleGrid.onclick = e => {
+    stage.classList.toggle('gridVisible');
+  }
+
+  // Event handler for btnModeWall:
+  btnModeWall = document.querySelector('.btnModeWall');
+  btnModeWall.onclick = e => {
+    resetMode();
+    stage.classList.add('modeWall');
+  }
+
+  // Event handler for btnModeWall:
+  btnModeGround = document.querySelector('.btnModeGround');
+  btnModeGround.onclick = e => {
+    resetMode();
+    stage.classList.add('modeGround');
+  }
+
+}
+
+function resetMode() {
+  stage.classList.remove('modeEmpty');
+  stage.classList.remove('modeWall');
+  stage.classList.remove('modeGround');
+  stage.classList.remove('modeCrystal');
 }
 
 function changeLevel(l) {
@@ -264,7 +295,7 @@ function drawSquare(pos, color, squareSize, className) {
   d.style.top = (pos.y * squareSize) + 'px';
   d.style.backgroundColor = color;
   d.classList.add(className);
-  container.appendChild(d);
+  stage.appendChild(d);
 }
 
 function drawLabel(label) {
@@ -279,11 +310,11 @@ function drawLabel(label) {
   //d.style.lineHeight = (squareSize - 2) + 'px';
   d.classList.add('label');
   d.classList.add('align-' + label.align);
-  container.appendChild(d);
+  stage.appendChild(d);
 }
 
 function clear() {
-  container.innerHTML = '';
+  stage.innerHTML = '';
 }
 
 function deepCopy(inObject) {
