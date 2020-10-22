@@ -1,6 +1,7 @@
-import levels from './levels.js'
+import levels from './levels.js';
+import * as util from './util.js';
 
-let state = {
+window.state = {
 
   player: {
     pos: {
@@ -23,6 +24,8 @@ let stage; // The DOM node we are drawing inside of.
 
 let canInput = true;
 
+let mode = null;
+
 const boardSize = {
   width: 11,
   height: 11,
@@ -41,14 +44,12 @@ const entity = {
 
 window.onload = () => {
 
-  stage = document.querySelector('.stage');
-  changeLevel(levelIndex);
-
+  // Build level buttons:
   for (let i = 0; i < levels.length; i++) {
 
     let btn = document.createElement('button');
     btn.classList.add('btn');
-    btn.textContent = 'level ' + i;
+    btn.textContent = 'level ' + (i + 1);
     btn.onclick = e => {
       changeLevel(i);
     }
@@ -56,43 +57,64 @@ window.onload = () => {
 
   }
 
-  // Set stage size:
+  // Define stage:
+  stage = document.querySelector('.stage');
   stage.style.width = boardSize.width * squareSize + 'px';
   stage.style.height = boardSize.height * squareSize + 'px';
 
   setEventHandlers();
 
+  changeLevel(levelIndex);
+
 }
 
 function setEventHandlers() {
 
-    // Event handler for btnToggleGrid:
+   // Event handler for btnToggleGrid:
   const btnToggleGrid = document.querySelector('.btnToggleGrid');
   btnToggleGrid.onclick = e => {
     stage.classList.toggle('gridVisible');
   }
 
-  // Event handler for btnModeWall:
-  const btnModeWall = document.querySelector('.btnModeWall');
-  btnModeWall.onclick = e => {
-    resetMode();
-    stage.classList.add('modeWall');
+
+  const btnModeEmpty = document.querySelector('.btn-mode-empty');
+  btnModeEmpty.onclick = e => {
+    setMode('empty');
   }
 
-  // Event handler for btnModeWall:
-  const btnModeGround = document.querySelector('.btnModeGround');
+  const btnModeWall = document.querySelector('.btn-mode-wall');
+  btnModeWall.onclick = e => {
+    setMode('wall');
+  }
+
+  const btnModeGround = document.querySelector('.btn-mode-ground');
   btnModeGround.onclick = e => {
-    resetMode();
-    stage.classList.add('modeGround');
+    setMode('ground');
+  }
+
+  const btnModeCrystal = document.querySelector('.btn-mode-crystal');
+  btnModeCrystal.onclick = e => {
+    setMode('crystal');
   }
 
 }
 
-function resetMode() {
-  stage.classList.remove('modeEmpty');
-  stage.classList.remove('modeWall');
-  stage.classList.remove('modeGround');
-  stage.classList.remove('modeCrystal');
+function setMode(m) {
+  stage.classList.remove('mode-empty');
+  stage.classList.remove('mode-wall');
+  stage.classList.remove('mode-ground');
+  stage.classList.remove('mode-crystal');
+  stage.classList.add('mode-' + m);
+  mode = m;
+
+  const modeButtons = document.querySelectorAll('.btn-mode');
+  modeButtons.forEach(b => {
+    b.classList.remove('active');
+  });
+
+  const btn = document.querySelector('.btn-mode-' + m);
+  btn.classList.add('active');
+
 }
 
 function changeLevel(l) {
@@ -109,8 +131,39 @@ function changeLevel(l) {
   levelIndex = l;
   state.player.pos.x = level.startPos.x;
   state.player.pos.y = level.startPos.y;
-  state.boxes = deepCopy(level.boxes);
+  state.boxes = util.deepCopy(level.boxes);
+
+  // Add id to each box.
+  for (var i = 0; i < state.boxes.length; i++) {
+    state.boxes[i].id = i
+  }
+
   drawBoard();
+
+  // Make boxes:
+  state.boxes.forEach(b => {
+
+    let boxColor = 'blue';
+    if (isBoxOnCrystal(b)) boxColor = 'lightpink';
+
+    makeSquare(
+      b,
+      boxColor,
+      squareSize,
+      'box',
+      'box-' + b.id,
+    );
+
+  });
+
+  // Make player:
+  makeSquare(
+    state.player.pos,
+    'orange',
+    squareSize,
+    'player',
+    'player-' + state.player.id,
+  );
 
 }
 
@@ -163,18 +216,18 @@ window.onkeydown = (e) => {
 
   // Move...
 
-  history.push(deepCopy(state));
+  history.push(util.deepCopy(state));
 
   if (adj) {
     adj.x += x;
     adj.y += y;
+    updateBox(adj);
   }
 
   // Move player:
   state.player.pos.x += x;
   state.player.pos.y += y;
-
-  drawBoard();
+  updatePlayer();
 
   checkWin();
 
@@ -199,8 +252,14 @@ function isBoxOnCrystal(box) {
 
 function undo() {
   if (history.length === 0) return;
-  state = history.pop();
-  drawBoard();
+  window.state = history.pop();
+
+  updatePlayer();
+
+  state.boxes.forEach(b => {
+    updateBox(b);
+  });
+
 }
 
 function convertPosToMapIndex(pos) {
@@ -244,7 +303,9 @@ function drawBoard() {
   for (let y = 0; y < boardSize.height; y++) {
     for (let x = 0; x < boardSize.width; x++) {
 
-      let cell = level.map[ convertPosToMapIndex({x,y}) ];
+      const i = convertPosToMapIndex({x,y})
+
+      let cell = level.map[i];
 
       let color;
       if (cell === entity.empty) {
@@ -258,38 +319,20 @@ function drawBoard() {
       }
 
       // Draw cell:
-      drawSquare(
+      const div = makeSquare(
         {x,y},
         color,
         squareSize,
         'cell',
+        'cell-' + i,
       );
+
+      div.onclick = (e) => {
+        changeSquare(div, mode)
+      }
 
     }
   }
-
-  // Draw boxes:
-  state.boxes.forEach(i => {
-
-    let boxColor = 'blue';
-    if (isBoxOnCrystal(i)) boxColor = 'lightpink';
-
-    drawSquare(
-      i,
-      boxColor,
-      squareSize,
-      'box',
-    );
-
-  });
-
-  // Draw player:
-  drawSquare(
-    state.player.pos,
-    'orange',
-    squareSize,
-    'person',
-  );
 
   level.labels.forEach(i => {
     drawLabel(i);
@@ -297,7 +340,7 @@ function drawBoard() {
 
 }
 
-function drawSquare(pos, color, squareSize, className) {
+function makeSquare(pos, color, squareSize, className, id) {
   let d = document.createElement('div');
   d.style.position = 'absolute';
   d.style.width = squareSize + 'px';
@@ -306,7 +349,30 @@ function drawSquare(pos, color, squareSize, className) {
   d.style.top = (pos.y * squareSize) + 'px';
   d.style.backgroundColor = color;
   d.classList.add(className);
+  d.classList.add(id);
   stage.appendChild(d);
+  return d;
+}
+
+function changeSquare(div, mode) {
+  // Todo...
+  console.log({div,mode});
+
+
+}
+
+function moveSquare(id, pos) {
+  const d = document.querySelector('.' + id);
+  d.style.left = (pos.x * squareSize) + 'px';
+  d.style.top = (pos.y * squareSize) + 'px';
+}
+
+function updatePlayer() {
+  moveSquare('player-' + state.player.id, state.player.pos);
+}
+
+function updateBox(b) {
+  moveSquare('box-' + b.id, b);
 }
 
 function drawLabel(label) {
@@ -326,26 +392,4 @@ function drawLabel(label) {
 
 function clear() {
   stage.innerHTML = '';
-}
-
-function deepCopy(inObject) {
-
-  let outObject, value, key
-
-  if (typeof inObject !== "object" || inObject === null) {
-    return inObject // Return the value if inObject is not an object
-  }
-
-  // Create an array or object to hold the values
-  outObject = Array.isArray(inObject) ? [] : {}
-
-  for (key in inObject) {
-    value = inObject[key]
-
-    // Recursively (deep) copy for nested objects, including arrays
-    outObject[key] = deepCopy(value)
-  }
-
-  return outObject
-
 }

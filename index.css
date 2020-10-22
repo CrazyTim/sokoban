@@ -53,6 +53,18 @@ div.toolbar .btn {
   padding: 5px 15px;
 }
 
+.btn-mode.active {
+  border: solid 2px #f00;
+}
+
+.btn:focus-visible {
+  outline: dashed 1px orange;
+}
+
+.btn:focus:not(:focus-visible) {
+  outline: none;
+}
+
 .label.align-right {
   justify-content: flex-end;
 }
@@ -71,7 +83,7 @@ div.toolbar .btn {
   padding: 0 4px;
 }
 
-div.person {
+div.player {
   border-radius: 100px;
 }
 
