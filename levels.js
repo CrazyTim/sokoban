@@ -3,7 +3,7 @@
 // ground: 2
 // crystal: 3
 
-let levels = [
+export default [
 
   { // Level 1
     map: [

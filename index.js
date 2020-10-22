@@ -1,3 +1,5 @@
+import levels from './levels.js'
+
 let state = {
 
   player: {
@@ -12,22 +14,23 @@ let state = {
 
 }
 
-let currentlevel = 0;
+let level = {}; // The current level.
+let levelIndex = 0;
 
 let history = [];
-
-let boardSize = {
-  width: 11,
-  height: 11,
-}
-
-squareSize = 30; // Pixels.
 
 let stage; // The DOM node we are drawing inside of.
 
 let canInput = true;
 
-let entity = {
+const boardSize = {
+  width: 11,
+  height: 11,
+}
+
+const squareSize = 30; // Pixels.
+
+const entity = {
   empty: 0,
   wall: 1,
   ground: 2,
@@ -39,7 +42,7 @@ let entity = {
 window.onload = () => {
 
   stage = document.querySelector('.stage');
-  changeLevel(currentlevel);
+  changeLevel(levelIndex);
 
   for (let i = 0; i < levels.length; i++) {
 
@@ -57,21 +60,27 @@ window.onload = () => {
   stage.style.width = boardSize.width * squareSize + 'px';
   stage.style.height = boardSize.height * squareSize + 'px';
 
-  // Event handler for btnToggleGrid:
-  btnToggleGrid = document.querySelector('.btnToggleGrid');
+  setEventHandlers();
+
+}
+
+function setEventHandlers() {
+
+    // Event handler for btnToggleGrid:
+  const btnToggleGrid = document.querySelector('.btnToggleGrid');
   btnToggleGrid.onclick = e => {
     stage.classList.toggle('gridVisible');
   }
 
   // Event handler for btnModeWall:
-  btnModeWall = document.querySelector('.btnModeWall');
+  const btnModeWall = document.querySelector('.btnModeWall');
   btnModeWall.onclick = e => {
     resetMode();
     stage.classList.add('modeWall');
   }
 
   // Event handler for btnModeWall:
-  btnModeGround = document.querySelector('.btnModeGround');
+  const btnModeGround = document.querySelector('.btnModeGround');
   btnModeGround.onclick = e => {
     resetMode();
     stage.classList.add('modeGround');
@@ -90,13 +99,14 @@ function changeLevel(l) {
 
   if (!levels[l]) {
     // todo...
-    alert('last level complete!');
+    alert('game over!');
     return;
   }
 
   canInput = true;
   history = [];
   level = levels[l];
+  levelIndex = l;
   state.player.pos.x = level.startPos.x;
   state.player.pos.y = level.startPos.y;
   state.boxes = deepCopy(level.boxes);
@@ -116,8 +126,9 @@ window.onkeydown = (e) => {
     return;
   }
 
+  // Restart level:
   if (e.key === 'Escape') {
-    changeLevel(currentlevel);
+    changeLevel(levelIndex);
     return;
   }
 
@@ -177,7 +188,7 @@ function checkWin() {
 
   canInput = false;
   setTimeout(() => {
-    changeLevel(++currentlevel);
+    changeLevel(levelIndex + 1);
   }, 1000);
 
 }
