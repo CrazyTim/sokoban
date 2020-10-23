@@ -33,6 +33,7 @@ div.buttons {
 div.toolbar {
   display: flex;
   gap: 10px;
+  align-items: center;
   padding: 10px;
   width: 100%;
   height: 60px;
@@ -84,28 +85,30 @@ div.toolbar .btn {
   user-select: none;
 }
 
-div.player {
-  border-radius: 100px;
-}
-
 div.box {
   border-radius: 5px;
 }
-
 
 div.stage.gridVisible .grid {
   visibility: visible;
 }
 
- div.stage.gridVisible div {
+div.stage.gridVisible .cell {
   border-right: 1px solid #333;
   border-bottom: 1px solid #333;
 }
 
 .toggle-btn-group {
-  padding: 0 10px;
+  padding: 5px 10px;
   display: flex;
   align-items: center;
   gap: 10px;
   background-color: #ffd8d8;
+}
+
+.player.state-idle {
+  background-image: url(./img/player-idle-4.svg);
+  background-repeat: no-repeat;
+  background-size: 100%;
+  background-position: center;
 }
