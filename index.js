@@ -236,66 +236,68 @@ function handleKeyDown(e) {
     return;
   }
 
-
   let x = 0;
   let y = 0;
-  let face;
 
   // Determine pos offset
   if (e.key === 'ArrowUp') {
     y -= 1;
-    face = 'up';
+    state.player.face = 'up';
   } else if (e.key === 'ArrowDown') {
     y += 1;
-    face = 'down';
+    state.player.face = 'down';
   } else if (e.key === 'ArrowLeft') {
     x -= 1;
-    face = 'left';
+    state.player.face = 'left';
   } else if (e.key === 'ArrowRight') {
     x += 1;
-    face = 'right';
+    state.player.face = 'right';
   }
 
-  if ( x === 0 && y === 0) return; // Cancel if no movement.
+  let move = true;
+
+  if ( x === 0 && y === 0) move = false; // Cancel if no movement.
 
   // Check movement is valid:
   let adj = getAdjacent(state.player.pos, {x, y});
   if (adj) {
 
     // Cancel if its a wall:
-    if (adj === 'wall') return;
+    if (adj === 'wall') move = false;
 
     // Cancel if the next adjacent space isn't empty:
     let adj2 = getAdjacent(adj, {x, y});
-    if (adj2) return;
+    if (adj2) move = false;
 
   }
 
-  // Move...
+  if (move) { // Check can move. Regardless, we still need to update `player.face`.
 
-  moves.push(util.deepCopy(state));
+    moves.push(util.deepCopy(state));
 
-  if (adj) {
-    adj.x += x;
-    adj.y += y;
-    updateBox(adj);
+    updateGui();
+
+    if (adj) {
+      adj.x += x;
+      adj.y += y;
+      updateBox(adj);
+    }
+
+    // Move player:
+    state.player.pos.x += x;
+    state.player.pos.y += y;
+
+    // Wait for css to animate:
+    canAct = false;
+    setTimeout(() => {
+      canAct = true;
+      checkWin();
+      sendQueuedInput();
+    }, moveDuration * 1000);
+
   }
 
-  // Move player:
-  state.player.pos.x += x;
-  state.player.pos.y += y;
-  state.player.face = face;
   updatePlayer();
-
-  updateGui();
-
-  // Wait for css to animate:
-  canAct = false;
-  setTimeout(() => {
-    canAct = true;
-    checkWin();
-    sendQueuedInput();
-  }, moveDuration * 1000);
 
 }
 
