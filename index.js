@@ -39,6 +39,7 @@ const boardSize = {
 const squareSize = 60; // Pixels.
 
 const moveDuration = 0.1;
+const winDuration = 1;
 
 const entity = {
 
@@ -318,9 +319,11 @@ function checkWin() {
   }
 
   canInput = false;
+  document.querySelector('.player').classList.add('state-win');
+
   setTimeout(() => {
     changeLevel(levelIndex + 1);
-  }, 1000);
+  }, winDuration * 1000);
 
 }
 
