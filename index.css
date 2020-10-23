@@ -54,14 +54,16 @@ div.toolbar .btn {
 }
 
 .btn-mode.active {
-  border: solid 2px #f00;
+  border: solid 2px #5a5a5a;
+  border-radius: 3px;
+  background-color: #bfbfbf;
 }
 
-.btn:focus-visible {
-  outline: dashed 1px orange;
+.btn-mode.active:focus-visible {
+  border-width: 3px;
 }
 
-.btn:focus:not(:focus-visible) {
+*:focus:not(:focus-visible) {
   outline: none;
 }
 
@@ -81,6 +83,7 @@ div.toolbar .btn {
   background-color: green;
   color: #fff;
   padding: 0 4px;
+  user-select: none;
 }
 
 div.player {

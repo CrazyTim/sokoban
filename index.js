@@ -34,12 +34,35 @@ const boardSize = {
 const squareSize = 30; // Pixels.
 
 const entity = {
-  empty: 0,
-  wall: 1,
-  ground: 2,
-  crystal: 3,
-  labelH: 4,
-  labelV: 5,
+
+  empty: {
+    id: 0,
+    color: 'white',
+  },
+
+  wall: {
+    id: 1,
+    color: 'green',
+  },
+
+  ground: {
+    id: 2,
+    color: 'yellow',
+  },
+
+  crystal: {
+    id: 3,
+    color: 'purple',
+  },
+
+  labelH: {
+    id: 4,
+  },
+
+  labelV: {
+    id: 5,
+  },
+
 }
 
 window.onload = () => {
@@ -247,7 +270,7 @@ function checkWin() {
 }
 
 function isBoxOnCrystal(box) {
-  return level.map[convertPosToMapIndex(box)] === entity.crystal;
+  return level.map[convertPosToMapIndex(box)] === entity.crystal.id;
 }
 
 function undo() {
@@ -289,7 +312,7 @@ function getAdjacent(pos, offset) {
     j = i + 1;
   }
 
-  if (level.map[j] === entity.wall) {
+  if (level.map[j] === entity.wall.id) {
     return 'wall';
   }
 
@@ -307,15 +330,13 @@ function drawBoard() {
 
       let cell = level.map[i];
 
+      // Set color:
       let color;
-      if (cell === entity.empty) {
-        color = 'white';
-      } else if (cell === entity.wall) {
-        color = 'green';
-      } else if (cell === entity.ground) {
-        color = 'yellow';
-      } else if (cell === entity.crystal) {
-        color = 'purple';
+      for (const value of Object.values(entity)) {
+        if (cell === value.id) {
+          color = value.color;
+          break;
+        }
       }
 
       // Draw cell:
@@ -328,7 +349,9 @@ function drawBoard() {
       );
 
       div.onclick = (e) => {
-        changeSquare(div, mode)
+        if (mode) {
+          changeCell(i, mode);
+        }
       }
 
     }
@@ -354,11 +377,23 @@ function makeSquare(pos, color, squareSize, className, id) {
   return d;
 }
 
-function changeSquare(div, mode) {
-  // Todo...
-  console.log({div,mode});
+function changeCell(id, entityKey) {
 
+  console.log({id,entityKey});
 
+  const div = document.querySelector('.cell-' + id);
+
+  // Get entity:
+  let e;
+  for (const [key, value] of Object.entries(entity)) {
+    if (entityKey === key) {
+      e = value;
+      break;
+    }
+  }
+
+  div.style.backgroundColor = e.color;
+  level.map[id] = e.id;
 }
 
 function moveSquare(id, pos) {
