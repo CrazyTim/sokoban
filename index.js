@@ -10,6 +10,7 @@ window.state = {
       y: 0,
     },
     name: '',
+    face: 'left',
   },
 
   boxes: [],
@@ -35,7 +36,7 @@ const boardSize = {
   height: 11,
 }
 
-const squareSize = 40; // Pixels.
+const squareSize = 60; // Pixels.
 
 const moveDuration = 0.1;
 
@@ -59,14 +60,6 @@ const entity = {
   crystal: {
     id: 3,
     color: 'purple',
-  },
-
-  labelH: {
-    id: 4,
-  },
-
-  labelV: {
-    id: 5,
   },
 
 }
@@ -188,16 +181,13 @@ function changeLevel(l) {
   // Make boxes:
   state.boxes.forEach(b => {
 
-    let boxColor = 'blue';
-    if (isBoxOnCrystal(b)) boxColor = 'lightpink';
-
     makeSquare(
       b,
-      boxColor,
       squareSize,
       [
         'box',
         'box-' + b.id,
+        'state-init',
       ],
     );
 
@@ -206,7 +196,6 @@ function changeLevel(l) {
   // Make player:
   const div = makeSquare(
     state.player.pos,
-    'transparent',
     squareSize,
     [
       'player',
@@ -216,6 +205,8 @@ function changeLevel(l) {
   );
 
   updateGui();
+
+  updatePlayer(); // Update classes on player div.
 
 }
 
@@ -247,16 +238,21 @@ function handleKeyDown(e) {
 
   let x = 0;
   let y = 0;
+  let face;
 
   // Determine pos offset
   if (e.key === 'ArrowUp') {
     y -= 1;
+    face = 'up';
   } else if (e.key === 'ArrowDown') {
     y += 1;
+    face = 'down';
   } else if (e.key === 'ArrowLeft') {
     x -= 1;
+    face = 'left';
   } else if (e.key === 'ArrowRight') {
     x += 1;
+    face = 'right';
   }
 
   if ( x === 0 && y === 0) return; // Cancel if no movement.
@@ -287,6 +283,7 @@ function handleKeyDown(e) {
   // Move player:
   state.player.pos.x += x;
   state.player.pos.y += y;
+  state.player.face = face;
   updatePlayer();
 
   updateGui();
@@ -392,11 +389,11 @@ function drawBoard() {
 
       let cell = level.map[i];
 
-      // Set color:
-      let color;
+      // Get entity type:
+      let e;
       for (const value of Object.values(entity)) {
         if (cell === value.id) {
-          color = value.color;
+          e = value;
           break;
         }
       }
@@ -404,11 +401,11 @@ function drawBoard() {
       // Draw cell:
       const div = makeSquare(
         {x,y},
-        color,
         squareSize,
         [
           'cell',
           'cell-' + i,
+          'type-' + e.id,
         ],
       );
 
@@ -427,16 +424,12 @@ function drawBoard() {
 
 }
 
-function makeSquare(pos, color, squareSize, classes) {
+function makeSquare(pos, squareSize, classes) {
   let d = document.createElement('div');
   d.style.position = 'absolute';
   d.style.width = squareSize + 'px';
   d.style.height = squareSize + 'px';
-
   d.style.transform = `translate(${pos.x * squareSize}px, ${pos.y * squareSize}px)`
-  //d.style.left = (pos.x * squareSize) + 'px';
-  //d.style.top = (pos.y * squareSize) + 'px';
-  d.style.backgroundColor = color;
   classes.forEach(c => {
     d.classList.add(c);
   });
@@ -459,7 +452,13 @@ function changeCell(id, entityKey) {
     }
   }
 
-  div.style.backgroundColor = e.color;
+  div.classList.remove('type-0');
+  div.classList.remove('type-1');
+  div.classList.remove('type-2');
+  div.classList.remove('type-3');
+
+  div.classList.add('type-' + e.id);
+
   level.map[id] = e.id;
 
 }
@@ -471,6 +470,20 @@ function moveSquare(id, pos) {
 
 function updatePlayer() {
   moveSquare('player-' + state.player.id, state.player.pos);
+
+  const d = document.querySelector('.player');
+
+  // Ensure we always have a x facing AND a y facing:
+  if (state.player.face === 'left' || state.player.face === 'right') {
+    d.classList.remove('face-left');
+    d.classList.remove('face-right');
+  } else {
+    d.classList.remove('face-up');
+    d.classList.remove('face-down');
+  }
+
+  d.classList.add('face-' + state.player.face);
+
 }
 
 function updateGui() {
@@ -479,6 +492,15 @@ function updateGui() {
 
 function updateBox(b) {
   moveSquare('box-' + b.id, b);
+
+  const d = document.querySelector('.box-' + b.id);
+
+  if(isBoxOnCrystal(b)) {
+    d.classList.add('state-win');
+  } else {
+    d.classList.remove('state-win');
+  }
+
 }
 
 function drawLabel(label) {
@@ -489,7 +511,7 @@ function drawLabel(label) {
   d.style.left = (label.pos.x * squareSize) + 'px';
   d.style.top = (label.pos.y * squareSize) + 'px';
   d.textContent = label.text;
-  d.style.fontSize = (squareSize - 2) + 'px';
+  d.style.fontSize = (squareSize - 10) + 'px';
   //d.style.lineHeight = (squareSize - 2) + 'px';
   d.classList.add('label');
   d.classList.add('align-' + label.align);
