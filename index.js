@@ -99,6 +99,10 @@ function setEventHandlers() {
     stage.classList.toggle('gridVisible');
   }
 
+  const btnExport = document.querySelector('.btn-export');
+  btnExport.onclick = e => {
+    util.downloadFile(JSON.stringify(level), 'application/json', 'level');
+  }
 
   const btnModeEmpty = document.querySelector('.btn-mode-empty');
   btnModeEmpty.onclick = e => {
