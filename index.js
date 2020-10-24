@@ -10,7 +10,8 @@ window.state = {
       y: 0,
     },
     name: '',
-    face: 'se',
+    face: '',
+    state: '',
   },
 
   boxes: [],
@@ -37,7 +38,7 @@ const boardSize = {
 
 const squareSize = 60; // Pixels.
 
-const moveDuration = 0.15;
+const moveDuration = 0.2;
 const winDuration = 1;
 
 const entity = {
@@ -71,7 +72,7 @@ window.onload = () => {
 
     let btn = document.createElement('button');
     btn.classList.add('btn');
-    btn.textContent = 'level ' + (i + 1);
+    btn.textContent = levels[i].labels[0].text;
     btn.onclick = e => {
       changeLevel(i);
     }
@@ -175,6 +176,8 @@ function changeLevel(l) {
   levelIndex = l;
   state.player.pos.x = level.startPos.x;
   state.player.pos.y = level.startPos.y;
+  state.player.state = 'idle';
+  state.player.face = level.startPos.face || 'se';
   state.boxes = util.deepCopy(level.boxes);
 
   // Add id to each box.
@@ -243,23 +246,29 @@ function handleKeyDown(e) {
 
   let x = 0;
   let y = 0;
+  let dir;
 
   // Determine pos offset
   if (e.key === 'ArrowUp') {
+    dir = 'up';
     y -= 1;
     state.player.face = state.player.face.includes('e') ? 'ne' : 'nw';
   } else if (e.key === 'ArrowDown') {
+    dir = 'down';
     y += 1;
     state.player.face = state.player.face.includes('e') ? 'se' : 'sw';
   } else if (e.key === 'ArrowLeft') {
+    dir = 'left';
     x -= 1;
     state.player.face = 'sw';
   } else if (e.key === 'ArrowRight') {
+    dir = 'right';
     x += 1;
     state.player.face = 'se';
   }
 
   let move = true;
+  state.player.state = 'idle';
 
   if ( x === 0 && y === 0) move = false; // Cancel if no movement.
 
@@ -286,6 +295,7 @@ function handleKeyDown(e) {
       adj.x += x;
       adj.y += y;
       updateBox(adj);
+      state.player.state = 'push-' + dir;
     }
 
     // Move player:
@@ -295,6 +305,10 @@ function handleKeyDown(e) {
     // Wait for css to animate:
     canAct = false;
     setTimeout(() => {
+
+      state.player.state = 'idle';
+      updatePlayer();
+
       canAct = true;
       checkWin();
       sendQueuedInput();
@@ -326,7 +340,9 @@ function checkWin() {
   }
 
   canInput = false;
-  document.querySelector('.player').classList.add('state-win');
+
+  state.player.state = 'win';
+  updatePlayer();
 
   setTimeout(() => {
     changeLevel(levelIndex + 1);
@@ -498,6 +514,21 @@ function updatePlayer() {
   div.classList.remove('face-se');
   div.classList.remove('face-sw');
   div.classList.add('face-' + state.player.face);
+
+  div.classList.remove('state-idle');
+  div.classList.remove('state-push-up');
+  div.classList.remove('state-push-down');
+  div.classList.remove('state-push-left');
+  div.classList.remove('state-push-right');
+  div.classList.remove('state-win');
+
+  if (state.player.state.includes('push')) {
+    div.classList.add('state-' + state.player.state);
+  } else if (state.player.state === 'win') {
+    div.classList.add('state-win');
+  } else {
+    div.classList.add('state-idle');
+  }
 
 }
 

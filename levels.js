@@ -10,6 +10,7 @@ export default [
     startPos: {
       x: 2,
       y: 2,
+      face: 'sw',
     },
     boxes: [
       { x:4, y:2 },

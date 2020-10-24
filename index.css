@@ -113,34 +113,51 @@ div.stage.edit .cell {
   position: absolute;
 }
 
-.player.state-idle.face-se::before {
+/* Player idle up */
+.player.face-se::before {
   background-image: url(./img/player-down.svg);
 }
-
-.player.state-idle.face-sw::before {
+.player.face-sw::before {
   background-image: url(./img/player-down.svg);
   transform: scaleX(-1); /* Face left */
 }
 
-.player.state-idle.face-ne::before {
+/* Player idle down */
+.player.face-ne::before {
   background-image: url(./img/player-up.svg);
 }
-
-.player.state-idle.face-nw::before {
+.player.face-nw::before {
   background-image: url(./img/player-up.svg);
   transform: scaleX(-1); /* Face left */
 }
 
+/* Player win */
+.player.state-win.face-ne::before,
+.player.state-win.face-se::before {
+  background-image: url(./img/player-win.svg);
+}
 .player.state-win.face-nw::before,
 .player.state-win.face-sw::before {
   background-image: url(./img/player-win.svg);
   transform: scaleX(-1); /* Face left */
 }
 
-.player.state-win.face-ne::before,
-.player.state-win.face-se::before {
-  background-image: url(./img/player-win.svg);
+/* Player push */
+.player.state-push-up::before {
+  background-image: url(./img/player-up.svg);
 }
+.player.state-push-down::before {
+  background-image: url(./img/player-down.svg);
+  transform: scaleX(-1); /* Face left */
+}
+.player.state-push-right::before {
+  background-image: url(./img/player-push.svg);
+}
+.player.state-push-left::before {
+  background-image: url(./img/player-push.svg);
+  transform: scaleX(-1); /* Face left */
+}
+
 
 .player,
 .box,
@@ -154,7 +171,7 @@ div.stage.edit .cell {
 }
 
 .box.state-win{
-  opacity: 0.7;
+  /* opacity: 0.7; */
 }
 
 .cell.type-0 { /* empty */
