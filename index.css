@@ -144,10 +144,10 @@ div.stage.edit .cell {
 
 /* Player push */
 .player.state-push-up::before {
-  background-image: url(./img/player-up.svg);
+  background-image: url(./img/player-push-up.svg);
 }
 .player.state-push-down::before {
-  background-image: url(./img/player-down.svg);
+  background-image: url(./img/player-push-down.svg);
   transform: scaleX(-1); /* Face left */
 }
 .player.state-push-right::before {
