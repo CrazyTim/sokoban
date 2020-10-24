@@ -110,34 +110,25 @@ window.onload = () => {
 function setEventHandlers() {
 
   const btnExport = document.querySelector('.btn-export');
-  btnExport.onclick = e => {
-    util.downloadFile(JSON.stringify(level), 'application/json', 'level');
-  }
+  btnExport.onclick = e => util.downloadFile(JSON.stringify(level), 'application/json', 'level');
+
+  const btnModeClear = document.querySelector('.btn-clear');
+  btnModeClear.onclick = e => empty();
 
   const btnModeEmpty = document.querySelector('.btn-mode-empty');
-  btnModeEmpty.onclick = e => {
-    changeMode('empty');
-  }
+  btnModeEmpty.onclick = e => changeMode('empty');
 
   const btnModeWall = document.querySelector('.btn-mode-wall');
-  btnModeWall.onclick = e => {
-    changeMode('wall');
-  }
+  btnModeWall.onclick = e => changeMode('wall');
 
   const btnModeGround = document.querySelector('.btn-mode-ground');
-  btnModeGround.onclick = e => {
-    changeMode('ground');
-  }
+  btnModeGround.onclick = e => changeMode('ground');
 
   const btnModeCrystal = document.querySelector('.btn-mode-crystal');
-  btnModeCrystal.onclick = e => {
-    changeMode('crystal');
-  }
+  btnModeCrystal.onclick = e => changeMode('crystal');
 
   const btnModePlayer = document.querySelector('.btn-mode-player');
-  btnModePlayer.onclick = e => {
-    changeMode('player');
-  }
+  btnModePlayer.onclick = e => changeMode('player');
 
 }
 
@@ -512,6 +503,12 @@ function changeCell(id, entityKey) {
 
   level.map[id] = e.id;
 
+}
+
+function empty() {
+  for (let i = 0; i < level.map.length; i++) {
+    changeCell(i, 'empty');
+  }
 }
 
 function moveSquare(id, pos) {
