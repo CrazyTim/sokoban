@@ -569,7 +569,7 @@ function drawLabel(label) {
   d.style.left = (label.pos.x * squareSize) + 'px';
   d.style.top = (label.pos.y * squareSize) + 'px';
   d.textContent = label.text;
-  d.style.fontSize = (squareSize - 10) + 'px';
+  d.style.fontSize = (squareSize - 0) + 'px';
   //d.style.lineHeight = (squareSize - 2) + 'px';
   d.classList.add('label');
   d.classList.add('align-' + label.align);

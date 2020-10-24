@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Yantramanav:wght@900&display=swap');
+
 * {
   box-sizing: border-box;
 }
@@ -13,7 +15,7 @@ body, html {
 }
 
 div.stage {
-  margin: 100px 50px;
+  margin: 110px 60px;
   position: relative;
 }
 
@@ -23,11 +25,12 @@ div.buttons {
   flex-direction: column;
   padding: 10px;
   width: 20%;
-  height: 100%;
+  height: calc(100% - 50px);
   background-color: white;
   position: absolute;
   top: 50px;
   right: 0px;
+  overflow-y: scroll;
 }
 
 div.toolbar {
@@ -75,20 +78,16 @@ div.toolbar .btn {
 .label {
   display: flex;
   align-items: center;
-  font-family: sans-serif;
-  font-weight: 600;
-  color: #fff;
+  font-family: 'Yantramanav', sans-serif;
+  letter-spacing: 2px;
+  color: #d2d2d2;
+  text-shadow: 0 0 7px #00000063;
   padding: 0 6px;
   user-select: none;
 }
 
-div.stage.edit .grid {
-  visibility: visible;
-}
-
 div.stage.edit .cell {
-  border-right: 1px solid #333;
-  border-bottom: 1px solid #333;
+  box-shadow: 0 0 0px 1px #404040;
 }
 
 .toggle-btn-group {
@@ -174,12 +173,14 @@ div.stage.edit .cell {
   /* opacity: 0.7; */
 }
 
-.cell.type-0 { /* empty */
-  background-color: #fff;
+/* empty */
+.cell.type-0 {
+  background-color: lightgrey;
 }
 
-.cell.type-1 { /* wall */
-  background-color: #693f4a;
+/* wall */
+.cell.type-1 {
+  background-image: url(./img/wall-2.svg);
 }
 
 /* ground  */
@@ -189,7 +190,7 @@ div.stage.edit .cell {
 
 
 .cell.type-3 { /* crystal  */
-  background-image: url(./img/crystal-7.svg);
+  background-image: url(./img/storage.svg), url(./img/ground.svg);
   background-color: #ecd4b8;
 }
 
