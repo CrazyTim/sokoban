@@ -280,14 +280,7 @@ function handleKeyDown(e) {
   // Check movement is valid:
   let adj = getAdjacent(state.player.pos, {x, y});
   if (adj) {
-
-    // Cancel if its a wall:
-    if (adj === 'wall') move = false;
-
-    // Cancel if the next adjacent space isn't empty:
-    let adj2 = getAdjacent(adj, {x, y});
-    if (adj2) move = false;
-
+    move = canBePushed(adj, {x, y});
   }
 
   if (move) { // Check can move. Regardless, we still need to update `player.face`.
@@ -311,8 +304,12 @@ function handleKeyDown(e) {
     canAct = false;
     setTimeout(() => {
 
-      state.player.state = 'idle';
-      updatePlayer();
+      // Change state from 'push' to 'idle' if the box can't be pushed any further.
+      let adj = getAdjacent(state.player.pos, {x, y});
+      if (!adj || !canBePushed(adj, {x, y}) ) {
+        state.player.state = 'idle';
+        updatePlayer();
+      }
 
       canAct = true;
       checkWin();
@@ -322,6 +319,19 @@ function handleKeyDown(e) {
   }
 
   updatePlayer();
+
+}
+
+function canBePushed(item, direction = {x:0, y:0}) {
+
+  // Cancel if its a wall:
+  if (item === 'wall') return false;
+
+  // Cancel if the next adjacent space isn't empty:
+  let adj = getAdjacent(item, direction);
+  if (adj) return false;
+
+  return true
 
 }
 
