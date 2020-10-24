@@ -67,12 +67,17 @@ const entity = {
 
 window.onload = () => {
 
+  // Compose labels
+  for (var i = 0; i < levels.length; i++) {
+    levels[i].labels[0].text = util.pad(i + 1, 2);
+  }
+
   // Build level buttons:
   for (let i = 0; i < levels.length; i++) {
 
     let btn = document.createElement('button');
     btn.classList.add('btn');
-    btn.textContent = levels[i].labels[0].text;
+    btn.textContent = 'level ' + levels[i].labels[0].text;
     btn.onclick = e => {
       changeLevel(i);
     }

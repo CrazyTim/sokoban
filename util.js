@@ -36,3 +36,11 @@ export function getRandomInt(min, max) {
   max = Math.floor(max);
   return Math.floor(Math.random() * (max - min)) + min;
 }
+
+/**
+ * Return a string where str is padded with a character x number of times.
+ */
+export function pad(str, x, char = '0') {
+  str = str + ''; // Ensure a string;
+  return str.length >= x ? str : new Array(x - str.length + 1).join(char) + str;
+}
