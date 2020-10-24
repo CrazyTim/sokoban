@@ -10,7 +10,7 @@ window.state = {
       y: 0,
     },
     name: '',
-    face: 'left',
+    face: 'se',
   },
 
   boxes: [],
@@ -37,7 +37,7 @@ const boardSize = {
 
 const squareSize = 60; // Pixels.
 
-const moveDuration = 0.1;
+const moveDuration = 0.15;
 const winDuration = 1;
 
 const entity = {
@@ -247,16 +247,16 @@ function handleKeyDown(e) {
   // Determine pos offset
   if (e.key === 'ArrowUp') {
     y -= 1;
-    state.player.face = 'up';
+    state.player.face = state.player.face.includes('e') ? 'ne' : 'nw';
   } else if (e.key === 'ArrowDown') {
     y += 1;
-    state.player.face = 'down';
+    state.player.face = state.player.face.includes('e') ? 'se' : 'sw';
   } else if (e.key === 'ArrowLeft') {
     x -= 1;
-    state.player.face = 'left';
+    state.player.face = 'sw';
   } else if (e.key === 'ArrowRight') {
     x += 1;
-    state.player.face = 'right';
+    state.player.face = 'se';
   }
 
   let move = true;
@@ -420,8 +420,18 @@ function drawBoard() {
       );
 
       div.onmousedown = (e) => {
-        if (_mode) {
+        if (_mode == 'player') {
+          console.log(e);
+          // Move player:
+          state.player.pos.x = x;
+          state.player.pos.y = y;
+
+          updatePlayer();
+
+        } else if (_mode) {
+
           changeCell(i, _mode);
+
         }
       }
 
@@ -479,20 +489,15 @@ function moveSquare(id, pos) {
 }
 
 function updatePlayer() {
+
   moveSquare('player-' + state.player.id, state.player.pos);
 
-  const d = document.querySelector('.player');
-
-  // Ensure we always have a x facing AND a y facing:
-  if (state.player.face === 'left' || state.player.face === 'right') {
-    d.classList.remove('face-left');
-    d.classList.remove('face-right');
-  } else {
-    d.classList.remove('face-up');
-    d.classList.remove('face-down');
-  }
-
-  d.classList.add('face-' + state.player.face);
+  const div = document.querySelector('.player');
+  div.classList.remove('face-ne');
+  div.classList.remove('face-nw');
+  div.classList.remove('face-se');
+  div.classList.remove('face-sw');
+  div.classList.add('face-' + state.player.face);
 
 }
 
