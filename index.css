@@ -84,11 +84,11 @@ div.toolbar .btn {
   user-select: none;
 }
 
-div.stage.gridVisible .grid {
+div.stage.edit .grid {
   visibility: visible;
 }
 
-div.stage.gridVisible .cell {
+div.stage.edit .cell {
   border-right: 1px solid #333;
   border-bottom: 1px solid #333;
 }

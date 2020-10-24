@@ -25,11 +25,10 @@ const inputStackLength = 1;
 let moves = [];
 
 let stage; // The DOM node we are drawing inside of.
+let _mode = null;
 
 let canInput = false;
 let canAct = true;
-
-let mode = null;
 
 const boardSize = {
   width: 11,
@@ -104,12 +103,6 @@ window.onload = () => {
 
 function setEventHandlers() {
 
-   // Event handler for btnToggleGrid:
-  const btnToggleGrid = document.querySelector('.btnToggleGrid');
-  btnToggleGrid.onclick = e => {
-    stage.classList.toggle('gridVisible');
-  }
-
   const btnExport = document.querySelector('.btn-export');
   btnExport.onclick = e => {
     util.downloadFile(JSON.stringify(level), 'application/json', 'level');
@@ -117,41 +110,53 @@ function setEventHandlers() {
 
   const btnModeEmpty = document.querySelector('.btn-mode-empty');
   btnModeEmpty.onclick = e => {
-    setMode('empty');
+    changeMode('empty');
   }
 
   const btnModeWall = document.querySelector('.btn-mode-wall');
   btnModeWall.onclick = e => {
-    setMode('wall');
+    changeMode('wall');
   }
 
   const btnModeGround = document.querySelector('.btn-mode-ground');
   btnModeGround.onclick = e => {
-    setMode('ground');
+    changeMode('ground');
   }
 
   const btnModeCrystal = document.querySelector('.btn-mode-crystal');
   btnModeCrystal.onclick = e => {
-    setMode('crystal');
+    changeMode('crystal');
+  }
+
+  const btnModePlayer = document.querySelector('.btn-mode-player');
+  btnModePlayer.onclick = e => {
+    changeMode('player');
   }
 
 }
 
-function setMode(m) {
-  stage.classList.remove('mode-empty');
-  stage.classList.remove('mode-wall');
-  stage.classList.remove('mode-ground');
-  stage.classList.remove('mode-crystal');
-  stage.classList.add('mode-' + m);
-  mode = m;
+function changeMode(m) {
 
+  const btn = document.querySelector('.btn-mode-' + m); // Button that was clicked on
   const modeButtons = document.querySelectorAll('.btn-mode');
-  modeButtons.forEach(b => {
-    b.classList.remove('active');
-  });
 
-  const btn = document.querySelector('.btn-mode-' + m);
-  btn.classList.add('active');
+  if (btn.classList.contains('active')) {
+
+    btn.classList.remove('active');
+    stage.classList.remove('edit');
+    _mode = null;
+
+  } else {
+
+    modeButtons.forEach(b => {
+      b.classList.remove('active');
+    });
+
+    btn.classList.add('active');
+    stage.classList.add('edit');
+    _mode = m;
+
+  }
 
 }
 
@@ -414,9 +419,9 @@ function drawBoard() {
         ],
       );
 
-      div.onclick = (e) => {
-        if (mode) {
-          changeCell(i, mode);
+      div.onmousedown = (e) => {
+        if (_mode) {
+          changeCell(i, _mode);
         }
       }
 
