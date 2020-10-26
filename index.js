@@ -229,7 +229,7 @@ function handleKeyDown(e) {
   inputStack.shift();
 
   // Undo:
-  if (e.key === 'Delete' || (e.key === 'z' && e.ctrlKey)) {
+  if (e.key === 'Delete' || e.key === 'Shift' || (e.key === 'z' && e.ctrlKey)) {
     undo();
     return;
   }
@@ -245,22 +245,24 @@ function handleKeyDown(e) {
   let dir;
 
   // Determine pos offset
-  if (e.key === 'ArrowUp') {
+  if (e.key === 'ArrowUp' || e.key === 'w') {
     dir = 'up';
     y -= 1;
     state.player.face = state.player.face.includes('e') ? 'ne' : 'nw';
-  } else if (e.key === 'ArrowDown') {
+  } else if (e.key === 'ArrowDown' || e.key === 's') {
     dir = 'down';
     y += 1;
     state.player.face = state.player.face.includes('e') ? 'se' : 'sw';
-  } else if (e.key === 'ArrowLeft') {
+  } else if (e.key === 'ArrowLeft' || e.key === 'a') {
     dir = 'left';
     x -= 1;
     state.player.face = 'sw';
-  } else if (e.key === 'ArrowRight') {
+  } else if (e.key === 'ArrowRight'  || e.key === 'd') {
     dir = 'right';
     x += 1;
     state.player.face = 'se';
+  } else {
+    return; // ignore all other keys
   }
 
   let move = true;
@@ -442,7 +444,7 @@ function drawBoard() {
       );
 
       div.onmousedown = (e) => {
-        if (_mode == 'player') {
+        if (_mode === 'player') {
           console.log(e);
           // Move player:
           state.player.pos.x = x;
