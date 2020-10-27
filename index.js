@@ -1,31 +1,30 @@
-import levels from './levels.js';
+import data from './levels.js';
 import * as util from './util.js';
 
 window.state = {
 
   player: {
     id: 0,
-    pos: {
-      x: 0,
-      y: 0,
-    },
+    pos: { x:2, y:2}, // Start position.
     name: '',
     face: '',
     state: '',
   },
 
-  boxes: [],
+  levelIndex: 0, // current level
+
+  levels: [],
 
 }
 
 let level = {}; // The current level.
-let levelIndex = 0;
+
 let inputStack = [];
 const inputStackLength = 1;
 
 let moves = [];
 
-let stage; // The DOM node we are drawing inside of.
+let _stage; // The DOM node we are drawing inside of.
 let _mode = null;
 
 let canInput = false;
@@ -36,7 +35,7 @@ const boardSize = {
   height: 11,
 }
 
-const squareSize = 60; // Pixels.
+const _squareSize = 60; // Pixels.
 
 const moveDuration = 0.2;
 const winDuration = 1;
@@ -67,23 +66,14 @@ const entity = {
 
 window.onload = () => {
 
-  // Compose labels
-  for (var i = 0; i < levels.length; i++) {
-    levels[i].labels[0].text = util.pad(i + 1, 2);
+  // Clone level data into state
+  for (let i = 0; i < data.length; i++) {
+    state.levels.push(util.deepCopy(data[i]));
+    state.levels[i].id = i;
+    state.levels[i].labels[0].text = util.pad(i + 1, 2);
   }
 
-  // Build level buttons:
-  for (let i = 0; i < levels.length; i++) {
-
-    let btn = document.createElement('button');
-    btn.classList.add('btn');
-    btn.textContent = 'level ' + levels[i].labels[0].text;
-    btn.onclick = e => {
-      changeLevel(i);
-    }
-    document.querySelector('.buttons').appendChild(btn);
-
-  }
+  setOnWinEvents();
 
   // Add styles for animations:
   var style = document.createElement('style');
@@ -95,17 +85,39 @@ window.onload = () => {
   `;
   document.head.appendChild(style);
 
-
   // Define stage:
-  stage = document.querySelector('.stage');
-  stage.style.width = boardSize.width * squareSize + 'px';
-  stage.style.height = boardSize.height * squareSize + 'px';
+  _stage = document.querySelector('.stage');
+  _stage.style.width = boardSize.width * _squareSize + 'px';
+  _stage.style.height = boardSize.height * _squareSize + 'px';
 
   setEventHandlers();
 
-  changeLevel(levelIndex);
+  changeLevel(state.levelIndex);
+  makeLevel(state.levels[1]);
+
+  // Make player:
+  const div = makeSquare(
+    state.player.pos,
+    _stage,
+    [
+      'player',
+      'player-' + state.player.id,
+      'state-idle',
+    ],
+  );
+
+  updatePlayer();
 
 }
+
+function setOnWinEvents() {
+
+  state.levels[0].onWin = () => {
+      openDoor(state.levels[0], 0);
+  };
+
+}
+
 
 function setEventHandlers() {
 
@@ -140,7 +152,7 @@ function changeMode(m) {
   if (btn.classList.contains('active')) {
 
     btn.classList.remove('active');
-    stage.classList.remove('edit');
+    _stage.classList.remove('edit');
     _mode = null;
 
   } else {
@@ -150,10 +162,19 @@ function changeMode(m) {
     });
 
     btn.classList.add('active');
-    stage.classList.add('edit');
+    _stage.classList.add('edit');
     _mode = m;
 
   }
+
+}
+
+function openDoor(level, doorIndex) {
+
+  changeCell(level.doors[doorIndex].id, 'ground');
+
+  // animate
+  // todo...
 
 }
 
@@ -161,53 +182,24 @@ function changeLevel(l) {
 
   canInput = true;
 
-  if (!levels[l]) {
+  if (!state.levels[l]) {
     // Game over
     // Todo...
     return;
   }
 
   moves = [];
-  level = levels[l];
-  levelIndex = l;
-  state.player.pos.x = level.startPos.x;
-  state.player.pos.y = level.startPos.y;
+  level = state.levels[l];
+  state.levelIndex = l;
   state.player.state = 'idle';
   state.player.face = level.startPos.face || 'se';
-  state.boxes = util.deepCopy(level.boxes);
 
   // Add id to each box.
-  for (var i = 0; i < state.boxes.length; i++) {
-    state.boxes[i].id = i
+  for (var i = 0; i < level.boxes.length; i++) {
+    level.boxes[i].id = i
   }
 
-  drawBoard();
-
-  // Make boxes:
-  state.boxes.forEach(b => {
-
-    makeSquare(
-      b,
-      squareSize,
-      [
-        'box',
-        'box-' + b.id,
-        'state-init',
-      ],
-    );
-
-  });
-
-  // Make player:
-  const div = makeSquare(
-    state.player.pos,
-    squareSize,
-    [
-      'player',
-      'player-' + state.player.id,
-      'state-idle',
-    ],
-  );
+  makeLevel(level);
 
   updateGui();
 
@@ -236,7 +228,7 @@ function handleKeyDown(e) {
 
   // Restart level:
   if (e.key === 'Escape') {
-    changeLevel(levelIndex);
+    // todo...
     return;
   }
 
@@ -278,7 +270,9 @@ function handleKeyDown(e) {
 
   if (move) { // Check can move. Regardless, we still need to update `player.face`.
 
-    moves.push(util.deepCopy(state));
+    // pop history
+    // todo...
+    //moves.push(util.deepCopy(state));
 
     updateGui();
 
@@ -343,8 +337,10 @@ function sendQueuedInput() {
 
 function checkWin() {
 
-  for (let i = 0; i < state.boxes.length; i++) {
-    if(!isBoxOnCrystal(state.boxes[i])) return;
+  if (level.hasWon) return;
+
+  for (let i = 0; i < level.boxes.length; i++) {
+    if(!isBoxOnCrystal(level.boxes[i])) return;
   }
 
   canInput = false;
@@ -353,7 +349,26 @@ function checkWin() {
   updatePlayer();
 
   setTimeout(() => {
-    changeLevel(levelIndex + 1);
+
+    level.onWin();
+    level.hasWon = true;
+
+    // Prevent boxes from being moved once the level has been won
+    // (otherwise player could move boxes out of level)
+    // todo...
+
+    canInput = true;
+
+    state.player.state = 'idle';
+    state.player.face = level.startPos.face || 'se';
+
+    // Make level visible
+    // todo...
+
+    updateGui();
+
+    updatePlayer(); // Update classes on player div.
+
   }, winDuration * 1000);
 
 }
@@ -368,7 +383,7 @@ function undo() {
 
   state = moves.pop();
 
-  state.boxes.forEach(b => {
+  level.boxes.forEach(b => {
     updateBox(b);
   });
 
@@ -385,10 +400,10 @@ function convertPosToMapIndex(pos) {
 function getAdjacent(pos, offset) {
 
   // Check box:
-  for (let i = 0; i < state.boxes.length; i++) {
-    if(state.boxes[i].x === pos.x + offset.x &&
-       state.boxes[i].y === pos.y + offset.y) {
-      return state.boxes[i];
+  for (let i = 0; i < level.boxes.length; i++) {
+    if(level.boxes[i].x === pos.x + offset.x &&
+       level.boxes[i].y === pos.y + offset.y) {
+      return level.boxes[i];
     }
   }
 
@@ -411,81 +426,119 @@ function getAdjacent(pos, offset) {
 
 }
 
-function drawBoard() {
+function makeLevel(level) {
 
-  clear();
+  if (!level.div) {
 
-  // Draw map:
-  for (let y = 0; y < boardSize.height; y++) {
-    for (let x = 0; x < boardSize.width; x++) {
+    // Create level container div:
+    level.div = document.createElement('div');
+    _stage.appendChild(level.div);
 
-      const i = convertPosToMapIndex({x,y})
+    level.div.classList.add('level');
+    level.div.classList.add('level-' + level.id);
+    level.div.style.transform = `translate(${level.pos.x * _squareSize}px, ${level.pos.y * _squareSize}px)`
 
-      let cell = level.map[i];
+    // Make cells:
+    for (let y = 0; y < boardSize.height; y++) {
+      for (let x = 0; x < boardSize.width; x++) {
 
-      // Get entity type:
-      let e;
-      for (const value of Object.values(entity)) {
-        if (cell === value.id) {
-          e = value;
-          break;
+        const i = convertPosToMapIndex({x,y})
+
+        let cell = level.map[i];
+
+        // Get entity type:
+        let e;
+        for (const value of Object.values(entity)) {
+          if (cell === value.id) {
+            e = value;
+            break;
+          }
         }
-      }
 
-      // Draw cell:
-      const div = makeSquare(
-        {x,y},
-        squareSize,
+        // Make cell:
+        const div = makeSquare(
+          {x,y},
+          level.div,
+          [
+            'cell',
+            'cell-' + i,
+            'type-' + e.id,
+          ],
+        );
+
+        // Handle cell click:
+        div.onmousedown = (e) => {
+          if (_mode === 'player') {
+            console.log(e);
+            // Move player:
+            state.player.pos.x = x;
+            state.player.pos.y = y;
+
+            updatePlayer();
+
+          } else if (_mode) {
+
+            changeCell(i, _mode);
+
+          }
+        }
+
+      }
+    }
+
+    // Make boxes:
+    level.boxes.forEach(b => {
+
+      makeSquare(
+        b,
+        level.div,
         [
-          'cell',
-          'cell-' + i,
-          'type-' + e.id,
+          'box',
+          'box-' + b.id,
+          'state-init',
         ],
       );
 
-      div.onmousedown = (e) => {
-        if (_mode === 'player') {
-          console.log(e);
-          // Move player:
-          state.player.pos.x = x;
-          state.player.pos.y = y;
+    });
 
-          updatePlayer();
-
-        } else if (_mode) {
-
-          changeCell(i, _mode);
-
-        }
-      }
-
+    // Add id to each box.
+    for (var i = 0; i < level.boxes.length; i++) {
+      level.boxes[i].id = i
     }
+
+    // Make labels:
+    level.labels.forEach(i => {
+      makeLabel(i, level.div);
+    });
+
   }
 
-  level.labels.forEach(i => {
-    drawLabel(i);
-  });
+  level.div.style.display = 'block';
 
 }
 
-function makeSquare(pos, squareSize, classes) {
+function makeSquare(pos, div, classes) {
+
   let d = document.createElement('div');
+  div.appendChild(d);
+
   d.style.position = 'absolute';
-  d.style.width = squareSize + 'px';
-  d.style.height = squareSize + 'px';
-  d.style.transform = `translate(${pos.x * squareSize}px, ${pos.y * squareSize}px)`
+  d.style.width = _squareSize + 'px';
+  d.style.height = _squareSize + 'px';
+  d.style.transform = `translate(${pos.x * _squareSize}px, ${pos.y * _squareSize}px)`
   classes.forEach(c => {
     d.classList.add(c);
   });
-  stage.appendChild(d);
+
   return d;
+
 }
 
 function changeCell(id, entityKey) {
 
   //console.log({id,entityKey});
 
-  const div = document.querySelector('.cell-' + id);
+  const div = document.querySelector('.level-' + level.id + ' .cell-' + id);
 
   // Get entity:
   let e;
@@ -515,14 +568,17 @@ function empty() {
 
 function moveSquare(id, pos) {
   const d = document.querySelector('.' + id);
-  d.style.transform = `translate(${pos.x * squareSize}px, ${pos.y * squareSize}px)`
+  d.style.transform = `translate(${pos.x * _squareSize}px, ${pos.y * _squareSize}px)`
 }
 
 function updatePlayer() {
 
+  const div = document.querySelector('.player');
+
+  if (!div) return;
+
   moveSquare('player-' + state.player.id, state.player.pos);
 
-  const div = document.querySelector('.player');
   div.classList.remove('face-ne');
   div.classList.remove('face-nw');
   div.classList.remove('face-se');
@@ -563,21 +619,19 @@ function updateBox(b) {
 
 }
 
-function drawLabel(label) {
+function makeLabel(label, div) {
+
   let d = document.createElement('div');
+  div.appendChild(d);
+
   d.style.position = 'absolute';
-  d.style.width = (squareSize * label.width) + 'px';
-  d.style.height = (squareSize * label.height) + 'px';
-  d.style.left = (label.pos.x * squareSize) + 'px';
-  d.style.top = (label.pos.y * squareSize) + 'px';
+  d.style.width = (_squareSize * label.width) + 'px';
+  d.style.height = (_squareSize * label.height) + 'px';
+  d.style.transform = `translate(${label.pos.x * _squareSize}px, ${label.pos.y * _squareSize}px)`
   d.textContent = label.text;
-  d.style.fontSize = (squareSize - 0) + 'px';
-  //d.style.lineHeight = (squareSize - 2) + 'px';
+  d.style.fontSize = (_squareSize - 0) + 'px';
+  //d.style.lineHeight = (_squareSize - 2) + 'px';
   d.classList.add('label');
   d.classList.add('align-' + label.align);
-  stage.appendChild(d);
-}
 
-function clear() {
-  stage.innerHTML = '';
 }
