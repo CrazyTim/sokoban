@@ -64,16 +64,36 @@ const entity = {
 
 }
 
+function levelFactory(i) {
+
+  const l = util.deepCopy(data[i]);
+
+  // Add id to level:
+  l.id =  i
+
+  // Add id to each box:
+  for (let j = 0; j < l.boxes.length; j++) {
+    l.boxes[j].id = j
+  }
+
+  // Compose text for first label:
+  l.labels[0].text = util.pad(i + 1, 2);
+
+  // Set onWin event:
+  l.onWin = onWinEventFactory(i);
+
+  if (!l.startPos.face) l.startPos.face = 'se';
+
+  return l;
+
+}
+
 window.onload = () => {
 
   // Clone level data into state
   for (let i = 0; i < data.length; i++) {
-    state.levels.push(util.deepCopy(data[i]));
-    state.levels[i].id = i;
-    state.levels[i].labels[0].text = util.pad(i + 1, 2);
+    state.levels.push(levelFactory(i));
   }
-
-  setOnWinEvents();
 
   // Add styles for animations:
   var style = document.createElement('style');
@@ -110,11 +130,17 @@ window.onload = () => {
 
 }
 
-function setOnWinEvents() {
+function onWinEventFactory(levelId) {
 
-  state.levels[0].onWin = () => {
+  if (levelId === 0) {
+
+    return () => {
       openDoor(state.levels[0], 0);
-  };
+    }
+
+  } else {
+    return () => {}
+  }
 
 }
 
@@ -194,11 +220,6 @@ function changeLevel(l) {
   state.player.state = 'idle';
   state.player.face = level.startPos.face || 'se';
 
-  // Add id to each box.
-  for (var i = 0; i < level.boxes.length; i++) {
-    level.boxes[i].id = i
-  }
-
   makeLevel(level);
 
   updateGui();
@@ -228,7 +249,7 @@ function handleKeyDown(e) {
 
   // Restart level:
   if (e.key === 'Escape') {
-    // todo...
+    restartLevel();
     return;
   }
 
@@ -314,6 +335,8 @@ function canBePushed(item, direction = {x:0, y:0}) {
   // Cancel if its a wall:
   if (item === 'wall') return false;
 
+  if (level.hasWon) return false;
+
   // Cancel if the next adjacent space isn't empty:
   let adj = getAdjacent(item, direction);
   if (adj) return false;
@@ -360,7 +383,6 @@ function checkWin() {
     canInput = true;
 
     state.player.state = 'idle';
-    state.player.face = level.startPos.face || 'se';
 
     // Make level visible
     // todo...
@@ -383,9 +405,7 @@ function undo() {
 
   state = moves.pop();
 
-  level.boxes.forEach(b => {
-    updateBox(b);
-  });
+  updateBoxes();
 
   updatePlayer();
 
@@ -397,6 +417,8 @@ function convertPosToMapIndex(pos) {
   return pos.x + (pos.y * boardSize.width);
 }
 
+
+// Return either a box object, or 'wall'.
 function getAdjacent(pos, offset) {
 
   // Check box:
@@ -501,11 +523,6 @@ function makeLevel(level) {
 
     });
 
-    // Add id to each box.
-    for (var i = 0; i < level.boxes.length; i++) {
-      level.boxes[i].id = i
-    }
-
     // Make labels:
     level.labels.forEach(i => {
       makeLabel(i, level.div);
@@ -566,9 +583,15 @@ function empty() {
   }
 }
 
-function moveSquare(id, pos) {
-  const d = document.querySelector('.' + id);
+function moveSquare(className, pos) {
+  const d = document.querySelector(className);
   d.style.transform = `translate(${pos.x * _squareSize}px, ${pos.y * _squareSize}px)`
+}
+
+function updateBoxes() {
+  level.boxes.forEach(b => {
+    updateBox(b);
+  });
 }
 
 function updatePlayer() {
@@ -577,7 +600,7 @@ function updatePlayer() {
 
   if (!div) return;
 
-  moveSquare('player-' + state.player.id, state.player.pos);
+  moveSquare('.player-' + state.player.id, state.player.pos);
 
   div.classList.remove('face-ne');
   div.classList.remove('face-nw');
@@ -607,9 +630,9 @@ function updateGui() {
 }
 
 function updateBox(b) {
-  moveSquare('box-' + b.id, b);
+  moveSquare('.level-' + level.id + ' .box-' + b.id, b);
 
-  const d = document.querySelector('.box-' + b.id);
+  const d = document.querySelector('.level-' + level.id + ' .box-' + b.id);
 
   if(isBoxOnCrystal(b)) {
     d.classList.add('state-win');
@@ -634,4 +657,17 @@ function makeLabel(label, div) {
   d.classList.add('label');
   d.classList.add('align-' + label.align);
 
+}
+
+function restartLevel() {
+
+  if (level.hasWon) return; // Todo: replace with a better mechanic?
+
+  state.levels[level.id] = levelFactory(level.id);
+  level = state.levels[level.id];
+  state.player.pos = util.deepCopy(state.levels[state.levelIndex].startPos);
+  state.player.state = 'idle';
+  state.player.face = level.startPos.face;
+  updateBoxes();
+  updatePlayer();
 }

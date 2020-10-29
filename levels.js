@@ -62,7 +62,6 @@ export default [
     "startPos": {
       x: 2,
       y: 3,
-      face: 'sw',
     },
     "boxes": [
       { x:1, y:3 },
@@ -84,7 +83,6 @@ export default [
     startPos: {
       x: 2,
       y: 1,
-      face: 'se',
     },
     boxes: [
       { x:2, y:3 },
