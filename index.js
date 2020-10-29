@@ -83,6 +83,15 @@ function levelFactory(i) {
 
   if (!l.startPos.face) l.startPos.face = 'se';
 
+  // Create doors if it doesn't exist
+  if (!l.doors) l.doors = [];
+
+  // Add id to each door:
+  for (let j = 0; j < l.doors.length; j++) {
+    l.doors[j].id = j;
+    l.doors[j].type = 'door';
+  }
+
   return l;
 
 }
@@ -135,7 +144,12 @@ function onWinEventFactory(levelId) {
   if (levelId === 0) {
 
     return () => {
-      openDoor(state.levels[0], 0);
+
+      // Open door:
+      const d = level.doors[0];
+      d.state = 'open';
+      updateDoor(d);
+
     }
 
   } else {
@@ -284,6 +298,11 @@ function handleKeyDown(e) {
 
   // Check movement is valid:
   let adj = getAdjacent(state.player.pos, {x, y});
+
+  if (adj.type === 'door' && adj.state === 'closed') {
+    move = false;
+  }
+
   if (adj.type === 'box' || adj.type === 'wall') {
     move = canBePushed(adj, {x, y});
   }
@@ -297,10 +316,21 @@ function handleKeyDown(e) {
     updateGui();
 
     if (adj.type === 'box') {
+      // Push box:
       adj.x += x;
       adj.y += y;
       updateBox(adj);
       state.player.state = 'push-' + dir;
+    }
+
+    if (adj.type === 'door') {
+      // Go through door:
+
+      console.log('move off board');
+
+      // Change level
+      // todo...
+
     }
 
     // Move player:
@@ -322,11 +352,6 @@ function handleKeyDown(e) {
       checkWin();
       sendQueuedInput();
     }, moveDuration * 1000);
-
-    // Check if player has moved off the board
-    if (adj.type === 'empty') {
-      consol.log('off board');
-    }
 
   }
 
@@ -433,6 +458,14 @@ function getAdjacent(pos, offset) {
     }
   }
 
+  // Check door:
+  for (let i = 0; i < level.doors.length; i++) {
+    if(level.doors[i].pos.x === pos.x + offset.x &&
+       level.doors[i].pos.y === pos.y + offset.y) {
+      return level.doors[i];
+    }
+  }
+
   // Check wall:
   let i = convertPosToMapIndex(pos);
   let j;
@@ -532,6 +565,11 @@ function makeLevel(level) {
     // Make labels:
     level.labels.forEach(i => {
       makeLabel(i, level.div);
+    });
+
+    // Make doors:
+    level.doors.forEach(i => {
+      makeDoor(i, level.div);
     });
 
   }
@@ -662,6 +700,32 @@ function makeLabel(label, div) {
   //d.style.lineHeight = (_squareSize - 2) + 'px';
   d.classList.add('label');
   d.classList.add('align-' + label.align);
+
+}
+
+function makeDoor(door, div) {
+
+  let d = document.createElement('div');
+  div.appendChild(d);
+
+  d.style.position = 'absolute';
+  d.style.width = (_squareSize * 1) + 'px';
+  d.style.height = (_squareSize * 1) + 'px';
+  d.style.transform = `translate(${door.pos.x * _squareSize}px, ${door.pos.y * _squareSize}px)`
+  d.classList.add('door');
+  d.classList.add('door-' + door.id);
+  d.classList.add('state-' + door.state);
+  d.classList.add('style-' + door.style);
+
+}
+
+function updateDoor(door) {
+
+  const d = document.querySelector('.level-' + level.id + ' .door-' + door.id);
+
+  d.classList.remove('state-open');
+  d.classList.remove('state-closed');
+  d.classList.add('state-' + door.state);
 
 }
 

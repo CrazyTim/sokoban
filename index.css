@@ -181,3 +181,14 @@ div.stage.edit .cell {
   background-size: 100%;
   background-position: center;
 }
+
+
+/* Door */
+.door.style-0 {
+  /* background-image: url(./img/storage.svg), url(./img/ground.svg); */
+  background-color: red;
+}
+.door.style-0.state-open {
+  /* background-image: url(./img/storage.svg), url(./img/ground.svg); */
+  background-color: green;
+}
