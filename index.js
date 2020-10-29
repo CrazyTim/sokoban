@@ -11,8 +11,6 @@ window.state = {
     state: '',
   },
 
-  levelIndex: 0, // current level
-
   levels: [],
 
 }
@@ -44,22 +42,22 @@ const entity = {
 
   empty: {
     id: 0,
-    color: 'white',
+    type: 'empty',
   },
 
   wall: {
     id: 1,
-    color: 'green',
+    type: 'wall',
   },
 
   ground: {
     id: 2,
-    color: '#b8cbbe',
+    type: 'ground',
   },
 
   crystal: {
     id: 3,
-    color: 'purple',
+    type: 'crystal',
   },
 
 }
@@ -73,7 +71,8 @@ function levelFactory(i) {
 
   // Add id to each box:
   for (let j = 0; j < l.boxes.length; j++) {
-    l.boxes[j].id = j
+    l.boxes[j].id = j;
+    l.boxes[j].type = 'box';
   }
 
   // Compose text for first label:
@@ -112,8 +111,9 @@ window.onload = () => {
 
   setEventHandlers();
 
-  changeLevel(state.levelIndex);
-  makeLevel(state.levels[1]);
+  changeLevel(0);
+
+  makeLevel(state.levels[1]); // temp
 
   // Make player:
   const div = makeSquare(
@@ -216,7 +216,6 @@ function changeLevel(l) {
 
   moves = [];
   level = state.levels[l];
-  state.levelIndex = l;
   state.player.state = 'idle';
   state.player.face = level.startPos.face || 'se';
 
@@ -285,7 +284,7 @@ function handleKeyDown(e) {
 
   // Check movement is valid:
   let adj = getAdjacent(state.player.pos, {x, y});
-  if (adj) {
+  if (adj.type === 'box' || adj.type === 'wall') {
     move = canBePushed(adj, {x, y});
   }
 
@@ -297,7 +296,7 @@ function handleKeyDown(e) {
 
     updateGui();
 
-    if (adj) {
+    if (adj.type === 'box') {
       adj.x += x;
       adj.y += y;
       updateBox(adj);
@@ -314,7 +313,7 @@ function handleKeyDown(e) {
 
       // Change state from 'push' to 'idle' if the box can't be pushed any further.
       let adj = getAdjacent(state.player.pos, {x, y});
-      if (!adj || !canBePushed(adj, {x, y}) ) {
+      if (adj.type !== 'box' || !canBePushed(adj, {x, y}) ) {
         state.player.state = 'idle';
         updatePlayer();
       }
@@ -323,6 +322,11 @@ function handleKeyDown(e) {
       checkWin();
       sendQueuedInput();
     }, moveDuration * 1000);
+
+    // Check if player has moved off the board
+    if (adj.type === 'empty') {
+      consol.log('off board');
+    }
 
   }
 
@@ -333,13 +337,13 @@ function handleKeyDown(e) {
 function canBePushed(item, direction = {x:0, y:0}) {
 
   // Cancel if its a wall:
-  if (item === 'wall') return false;
+  if (item.type === 'wall') return false;
 
   if (level.hasWon) return false;
 
   // Cancel if the next adjacent space isn't empty:
   let adj = getAdjacent(item, direction);
-  if (adj) return false;
+  if (adj.type === 'box' || adj.type === 'wall') return false;
 
   return true
 
@@ -418,7 +422,7 @@ function convertPosToMapIndex(pos) {
 }
 
 
-// Return either a box object, or 'wall'.
+// Return either a box object, or an entity object.
 function getAdjacent(pos, offset) {
 
   // Check box:
@@ -442,9 +446,11 @@ function getAdjacent(pos, offset) {
     j = i + 1;
   }
 
-  if (level.map[j] === entity.wall.id) {
-    return 'wall';
+  for (const value of Object.values(entity)) {
+    if (value.id === level.map[j]) return value;
   }
+
+  return null; // Shouldn't happen.
 
 }
 
@@ -665,7 +671,7 @@ function restartLevel() {
 
   state.levels[level.id] = levelFactory(level.id);
   level = state.levels[level.id];
-  state.player.pos = util.deepCopy(state.levels[state.levelIndex].startPos);
+  state.player.pos = util.deepCopy(state.levels[level.id].startPos);
   state.player.state = 'idle';
   state.player.face = level.startPos.face;
   updateBoxes();
