@@ -15,8 +15,10 @@ body, html {
 }
 
 div.stage {
-  margin: 70px auto;
   position: relative;
+  margin: 70px auto;
+  overflow: hidden;
+  border: solid 2px #186f9280;
 }
 
 div.toolbar {
@@ -70,6 +72,11 @@ div.toolbar .btn {
 
 div.stage.edit .cell {
   box-shadow: 0 0 0px 1px #404040;
+}
+
+.stage-edge {
+  border: dashed 3px #186f9280;
+  box-shadow: 0 0 0px 500px #186f9224;
 }
 
 .toggle-btn-group {
@@ -186,9 +193,9 @@ div.stage.edit .cell {
 /* Door */
 .door.style-0 {
   /* background-image: url(./img/storage.svg), url(./img/ground.svg); */
-  background-color: red;
+  background-color: #2b2b2b;
 }
 .door.style-0.state-open {
   /* background-image: url(./img/storage.svg), url(./img/ground.svg); */
-  background-color: green;
+  background-color: #2b2b2b33;
 }

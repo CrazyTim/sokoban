@@ -1,5 +1,17 @@
 import data from './levels.js';
 import * as util from './util.js';
+/*
+
+todo:
+- convert to class so easier to expose methods and debug
+- rename 'level' to 'room'
+- tweak push-down img
+  - move to bottom edge
+  - make head wider
+  - adjust face perspective
+
+*/
+
 
 window.state = {
 
@@ -9,20 +21,26 @@ window.state = {
     name: '',
     face: '',
     state: '',
+    getLocalPos: function() {
+      return {
+        x: this.pos.x - level.pos.x,
+        y: this.pos.y - level.pos.y,
+      };
+    }
   },
 
   levels: [],
 
 }
 
-let level = {}; // The current level.
+let level = {}; // The current level (area).
 
 let inputStack = [];
 const inputStackLength = 1;
-
 let moves = [];
 
 let _stage; // The DOM node we are drawing inside of.
+let _world; // The DOM node that wraps everything inside the stage. Used to easily adjust the users viewpoint.
 let _mode = null;
 
 let canInput = false;
@@ -34,6 +52,7 @@ const boardSize = {
 }
 
 const _squareSize = 60; // Pixels.
+const _worldOffset = _squareSize * 1; // Number of squares to offset the world
 
 const moveDuration = 0.2;
 const winDuration = 1;
@@ -93,6 +112,9 @@ function levelFactory(i) {
   for (let j = 0; j < l.doors.length; j++) {
     l.doors[j].id = j;
     l.doors[j].type = 'door';
+
+    if (!l.doors[j].state) l.doors[j].state = 'open';
+
   }
 
   return l;
@@ -112,13 +134,28 @@ function onLoad() {
     .box {
       transition: transform ${moveDuration}s;
     }
+
+    .world {
+      transition: transform ${.5}s;
+    }
   `;
   document.head.appendChild(style);
 
   // Define stage:
   _stage = document.querySelector('.stage');
-  _stage.style.width = boardSize.width * _squareSize + 'px';
-  _stage.style.height = boardSize.height * _squareSize + 'px';
+  _stage.style.width = (_worldOffset * 2) + (boardSize.width * _squareSize) + 'px';
+  _stage.style.height = (_worldOffset * 2) + (boardSize.height * _squareSize) + 'px';
+
+  _world = document.createElement('div');
+  _world.classList.add('world')
+  _stage.appendChild(_world);
+
+  const stageEdge = document.createElement('div');
+  stageEdge.classList.add('stage-edge')
+  stageEdge.style.width = (boardSize.width * _squareSize) + 'px';
+  stageEdge.style.height = (boardSize.height * _squareSize) + 'px';
+  stageEdge.style.transform = `translate(${_worldOffset}px, ${_worldOffset}px)`
+  _stage.appendChild(stageEdge);
 
   setEventHandlers();
 
@@ -129,7 +166,7 @@ function onLoad() {
   // Make player:
   const div = makeSquare(
     state.player.pos,
-    _stage,
+    _world,
     [
       'player',
       'player-' + state.player.id,
@@ -231,6 +268,7 @@ function changeLevel(l) {
 
   moves = [];
   level = state.levels[l];
+  state.level = level;
   state.player.state = 'idle';
   state.player.face = level.startPos.face || 'se';
 
@@ -239,6 +277,8 @@ function changeLevel(l) {
   updateGui();
 
   updatePlayer(); // Update classes on player div.
+
+  _world.style.transform = `translate(${_worldOffset - (level.pos.x * _squareSize)}px, ${_worldOffset - (level.pos.y * _squareSize)}px)`
 
 }
 
@@ -296,7 +336,7 @@ function onKeyDown(e) {
   if ( x === 0 && y === 0) move = false; // Cancel if no movement.
 
   // Check movement is valid:
-  let adj = getAdjacent(state.player.pos, {x, y});
+  let adj = getAdjacent(state.player.getLocalPos(), {x, y});
 
   if (adj.type === 'door' && adj.state === 'closed') {
     move = false;
@@ -322,13 +362,15 @@ function onKeyDown(e) {
       state.player.state = 'push-' + dir;
     }
 
+    // Check if we need to transition to a new level
     if (adj.type === 'door') {
-      // Go through door:
-
-      console.log('move off board');
 
       // Change level
       // todo...
+
+      changeLevel(adj.portal);
+
+      console.log('move into room ' + adj.portal);
 
     }
 
@@ -341,7 +383,7 @@ function onKeyDown(e) {
     setTimeout(() => {
 
       // Change state from 'push' to 'idle' if the box can't be pushed any further.
-      let adj = getAdjacent(state.player.pos, {x, y});
+      let adj = getAdjacent(state.player.getLocalPos(), {x, y});
       if (adj.type !== 'box' || !canBePushed(adj, {x, y}) ) {
         state.player.state = 'idle';
         updatePlayer();
@@ -363,6 +405,8 @@ function canBePushed(item, direction = {x:0, y:0}) {
   // Cancel if its a wall:
   if (item.type === 'wall') return false;
 
+  // Prevent boxes from being moved once the level has been won
+  // (otherwise player could move boxes out of level)
   if (level.hasWon) return false;
 
   // Cancel if the next adjacent space isn't empty:
@@ -404,10 +448,6 @@ function checkWin() {
     level.onWin();
     level.hasWon = true;
 
-    // Prevent boxes from being moved once the level has been won
-    // (otherwise player could move boxes out of level)
-    // todo...
-
     canInput = true;
 
     state.player.state = 'idle';
@@ -441,12 +481,18 @@ function undo() {
 
 }
 
+// local coords
 function convertPosToMapIndex(pos) {
   return pos.x + (pos.y * boardSize.width);
+  /*
+  return (level.pos.x + pos.x) +
+         (level.pos.y + (pos.y * boardSize.width));
+  */
 }
 
 
 // Return either a box object, or an entity object.
+// local coords
 function getAdjacent(pos, offset) {
 
   // Check box:
@@ -482,7 +528,9 @@ function getAdjacent(pos, offset) {
     if (value.id === level.map[j]) return value;
   }
 
-  return null; // Shouldn't happen.
+  return { // Player ran off the edge of board.
+    type: 'null',
+  };
 
 }
 
@@ -492,7 +540,7 @@ function makeLevel(level) {
 
     // Create level container div:
     level.div = document.createElement('div');
-    _stage.appendChild(level.div);
+    _world.appendChild(level.div);
 
     level.div.classList.add('level');
     level.div.classList.add('level-' + level.id);
@@ -528,19 +576,16 @@ function makeLevel(level) {
 
         // Handle cell click:
         div.onmousedown = (e) => {
-          if (_mode === 'player') {
-            console.log(e);
-            // Move player:
+
+          if (_mode === 'player') { // Move player...
             state.player.pos.x = x;
             state.player.pos.y = y;
-
             updatePlayer();
 
-          } else if (_mode) {
-
+          } else if (_mode) { // Change cell...
             changeCell(i, _mode);
-
           }
+
         }
 
       }
@@ -734,7 +779,10 @@ function restartLevel() {
 
   state.levels[level.id] = levelFactory(level.id);
   level = state.levels[level.id];
-  state.player.pos = util.deepCopy(state.levels[level.id].startPos);
+  state.level = level;
+
+  state.player.pos.x = level.pos.x + level.startPos.x;
+  state.player.pos.y = level.pos.y + level.startPos.y;
   state.player.state = 'idle';
   state.player.face = level.startPos.face;
   updateBoxes();
