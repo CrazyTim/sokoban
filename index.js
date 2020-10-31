@@ -38,7 +38,7 @@ const _squareSize = 60; // Pixels.
 const moveDuration = 0.2;
 const winDuration = 1;
 
-const entity = {
+const entity = { // These entities are stateless and do not change.
 
   empty: {
     id: 0,
@@ -61,6 +61,9 @@ const entity = {
   },
 
 }
+
+window.onload = onLoad;
+window.onkeydown = onKeyDown;
 
 function levelFactory(i) {
 
@@ -96,8 +99,7 @@ function levelFactory(i) {
 
 }
 
-window.onload = () => {
-
+function onLoad() {
   // Clone level data into state
   for (let i = 0; i < data.length; i++) {
     state.levels.push(levelFactory(i));
@@ -157,7 +159,6 @@ function onWinEventFactory(levelId) {
   }
 
 }
-
 
 function setEventHandlers() {
 
@@ -241,9 +242,7 @@ function changeLevel(l) {
 
 }
 
-window.onkeydown = handleKeyDown;
-
-function handleKeyDown(e) {
+function onKeyDown(e) {
 
   //console.log(e);
 
@@ -382,7 +381,7 @@ function sendQueuedInput() {
   }
 
   if (inputStack.length > 0) {
-    handleKeyDown(inputStack.shift());
+    onKeyDown(inputStack.shift());
   }
 
 }
