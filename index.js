@@ -9,6 +9,8 @@ todo:
   - move to bottom edge
   - make head wider
   - adjust face perspective
+- add physical boundries inside a room that you can't push over (groves in floor).
+  - Use these as a mechanic to sopt user from pushing boxes into adjacent rooms, when it makes sense in the level design.
 
 */
 
@@ -21,10 +23,13 @@ window.state = {
     name: '',
     face: '',
     state: '',
-    getLocalPos: function() {
+    getLocalPos: function(levelId) {
+
+      if (levelId === undefined) levelId = level.id;
+
       return {
-        x: this.pos.x - level.pos.x,
-        y: this.pos.y - level.pos.y,
+        x: this.pos.x - state.levels[levelId].pos.x,
+        y: this.pos.y - state.levels[levelId].pos.y,
       };
     }
   },
@@ -365,7 +370,7 @@ function onKeyDown(e) {
     // Check if we need to transition to a new level
     if (adj.type === 'door') {
 
-      // Change level
+      // Change level only if we have moved *into* a new room.
       // todo...
 
       changeLevel(adj.portal);
@@ -399,6 +404,40 @@ function onKeyDown(e) {
   updatePlayer();
 
 }
+
+// Return an array of room ids that the player is currently over.
+// The player is considered to be in a room if they are over a cell that != empty.
+function getCurrentRooms() {
+  // Can use this to loop over each room when checking for collisions,
+  // and push boxes between rooms.
+
+  const currentRooms = [];
+
+  state.levels.forEach((l) => {
+
+    const playerLocalPos = state.player.getLocalPos(l.id)
+
+    // check out of bounds
+    if (playerLocalPos.x >= 0 && playerLocalPos.x < boardSize.width &&
+        playerLocalPos.y >= 0 && playerLocalPos.y < boardSize.height) {
+
+      const i = convertPosToMapIndex(playerLocalPos);
+      const cell = l.map[i];
+
+      // Ensure cell is not empty
+      if (cell !== entity.empty.id) {
+        currentRooms.push(l);
+      }
+
+    }
+
+  });
+
+  return currentRooms;
+
+}
+
+window.getCurrentRooms = getCurrentRooms;
 
 function canBePushed(item, direction = {x:0, y:0}) {
 
@@ -540,7 +579,10 @@ function makeLevel(level) {
 
     // Create level container div:
     level.div = document.createElement('div');
-    _world.appendChild(level.div);
+
+    // *Prepend* to DOM so the first rooms z-index is always above the others.
+    // This makes it simpler when designing levels, in particular overlapping elements like doors.
+    _world.prepend(level.div);
 
     level.div.classList.add('level');
     level.div.classList.add('level-' + level.id);
