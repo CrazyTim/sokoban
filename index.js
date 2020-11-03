@@ -124,10 +124,16 @@ function levelFactory(i) {
 
   // Add id to each door:
   for (let j = 0; j < l.doors.length; j++) {
-    l.doors[j].id = j;
-    l.doors[j].type = 'door';
 
-    if (!l.doors[j].state) l.doors[j].state = 'open';
+    const door = l.doors[j];
+    door.id = j;
+    door.type = 'door';
+
+    if (!door.state) door.state = 'open'; // Open door if not specified.
+
+    // Ensure ground is always under a door (for convenience when joining levels tolgether):
+    const cellIndex = convertPosToMapIndex(door.pos)
+    l.map[cellIndex] = entity.ground.id;
 
   }
 
