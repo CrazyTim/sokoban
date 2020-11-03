@@ -25,15 +25,15 @@ window.state = {
     id: 0,
     pos: { x:2, y:2}, // Start position.
     name: '',
-    face: '',
+    face: 'se', // Facing direction (ne|nw|se|sw).
     state: '',
-    getLocalPos: function(levelId) {
+    getLocalPos: function(roomId) {
 
-      if (levelId === undefined) levelId = level.id;
+      if (roomId === undefined) roomId = level.id;
 
       return {
-        x: this.pos.x - state.levels[levelId].pos.x,
-        y: this.pos.y - state.levels[levelId].pos.y,
+        x: this.pos.x - state.levels[roomId].pos.x,
+        y: this.pos.y - state.levels[roomId].pos.y,
       };
     }
   },
@@ -168,9 +168,7 @@ function onLoad() {
 
   setEventHandlers();
 
-  changeLevel(0);
-
-  makeLevel(state.levels[1]); // temp
+  changeRoom(0);
 
   // Make player:
   const div = makeSquare(
@@ -185,25 +183,47 @@ function onLoad() {
 
   updatePlayer();
 
+  canInput = true;
+
 }
 
-function onWinEventFactory(levelId) {
+function onWinEventFactory(roomId) {
 
-  if (levelId === 0) {
+  if (roomId === 0) {
 
     return () => {
+      makeLevel(state.levels[1]);
+      openDoor(level.doors[0]);
+    }
 
-      // Open door:
-      const d = level.doors[0];
-      d.state = 'open';
-      updateDoor(d);
+  } else if (roomId === 1) {
 
+    return () => {
+      facePlayer('se');
+      console.log('end game');
     }
 
   } else {
-    return () => {}
+
+    return () => {
+      console.error('unhandled `onWin()` event for room ' + roomId);
+    }
+
   }
 
+}
+
+function openDoor(d) {
+
+  // todo: animate door
+
+  d.state = 'open';
+  updateDoor(d);
+}
+
+function facePlayer(direction) {
+  state.player.face = direction;
+  updatePlayer();
 }
 
 function setEventHandlers() {
@@ -256,37 +276,14 @@ function changeMode(m) {
 
 }
 
-function openDoor(level, doorIndex) {
+function changeRoom(roomId) {
 
-  changeCell(level.doors[doorIndex].id, 'ground');
-
-  // animate
-  // todo...
-
-}
-
-function changeLevel(l) {
-
-  canInput = true;
-
-  if (!state.levels[l]) {
-    // Game over
-    // Todo...
-    return;
-  }
-
-  moves = [];
-  level = state.levels[l];
+  level = state.levels[roomId];
   state.level = level;
-  state.player.state = 'idle';
-  state.player.face = level.startPos.face || 'se';
 
-  makeLevel(level);
+  makeLevel(level); // ensure room has been made;
 
-  updateGui();
-
-  updatePlayer(); // Update classes on player div.
-
+  // Center viewport on the room:
   _world.style.transform = `translate(${_worldOffset - (level.pos.x * _squareSize)}px, ${_worldOffset - (level.pos.y * _squareSize)}px)`
 
 }
@@ -420,7 +417,7 @@ function enterRoom() {
 
     console.log('Enter room ' + r.id);
 
-    changeLevel(r.id);
+    changeRoom(r.id);
 
     return r.id;
 
@@ -684,8 +681,6 @@ function makeLevel(level) {
     });
 
   }
-
-  level.div.style.display = 'block';
 
 }
 
