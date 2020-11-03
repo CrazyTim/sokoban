@@ -299,7 +299,7 @@ function onKeyDown(e) {
   inputStack.shift();
 
   // Undo:
-  if (e.key === 'Delete' || e.key === 'Shift' || (e.key === 'z' && e.ctrlKey)) {
+  if (e.key === 'Delete' || e.key === 'z' || (e.key === 'z' && e.ctrlKey)) {
     undo();
     return;
   }
