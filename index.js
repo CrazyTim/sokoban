@@ -12,6 +12,10 @@ todo:
 - add physical boundries inside a room that you can't push over (groves in floor).
   - Use these as a mechanic to sopt user from pushing boxes into adjacent rooms, when it makes sense in the level design.
 
+- idea: allow push boxes between rooms.
+  - instead of transitioning (always in one room), keep track of the 'rooms' player is in and
+    check move rules against each room (loop). This means we also need to check colisions against objects in both rooms.
+
 */
 
 
@@ -367,21 +371,11 @@ function onKeyDown(e) {
       state.player.state = 'push-' + dir;
     }
 
-    // Check if we need to transition to a new level
-    if (adj.type === 'door') {
-
-      // Change level only if we have moved *into* a new room.
-      // todo...
-
-      changeLevel(adj.portal);
-
-      console.log('move into room ' + adj.portal);
-
-    }
-
     // Move player:
     state.player.pos.x += x;
     state.player.pos.y += y;
+
+    enterRoom();
 
     // Wait for css to animate:
     canAct = false;
@@ -397,11 +391,40 @@ function onKeyDown(e) {
       canAct = true;
       checkWin();
       sendQueuedInput();
+
     }, moveDuration * 1000);
 
   }
 
   updatePlayer();
+
+}
+
+function enterRoom() {
+
+  // Check if we need to transition to a new room.
+  // Change currentRoom if we have moved onto a non-null square in another room.
+  const currentRooms = getCurrentRooms();
+
+  // Find the first room that is not the current room and switch to it.
+  for (let i = 0; i < currentRooms.length; i++) {
+
+    const r = currentRooms[i];
+
+    if (r.id === level.id) continue; // Ignore current room.
+
+    // Get cell in the new room.
+    const otherRoomAdj = getAdjacent(state.player.getLocalPos(r.id), { x:0, y:0 });
+
+    if (otherRoomAdj.type === entity.empty.type) continue; // Ignore empty (only overlapping cells allow transition between rooms).
+
+    console.log('Enter room ' + r.id);
+
+    changeLevel(r.id);
+
+    return r.id;
+
+  }
 
 }
 
@@ -533,6 +556,8 @@ function convertPosToMapIndex(pos) {
 // Return either a box object, or an entity object.
 // local coords
 function getAdjacent(pos, offset) {
+
+  // todo: rename to `getCell()`
 
   // Check box:
   for (let i = 0; i < level.boxes.length; i++) {

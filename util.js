@@ -44,3 +44,8 @@ export function pad(str, x, char = '0') {
   str = str + ''; // Ensure a string;
   return str.length >= x ? str : new Array(x - str.length + 1).join(char) + str;
 }
+
+export function areArraysIdentical(a1, a2) {
+  // Todo: not efficient.
+  JSON.stringify(a1) === JSON.stringify(a2);
+}
