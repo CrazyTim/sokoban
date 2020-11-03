@@ -3,6 +3,7 @@ import * as util from './util.js';
 /*
 
 todo:
+- take screen shots of levels so easier to piece them together.
 - convert to class so easier to expose methods and debug
 - rename 'level' to 'room'
 - tweak push-down img
@@ -659,9 +660,15 @@ function makeRoom(room) {
     // This makes it simpler when designing rooms, in particular overlapping elements like doors.
     _world.prepend(room.div);
 
-    room.div.classList.add('level');
+    room.div.classList.add('room');
+    room.div.classList.add('hidden');
     room.div.classList.add('level-' + room.id);
     room.div.style.transform = `translate(${room.pos.x * _squareSize}px, ${room.pos.y * _squareSize}px)`
+
+    // Fade-in level
+    setTimeout(() => {
+      room.div.classList.remove('hidden');
+    }, 100);
 
     // Make cells:
     for (let y = 0; y < boardSize.height; y++) {

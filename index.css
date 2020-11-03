@@ -190,6 +190,14 @@ body, html {
   background-position: center;
 }
 
+.room.hidden {
+  opacity: 0;
+}
+
+.room {
+  transition: opacity 1s;
+}
+
 
 /* Door */
 .door.style-0 {
