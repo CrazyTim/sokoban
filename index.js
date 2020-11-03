@@ -345,7 +345,7 @@ function onKeyDown(e) {
   if ( x === 0 && y === 0) move = false; // Cancel if no movement.
 
   // Check movement is valid:
-  let adj = getAdjacent(state.player.getLocalPos(), {x, y});
+  let adj = getObject(state.player.getLocalPos(), {x, y});
 
   if (adj.type === 'door' && adj.state === 'closed') {
     move = false;
@@ -382,7 +382,7 @@ function onKeyDown(e) {
     setTimeout(() => {
 
       // Change state from 'push' to 'idle' if the box can't be pushed any further.
-      let adj = getAdjacent(state.player.getLocalPos(), {x, y});
+      let adj = getObject(state.player.getLocalPos(), {x, y});
       if (adj.type !== 'box' || !canBePushed(adj, {x, y}) ) {
         state.player.state = 'idle';
         updatePlayer();
@@ -414,7 +414,7 @@ function enterRoom() {
     if (r.id === level.id) continue; // Ignore current room.
 
     // Get cell in the new room.
-    const otherRoomAdj = getAdjacent(state.player.getLocalPos(r.id), { x:0, y:0 });
+    const otherRoomAdj = getObject(state.player.getLocalPos(r.id));
 
     if (otherRoomAdj.type === entity.empty.type) continue; // Ignore empty (only overlapping cells allow transition between rooms).
 
@@ -472,7 +472,7 @@ function canBePushed(item, direction = {x:0, y:0}) {
   if (level.hasWon) return false;
 
   // Cancel if the next adjacent space isn't empty:
-  let adj = getAdjacent(item, direction);
+  let adj = getObject(item, direction);
   if (adj.type === 'box' || adj.type === 'wall') return false;
 
   return true
@@ -555,7 +555,7 @@ function convertPosToMapIndex(pos) {
 
 // Return either a box object, or an entity object.
 // local coords
-function getAdjacent(pos, offset) {
+function getObject(pos, offset = { x:0, y:0 }) {
 
   // todo: rename to `getCell()`
 
