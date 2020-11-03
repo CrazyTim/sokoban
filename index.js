@@ -35,6 +35,7 @@ window.state = {
         x: this.pos.x - state.levels[roomId].pos.x,
         y: this.pos.y - state.levels[roomId].pos.y,
       };
+
     }
   },
 
@@ -197,13 +198,20 @@ function onWinEventFactory(roomId) {
 
     return () => {
       makeRoom(state.levels[1]);
-      openDoor(level.doors[0]);
+      openDoor(0, 0);
     }
 
   } else if (roomId === 1) {
 
     return () => {
       facePlayer('se');
+      makeRoom(state.levels[2]);
+      openDoor(0, 1);
+    }
+
+  } else if (roomId === 2) {
+
+    return () => {
       console.log('end game');
     }
 
@@ -217,12 +225,16 @@ function onWinEventFactory(roomId) {
 
 }
 
-function openDoor(d) {
+function openDoor(roomIndex, doorIndex) {
+
+  const room = state.levels[roomIndex];
+  const door = room.doors[doorIndex];
 
   // todo: animate door
 
-  d.state = 'open';
-  updateDoor(d);
+  door.state = 'open';
+  updateDoor(room, door);
+
 }
 
 function facePlayer(direction) {
@@ -859,9 +871,9 @@ function makeDoor(door, div) {
 
 }
 
-function updateDoor(door) {
+function updateDoor(room, door) {
 
-  const d = document.querySelector('.level-' + level.id + ' .door-' + door.id);
+  const d = document.querySelector('.level-' + room.id + ' .door-' + door.id);
 
   d.classList.remove('state-open');
   d.classList.remove('state-closed');
