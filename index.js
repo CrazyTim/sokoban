@@ -3,7 +3,7 @@ import * as util from './util.js';
 /*
 
 todo:
-- take screen shots of levels so easier to piece them together.
+- take screen shots of rooms so easier to piece them together.
 - convert to class so easier to expose methods and debug
 - rename 'level' to 'room'
 - tweak push-down img
@@ -30,7 +30,7 @@ window.state = {
     state: '',
     getLocalPos: function(roomId) {
 
-      if (roomId === undefined) roomId = level.id;
+      if (roomId === undefined) roomId = state.level.id;
 
       return {
         x: this.pos.x - state.levels[roomId].pos.x,
@@ -46,9 +46,9 @@ window.state = {
 
   moves: [],
 
-}
+  level: {}, // The current room.
 
-let level = {}; // The current level (area).
+}
 
 let inputStack = [];
 const inputStackLength = 1;
@@ -98,11 +98,11 @@ const entity = { // These entities are stateless and do not change.
 window.onload = onLoad;
 window.onkeydown = onKeyDown;
 
-function levelFactory(i) {
+function roomFactory(i) {
 
   const l = util.deepCopy(data[i]);
 
-  // Add id to level:
+  // Add id to room:
   l.id =  i
 
   // Add id to each box:
@@ -133,7 +133,7 @@ function levelFactory(i) {
 
     if (!door.state) door.state = 'open'; // Open door if not specified.
 
-    // Ensure ground is always under a door (for convenience when joining levels tolgether):
+    // Ensure ground is always under a door (for convenience when joining rooms tolgether):
     const cellIndex = convertPosToMapIndex(door.pos)
     l.map[cellIndex] = entity.ground.id;
 
@@ -144,9 +144,9 @@ function levelFactory(i) {
 }
 
 function onLoad() {
-  // Clone level data into state
+  // Clone room data into state
   for (let i = 0; i < data.length; i++) {
-    state.levels.push(levelFactory(i));
+    state.levels.push(roomFactory(i));
   }
 
   // Add styles for animations:
@@ -253,7 +253,7 @@ function facePlayer(direction) {
 function setEventHandlers() {
 
   const btnExport = document.querySelector('.btn-export');
-  btnExport.onclick = e => util.downloadFile(JSON.stringify(level), 'application/json', 'level');
+  btnExport.onclick = e => util.downloadFile(JSON.stringify(state.level), 'application/json', 'level');
 
   const btnModeClear = document.querySelector('.btn-clear');
   btnModeClear.onclick = e => clearCell();
@@ -302,13 +302,12 @@ function changeMode(m) {
 
 function changeRoom(roomId) {
 
-  level = state.levels[roomId];
-  state.level = level;
+  state.level = state.levels[roomId];
 
-  makeRoom(level); // ensure room has been made;
+  makeRoom(state.level); // ensure room has been made;
 
   // Center viewport on the room:
-  _world.style.transform = `translate(${_worldOffset - (level.pos.x * _squareSize)}px, ${_worldOffset - (level.pos.y * _squareSize)}px)`
+  _world.style.transform = `translate(${_worldOffset - (state.level.pos.x * _squareSize)}px, ${_worldOffset - (state.level.pos.y * _squareSize)}px)`
 
 }
 
@@ -329,9 +328,9 @@ function onKeyDown(e) {
     return;
   }
 
-  // Restart level:
+  // Reset room:
   if (e.key === 'Escape') {
-    restartRoom();
+    resetRoom();
     return;
   }
 
@@ -446,7 +445,7 @@ function enterRoom() {
 
     const r = currentRooms[i];
 
-    if (r.id === level.id) continue; // Ignore current room.
+    if (r.id === state.level.id) continue; // Ignore current room.
 
     // Get cell in the new room.
     const otherRoomAdj = getObject(state.player.getLocalPos(r.id));
@@ -502,7 +501,7 @@ function canBePushed(item, direction = {x:0, y:0}) {
 
   // Prevent boxes from being moved once the level has been won
   // (otherwise player could move boxes out of level)
-  if (level.hasWon) return false;
+  if (state.level.hasWon) return false;
 
   // Cancel if the next adjacent space isn't empty:
   let adj = getObject(item, direction);
@@ -527,10 +526,10 @@ function sendQueuedInput() {
 
 function checkWin() {
 
-  if (level.hasWon) return;
+  if (state.level.hasWon) return;
 
-  for (let i = 0; i < level.boxes.length; i++) {
-    if(!isBoxOnCrystal(level.boxes[i])) return;
+  for (let i = 0; i < state.level.boxes.length; i++) {
+    if(!isBoxOnCrystal(state.level.boxes[i])) return;
   }
 
   state.canInput = false;
@@ -541,8 +540,8 @@ function checkWin() {
 
   setTimeout(() => {
 
-    level.onWin();
-    level.hasWon = true;
+    state.level.onWin();
+    state.level.hasWon = true;
 
     state.canInput = true;
 
@@ -557,7 +556,7 @@ function checkWin() {
 }
 
 function isBoxOnCrystal(box) {
-  return level.map[convertPosToMapIndex(box)] === entity.crystal.id;
+  return state.level.map[convertPosToMapIndex(box)] === entity.crystal.id;
 }
 
 function undo() {
@@ -568,7 +567,7 @@ function undo() {
 
 }
 
-function restartRoom() {
+function resetRoom() {
 
   if (state.moves.length === 0) return;
 
@@ -612,18 +611,18 @@ function getObject(pos, offset = { x:0, y:0 }) {
   // todo: rename to `getCell()`
 
   // Check box:
-  for (let i = 0; i < level.boxes.length; i++) {
-    if(level.boxes[i].x === pos.x + offset.x &&
-       level.boxes[i].y === pos.y + offset.y) {
-      return level.boxes[i];
+  for (let i = 0; i < state.level.boxes.length; i++) {
+    if(state.level.boxes[i].x === pos.x + offset.x &&
+       state.level.boxes[i].y === pos.y + offset.y) {
+      return state.level.boxes[i];
     }
   }
 
   // Check door:
-  for (let i = 0; i < level.doors.length; i++) {
-    if(level.doors[i].pos.x === pos.x + offset.x &&
-       level.doors[i].pos.y === pos.y + offset.y) {
-      return level.doors[i];
+  for (let i = 0; i < state.level.doors.length; i++) {
+    if(state.level.doors[i].pos.x === pos.x + offset.x &&
+       state.level.doors[i].pos.y === pos.y + offset.y) {
+      return state.level.doors[i];
     }
   }
 
@@ -641,7 +640,7 @@ function getObject(pos, offset = { x:0, y:0 }) {
   }
 
   for (const value of Object.values(entity)) {
-    if (value.id === level.map[j]) return value;
+    if (value.id === state.level.map[j]) return value;
   }
 
   return { // Player ran off the edge of board.
@@ -666,7 +665,7 @@ function makeRoom(room) {
     room.div.classList.add('level-' + room.id);
     room.div.style.transform = `translate(${room.pos.x * _squareSize}px, ${room.pos.y * _squareSize}px)`
 
-    // Fade-in level
+    // Fade-in room
     setTimeout(() => {
       room.div.classList.remove('hidden');
     }, 100);
@@ -766,7 +765,7 @@ function changeCell(id, entityKey) {
 
   //console.log({id,entityKey});
 
-  const div = document.querySelector('.level-' + level.id + ' .cell-' + id);
+  const div = document.querySelector('.level-' + state.level.id + ' .cell-' + id);
 
   // Get entity:
   let e;
@@ -784,12 +783,12 @@ function changeCell(id, entityKey) {
 
   div.classList.add('type-' + e.id);
 
-  level.map[id] = e.id;
+  state.level.map[id] = e.id;
 
 }
 
 function clearCell() {
-  for (let i = 0; i < level.map.length; i++) {
+  for (let i = 0; i < state.level.map.length; i++) {
     changeCell(i, 'empty');
   }
 }
@@ -800,7 +799,7 @@ function moveSquare(className, pos) {
 }
 
 function updateBoxes() {
-  level.boxes.forEach(b => {
+  state.level.boxes.forEach(b => {
     updateBox(b);
   });
 }
@@ -841,9 +840,9 @@ function updateGui() {
 }
 
 function updateBox(b) {
-  moveSquare('.level-' + level.id + ' .box-' + b.id, b);
+  moveSquare('.level-' + state.level.id + ' .box-' + b.id, b);
 
-  const d = document.querySelector('.level-' + level.id + ' .box-' + b.id);
+  const d = document.querySelector('.level-' + state.level.id + ' .box-' + b.id);
 
   if(isBoxOnCrystal(b)) {
     d.classList.add('state-win');
