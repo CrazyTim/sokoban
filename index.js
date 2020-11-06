@@ -3,13 +3,20 @@ import * as util from './util.js';
 /*
 
 todo:
+
+- store state in local storage.
+
 - take screen shots of rooms so easier to piece them together.
-- convert to class so easier to expose methods and debug
-- rename 'level' to 'room'
-- tweak push-down img
+
+- convert to class so easier to expose methods and debug.
+
+- rename 'level' to 'room'.
+
+- tweak push-down img:
   - move to bottom edge
   - make head wider
   - adjust face perspective
+
 - add physical boundries inside a room that you can't push over (groves in floor).
   - Use these as a mechanic to sopt user from pushing boxes into adjacent rooms, when it makes sense in the level design.
 
@@ -96,6 +103,7 @@ const entity = { // These entities are stateless and do not change.
 window.onload = onLoad;
 window.onkeydown = onKeyDown;
 
+// Clone room data from `level.js` and set default values.
 function roomFactory(i) {
 
   const l = util.deepCopy(data[i]);
@@ -116,8 +124,6 @@ function roomFactory(i) {
   l.onWin = onWinEventFactory(i);
 
   l.moves = [];
-
-  if (!l.startPos.face) l.startPos.face = 'se';
 
   // Create doors if it doesn't exist
   if (!l.doors) l.doors = [];
@@ -142,10 +148,6 @@ function roomFactory(i) {
 }
 
 function onLoad() {
-  // Clone room data into state
-  for (let i = 0; i < data.length; i++) {
-    state.levels.push(roomFactory(i));
-  }
 
   // Add styles for animations:
   var style = document.createElement('style');
@@ -161,21 +163,30 @@ function onLoad() {
   `;
   document.head.appendChild(style);
 
-  // Define stage:
+  // Make stage:
   _stage = document.querySelector('.stage');
   _stage.style.width = (_worldOffset * 2) + (_boardSize.width * _squareSize) + 'px';
   _stage.style.height = (_worldOffset * 2) + (_boardSize.height * _squareSize) + 'px';
 
+  // Make world:
   _world = document.createElement('div');
   _world.classList.add('world')
   _stage.appendChild(_world);
 
+  // Make stage edge:
   const stageEdge = document.createElement('div');
   stageEdge.classList.add('stage-edge')
   stageEdge.style.width = (_boardSize.width * _squareSize) + 'px';
   stageEdge.style.height = (_boardSize.height * _squareSize) + 'px';
   stageEdge.style.transform = `translate(${_worldOffset}px, ${_worldOffset}px)`
   _stage.appendChild(stageEdge);
+
+  // Make each room:
+  for (let i = 0; i < data.length; i++) {
+    const r = roomFactory(i);
+    state.levels.push(r);
+    makeRoom(r);
+  }
 
   setEventHandlers();
 
@@ -302,10 +313,16 @@ function changeRoom(roomId) {
 
   state.level = state.levels[roomId];
 
-  makeRoom(state.level); // ensure room has been made;
+  // ensure room has been made:
+  makeRoom(state.level);
 
   // Center viewport on the room:
   _world.style.transform = `translate(${_worldOffset - (state.level.pos.x * _squareSize)}px, ${_worldOffset - (state.level.pos.y * _squareSize)}px)`
+
+  // Wait until node has been added to DOM:
+  setTimeout(() => {
+    state.level.div.classList.remove('hidden');
+  }, 50);
 
 }
 
@@ -408,7 +425,7 @@ function onKeyDown(e) {
 
     enterRoom();
 
-    // Wait for css to animate:
+    // Wait for move animation to finish:
     state.isPendingMove = true;
     setTimeout(() => {
 
@@ -536,6 +553,7 @@ function checkWin() {
   state.player.state = 'win';
   updatePlayer();
 
+  // Wait for win animation to finish:
   setTimeout(() => {
 
     state.level.onWin();
@@ -662,11 +680,6 @@ function makeRoom(room) {
     room.div.classList.add('hidden');
     room.div.classList.add('level-' + room.id);
     room.div.style.transform = `translate(${room.pos.x * _squareSize}px, ${room.pos.y * _squareSize}px)`
-
-    // Fade-in room
-    setTimeout(() => {
-      room.div.classList.remove('hidden');
-    }, 100);
 
     // Make cells:
     for (let y = 0; y < _boardSize.height; y++) {
