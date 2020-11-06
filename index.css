@@ -199,12 +199,37 @@ body, html {
 }
 
 
+
+
 /* Door */
-.door.style-0 {
-  /* background-image: url(./img/storage.svg), url(./img/ground.svg); */
-  background-color: #2b2b2b;
+svg {
+overflow: visible;
 }
-.door.style-0.state-open {
-  /* background-image: url(./img/storage.svg), url(./img/ground.svg); */
-  background-color: #2b2b2b33;
+
+rect {
+  transition: transform 0.2s;
+  transition-timing-function: ease-in;
 }
+
+.door.style-0 svg rect.shadow {
+  fill: #6363635e;
+  width: 10px;
+  height: 40px;
+  x: 15px;
+  y: 0px;
+}
+.door.style-0 svg rect.divider {
+  fill: red;
+  width: 10px;
+  height: 40px;
+  x: 15px;
+  y: 0px;
+}
+
+
+.door.style-0.state-open svg rect.divider {
+  transform: rotate(90deg);
+  transform-origin: 50% 0%;
+}
+
+

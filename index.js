@@ -893,6 +893,27 @@ function makeDoor(door, div) {
   d.classList.add('state-' + door.state);
   d.classList.add('style-' + door.style);
 
+  // Note: svg is styled entirely in css.
+  d.appendChild(util.makeSvg(
+    '0 0 40 40',
+    ['opener'],
+    `
+    <rect class="shadow"/>
+    <rect class="divider"/>
+    `
+  ));
+
+  // todo:
+  /*
+  <svg width="500" height="250">
+    <defs>
+        <clipPath id="circleView">
+            <circle cx="250" cy="125" r="125" fill="#FFFFFF" />
+        </clipPath>
+    </defs>
+    <image width="500" height="250" xlink:href="https://www.amrita.edu/sites/default/files/news-images/new/news-events/images/l-nov/grass.jpg" clip-path="url(#circleView)" />
+  */
+
 }
 
 function updateDoor(room, door) {

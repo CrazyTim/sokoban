@@ -49,3 +49,15 @@ export function areArraysIdentical(a1, a2) {
   // Todo: not efficient.
   JSON.stringify(a1) === JSON.stringify(a2);
 }
+
+export function makeSvg(viewbox, classes, html) {
+
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('viewBox', viewbox);
+  svg.innerHTML = html;
+  classes.forEach(c => {
+    svg.classList.add(c);
+  });
+  return svg;
+
+}
