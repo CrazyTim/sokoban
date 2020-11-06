@@ -44,6 +44,8 @@ window.state = {
 
   canInput: false,
 
+  isPendingMove: false,
+
   moves: [],
 
   level: {}, // The current room.
@@ -56,8 +58,6 @@ const inputStackLength = 1;
 let _stage; // The DOM node we are drawing inside of.
 let _world; // The DOM node that wraps everything inside the stage. Used to easily adjust the users viewpoint.
 let _mode = null;
-
-let canAct = true;
 
 const boardSize = {
   width: 11,
@@ -319,7 +319,7 @@ function onKeyDown(e) {
 
   // Wait for prev input to finish:
   inputStack.push(e);
-  if (!canAct) return;
+  if (state.isPendingMove) return;
   inputStack.shift();
 
   // Undo:
@@ -411,7 +411,7 @@ function onKeyDown(e) {
     enterRoom();
 
     // Wait for css to animate:
-    canAct = false;
+    state.isPendingMove = true;
     setTimeout(() => {
 
       // Change state from 'push' to 'idle' if the box can't be pushed any further.
@@ -421,7 +421,7 @@ function onKeyDown(e) {
         updatePlayer();
       }
 
-      canAct = true;
+      state.isPendingMove = false;
       checkWin();
       sendQueuedInput();
 
