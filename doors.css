@@ -1,0 +1,63 @@
+/*
+
+todo: add img texture to doors
+use background image on rect if possible
+
+*/
+
+.door svg {
+  /* overflow: visible; */
+}
+
+.door rect {
+  transition: transform 0.2s;
+  transition-timing-function: ease-in;
+}
+
+/*
+STYLE 0 - Vertical
+*/
+
+.door.style-0 svg rect.shadow {
+  fill: #6363635e;
+  width: 10px;
+  height: 40px;
+  x: 15px;
+  y: 0px;
+}
+
+.door.style-0 svg rect.divider {
+  fill: #4b4436;
+  width: 10px;
+  height: 40px;
+  x: 15px;
+  y: 0px;
+}
+
+.door.style-0.state-open svg rect.divider {
+  transform: translate(0px, 39px);
+}
+
+/*
+STYLE 1 - Horizontal
+*/
+
+.door.style-1 svg rect.shadow {
+  fill: #6363635e;
+  width: 40px;
+  height: 10px;
+  x: 0px;
+  y: 15px;
+}
+
+.door.style-1 svg rect.divider {
+  fill: #4b4436;
+  width: 40px;
+  height: 10px;
+  x: 0px;
+  y: 15px;
+}
+
+.door.style-1.state-open svg rect.divider {
+  transform: translate(39px, 0px);
+}

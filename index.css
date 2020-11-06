@@ -1,5 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Yantramanav:wght@900&display=swap');
 
+@import url("doors.css");
+
 * {
   box-sizing: border-box;
 }
@@ -197,39 +199,3 @@ body, html {
 .room {
   transition: opacity 1s;
 }
-
-
-
-
-/* Door */
-svg {
-overflow: visible;
-}
-
-rect {
-  transition: transform 0.2s;
-  transition-timing-function: ease-in;
-}
-
-.door.style-0 svg rect.shadow {
-  fill: #6363635e;
-  width: 10px;
-  height: 40px;
-  x: 15px;
-  y: 0px;
-}
-.door.style-0 svg rect.divider {
-  fill: red;
-  width: 10px;
-  height: 40px;
-  x: 15px;
-  y: 0px;
-}
-
-
-.door.style-0.state-open svg rect.divider {
-  transform: rotate(90deg);
-  transform-origin: 50% 0%;
-}
-
-
