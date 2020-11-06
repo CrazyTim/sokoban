@@ -67,8 +67,9 @@ const boardSize = {
 const _squareSize = 60; // Pixels.
 const _worldOffset = _squareSize * 1; // Number of squares to offset the world
 
-const moveDuration = 0.2;
+const moveDuration = .2;
 const winDuration = 1;
+const roomTransitionDuration = 1;
 
 const entity = { // These entities are stateless and do not change.
 
@@ -157,7 +158,7 @@ function onLoad() {
     }
 
     .world {
-      transition: transform ${.5}s;
+      transition: transform ${roomTransitionDuration}s;
     }
   `;
   document.head.appendChild(style);
@@ -382,7 +383,7 @@ function onKeyDown(e) {
 
       const levelsCopy = [];
 
-      state.levels.forEach((l) => {
+      state.levels.forEach(l => {
         levelsCopy.push({
           id: l.id,
           boxes: util.deepCopy(l.boxes),
@@ -470,7 +471,7 @@ function getCurrentRooms() {
 
   const currentRooms = [];
 
-  state.levels.forEach((l) => {
+  state.levels.forEach(l => {
 
     const playerLocalPos = state.player.getLocalPos(l.id)
 
@@ -582,7 +583,7 @@ function undoState() {
   const oldState = state.moves.pop();
 
   // Restore boxes
-  oldState.levels.forEach((l) => {
+  oldState.levels.forEach(l => {
     state.levels[l.id].boxes = l.boxes;
   });
   updateBoxes();
@@ -699,7 +700,7 @@ function makeRoom(room) {
         );
 
         // Handle cell click:
-        div.onmousedown = (e) => {
+        div.onmousedown = e => {
 
           if (_mode === 'player') { // Move player...
             state.player.pos.x = x;
@@ -891,5 +892,32 @@ function updateDoor(room, door) {
   d.classList.remove('state-open');
   d.classList.remove('state-closed');
   d.classList.add('state-' + door.state);
+
+}
+
+// Un-render rooms that are too far away from the current room.
+// This is based on the viewport size, and should improve performance.
+function hideDistantRooms() {
+
+  state.levels.forEach(r => {
+
+    if (r.id === state.level.id) return;
+
+    const xOffset = Math.abs(r.pos.x - state.level.pos.x);
+    const yOffset = Math.abs(r.pos.y - state.level.pos.y);
+
+    if (xOffset > (boardSize.width + 2) ||
+        yOffset > (boardSize.height + 2)) {
+
+      // This room is definitely outside the viewport
+      r.div.style.display = 'none';
+
+    } else {
+
+      r.div.style.display = '';
+
+    }
+
+  });
 
 }
