@@ -19,7 +19,6 @@ todo:
 
 */
 
-
 window.state = {
 
   player: {
@@ -52,24 +51,23 @@ window.state = {
 
 }
 
-let inputStack = [];
-const inputStackLength = 1;
+let _inputStack = [];
+const _inputStackLength = 1;
 
 let _stage; // The DOM node we are drawing inside of.
 let _world; // The DOM node that wraps everything inside the stage. Used to easily adjust the users viewpoint.
 let _mode = null;
 
-const boardSize = {
+const _boardSize = {
   width: 11,
   height: 11,
 }
 
 const _squareSize = 60; // Pixels.
 const _worldOffset = _squareSize * 1; // Number of squares to offset the world
-
-const moveDuration = .2;
-const winDuration = 1;
-const roomTransitionDuration = 1;
+const _moveDuration = .2;
+const _winDuration = 1;
+const _roomTransitionDuration = 1;
 
 const entity = { // These entities are stateless and do not change.
 
@@ -154,19 +152,19 @@ function onLoad() {
   style.innerHTML = `
     .player,
     .box {
-      transition: transform ${moveDuration}s;
+      transition: transform ${_moveDuration}s;
     }
 
     .world {
-      transition: transform ${roomTransitionDuration}s;
+      transition: transform ${_roomTransitionDuration}s;
     }
   `;
   document.head.appendChild(style);
 
   // Define stage:
   _stage = document.querySelector('.stage');
-  _stage.style.width = (_worldOffset * 2) + (boardSize.width * _squareSize) + 'px';
-  _stage.style.height = (_worldOffset * 2) + (boardSize.height * _squareSize) + 'px';
+  _stage.style.width = (_worldOffset * 2) + (_boardSize.width * _squareSize) + 'px';
+  _stage.style.height = (_worldOffset * 2) + (_boardSize.height * _squareSize) + 'px';
 
   _world = document.createElement('div');
   _world.classList.add('world')
@@ -174,8 +172,8 @@ function onLoad() {
 
   const stageEdge = document.createElement('div');
   stageEdge.classList.add('stage-edge')
-  stageEdge.style.width = (boardSize.width * _squareSize) + 'px';
-  stageEdge.style.height = (boardSize.height * _squareSize) + 'px';
+  stageEdge.style.width = (_boardSize.width * _squareSize) + 'px';
+  stageEdge.style.height = (_boardSize.height * _squareSize) + 'px';
   stageEdge.style.transform = `translate(${_worldOffset}px, ${_worldOffset}px)`
   _stage.appendChild(stageEdge);
 
@@ -318,9 +316,9 @@ function onKeyDown(e) {
   if (!state.canInput) return;
 
   // Wait for prev input to finish:
-  inputStack.push(e);
+  _inputStack.push(e);
   if (state.isPendingMove) return;
-  inputStack.shift();
+  _inputStack.shift();
 
   // Undo:
   if (e.key === 'Delete' || e.key === 'z' || (e.key === 'z' && e.ctrlKey)) {
@@ -425,7 +423,7 @@ function onKeyDown(e) {
       checkWin();
       sendQueuedInput();
 
-    }, moveDuration * 1000);
+    }, _moveDuration * 1000);
 
   }
 
@@ -475,8 +473,8 @@ function getCurrentRooms() {
     const playerLocalPos = state.player.getLocalPos(l.id)
 
     // check out of bounds
-    if (playerLocalPos.x >= 0 && playerLocalPos.x < boardSize.width &&
-        playerLocalPos.y >= 0 && playerLocalPos.y < boardSize.height) {
+    if (playerLocalPos.x >= 0 && playerLocalPos.x < _boardSize.width &&
+        playerLocalPos.y >= 0 && playerLocalPos.y < _boardSize.height) {
 
       const i = convertPosToMapIndex(playerLocalPos);
       const cell = l.map[i];
@@ -514,12 +512,12 @@ function canBePushed(item, direction = {x:0, y:0}) {
 function sendQueuedInput() {
 
   // Truncate stack if its too bog.
-  if (inputStack.length > inputStackLength) {
-    inputStack.length = inputStackLength;
+  if (_inputStack.length > _inputStackLength) {
+    _inputStack.length = _inputStackLength;
   }
 
-  if (inputStack.length > 0) {
-    onKeyDown(inputStack.shift());
+  if (_inputStack.length > 0) {
+    onKeyDown(_inputStack.shift());
   }
 
 }
@@ -551,7 +549,7 @@ function checkWin() {
 
     updatePlayer(); // Update classes on player div.
 
-  }, winDuration * 1000);
+  }, _winDuration * 1000);
 
 }
 
@@ -600,7 +598,7 @@ function undoState() {
 // Return the map index for the given position.
 // local coords.
 function convertPosToMapIndex(pos) {
-  return pos.x + (pos.y * boardSize.width);
+  return pos.x + (pos.y * _boardSize.width);
 }
 
 
@@ -630,9 +628,9 @@ function getObject(pos, offset = { x:0, y:0 }) {
   let i = convertPosToMapIndex(pos);
   let j;
   if (offset.y === -1) {
-    j = i - boardSize.width;
+    j = i - _boardSize.width;
   } else if (offset.y === 1) {
-    j = i + boardSize.width;
+    j = i + _boardSize.width;
   } else if (offset.x === -1) {
     j = i - 1;
   } else if (offset.x === 1) {
@@ -671,8 +669,8 @@ function makeRoom(room) {
     }, 100);
 
     // Make cells:
-    for (let y = 0; y < boardSize.height; y++) {
-      for (let x = 0; x < boardSize.width; x++) {
+    for (let y = 0; y < _boardSize.height; y++) {
+      for (let x = 0; x < _boardSize.width; x++) {
 
         const i = convertPosToMapIndex({x,y})
 
@@ -905,8 +903,8 @@ function hideDistantRooms() {
     const xOffset = Math.abs(r.pos.x - state.level.pos.x);
     const yOffset = Math.abs(r.pos.y - state.level.pos.y);
 
-    if (xOffset > (boardSize.width + 2) ||
-        yOffset > (boardSize.height + 2)) {
+    if (xOffset > (_boardSize.width + 2) ||
+        yOffset > (_boardSize.height + 2)) {
 
       // This room is definitely outside the viewport
       r.div.style.display = 'none';
