@@ -5,59 +5,68 @@ use background image on rect if possible
 
 */
 
-.door svg {
-  /* overflow: visible; */
-}
+/*
+--------------------------------
+STYLE 0 - Vertical
+--------------------------------
+*/
 
-.door rect {
+.door.style-0 svg .div {
   transition: transform 0.2s;
   transition-timing-function: ease-in;
 }
 
-/*
-STYLE 0 - Vertical
-*/
-
-.door.style-0 svg rect.shadow {
-  fill: #6363635e;
-  width: 10px;
-  height: 40px;
-  x: 15px;
-  y: 0px;
+.door.style-0 svg .groove {
+  opacity: 0.7;
 }
 
-.door.style-0 svg rect.divider {
-  fill: #4b4436;
-  width: 10px;
-  height: 40px;
-  x: 15px;
+.door.style-0 svg .groove rect:nth-child(1) { /* groove */
+  width: 8px;
+  height: 60px;
+  x: 26px;
   y: 0px;
+  fill: #424242;
+  stroke-width: 2.5px;
+  stroke: #b4b4b4;
+  opacity: 0.6;
 }
 
-.door.style-0.state-open svg rect.divider {
-  transform: translate(0px, 39px);
+.door.style-0 svg .div rect:nth-child(1) { /* groove */
+  width: 60px;
+  height: 30px;
+  x: -20px;
+  y: 0px;
+  opacity: 0.1;
+}
+.door.style-0 svg .div rect:nth-child(2) { /* door part */
+  width: 18px;
+  height: 30px;
+  x: 0px;
+  y: 0px;
+  stroke: #56514e;
+  fill: #3f3834;
+  stroke-width: 3px;
+  stroke-dasharray: 0 18 30 18 30 0;
+}
+
+.door.style-0 svg .div-1 {
+  transform: translate(21px, 0px);
+}
+.door.style-0 svg .div-2 {
+  transform: translate(21px, 30px);
+}
+
+.door.style-0.state-open svg .div-1 {
+  transform: translate(21px, -27px);
+}
+.door.style-0.state-open svg .div-2 {
+  transform: translate(21px, 57.5px);
 }
 
 /*
 STYLE 1 - Horizontal
 */
 
-.door.style-1 svg rect.shadow {
-  fill: #6363635e;
-  width: 40px;
-  height: 10px;
-  x: 0px;
-  y: 15px;
-}
-
-.door.style-1 svg rect.divider {
-  fill: #4b4436;
-  width: 40px;
-  height: 10px;
-  x: 0px;
-  y: 15px;
-}
-
-.door.style-1.state-open svg rect.divider {
-  transform: translate(39px, 0px);
+.door.style-0.horizontal svg {
+  transform: rotate(90deg);
 }

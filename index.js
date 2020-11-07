@@ -520,7 +520,7 @@ function canBePushed(item, direction = {x:0, y:0}) {
 
   // Cancel if the next adjacent space isn't empty:
   let adj = getObject(item, direction);
-  if (adj.type === 'box' || adj.type === 'wall') return false;
+  if (adj.type === 'box' || adj.type === 'wall' || adj.type === 'door') return false;
 
   return true
 
@@ -893,13 +893,35 @@ function makeDoor(door, div) {
   d.classList.add('state-' + door.state);
   d.classList.add('style-' + door.style);
 
+  if (door.horizontal) {
+    d.classList.add('horizontal');
+  }
+
   // Note: svg is styled entirely in css.
   d.appendChild(util.makeSvg(
-    '0 0 40 40',
+    '0 0 60 60',
     ['opener'],
     `
-    <rect class="shadow"/>
-    <rect class="divider"/>
+    <defs>
+      <linearGradient id="grad-1" x1="0%" y1="50%" x2="100%" y2="50%" >
+      <stop offset="0%" style="stop-color:rgb(0,0,0);stop-opacity:0" />
+      <stop offset="40%" style="stop-color:rgb(0,0,0);stop-opacity:1" />
+      <stop offset="60%" style="stop-color:rgb(0,0,0);stop-opacity:1" />
+      <stop offset="100%" style="stop-color:rgb(0,0,0);stop-opacity:0" />
+      </linearGradient>
+    </defs>
+
+    <g class="groove">
+      <rect />
+    </g>
+    <g class="div div-1">
+      <rect fill="url(#grad-1)" />
+      <rect />
+    </g>
+    <g class="div div-2">
+      <rect fill="url(#grad-1)" />
+      <rect />
+    </g>
     `
   ));
 

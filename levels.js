@@ -34,7 +34,8 @@ export default [
       {
         pos: { x:1, y:4 },
         portal: 2,
-        style: 1,
+        style: 0,
+        horizontal: true,
         state: 'closed',
       },
     ],

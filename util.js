@@ -54,6 +54,7 @@ export function makeSvg(viewbox, classes, html) {
 
   const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
   svg.setAttribute('viewBox', viewbox);
+  svg.setAttribute('shape-rendering', 'crispEdges');
   svg.innerHTML = html;
   classes.forEach(c => {
     svg.classList.add(c);
