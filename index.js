@@ -294,6 +294,14 @@ function onWinEventFactory(roomId) {
   } else if (roomId === 2) {
 
     return () => {
+      facePlayer('se');
+      makeRoom(state.levels[3]);
+      openDoor(2, 1);
+    }
+
+  } else if (roomId === 3) {
+
+    return () => {
       console.log('end game');
     }
 
