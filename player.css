@@ -1,0 +1,54 @@
+.player::before {
+  background-repeat: no-repeat;
+  background-size: 100%;
+  background-position: center;
+  content:"";
+  width:100%;
+  height:100%;
+  position: absolute;
+}
+
+/* Player idle up */
+.player.face-se::before {
+  background-image: url(./img/player-down.svg);
+}
+.player.face-sw::before {
+  background-image: url(./img/player-down.svg);
+  transform: scaleX(-1); /* Face left */
+}
+
+/* Player idle down */
+.player.face-ne::before {
+  background-image: url(./img/player-up.svg);
+}
+.player.face-nw::before {
+  background-image: url(./img/player-up.svg);
+  transform: scaleX(-1); /* Face left */
+}
+
+/* Player win */
+.player.state-win.face-ne::before,
+.player.state-win.face-se::before {
+  background-image: url(./img/player-win.svg);
+}
+.player.state-win.face-nw::before,
+.player.state-win.face-sw::before {
+  background-image: url(./img/player-win.svg);
+  transform: scaleX(-1); /* Face left */
+}
+
+/* Player push */
+.player.state-push-up::before {
+  background-image: url(./img/player-push-up.svg);
+}
+.player.state-push-down::before {
+  background-image: url(./img/player-push-down.svg);
+  transform: scaleX(-1); /* Face left */
+}
+.player.state-push-right::before {
+  background-image: url(./img/player-push.svg);
+}
+.player.state-push-left::before {
+  background-image: url(./img/player-push.svg);
+  transform: scaleX(-1); /* Face left */
+}
