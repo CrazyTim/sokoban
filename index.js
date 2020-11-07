@@ -173,19 +173,34 @@ function onLoad() {
   _world.classList.add('world')
   _stage.appendChild(_world);
 
-  // Make stage edge:
-  const stageEdge = document.createElement('div');
-  stageEdge.classList.add('stage-edge')
-  stageEdge.style.width = (_boardSize.width * _squareSize) + 'px';
-  stageEdge.style.height = (_boardSize.height * _squareSize) + 'px';
-  stageEdge.style.transform = `translate(${_worldOffset}px, ${_worldOffset}px)`
-  _stage.appendChild(stageEdge);
+  makeEditGrid();
 
   // Make each room:
   for (let i = 0; i < data.length; i++) {
+
     const r = roomFactory(i);
     state.levels.push(r);
     makeRoom(r);
+
+    // Make button to edit room:
+    let btn = document.createElement('button');
+    btn.classList.add('btn');
+    btn.classList.add('btn-room');
+    btn.classList.add('btn-room-' + i);
+    btn.textContent = 'level ' + util.pad(i,2);
+    btn.onclick = e => {
+
+      changeRoom(i);
+
+      // Move player to room:
+      const room = state.levels[i];
+      state.player.pos.x = room.startPos.x + room.pos.x;
+      state.player.pos.y = room.startPos.y + room.pos.y;
+      updatePlayer();
+
+    }
+    document.querySelector('.buttons').appendChild(btn);
+
   }
 
   setEventHandlers();
@@ -206,6 +221,56 @@ function onLoad() {
   updatePlayer();
 
   state.canInput = true;
+
+}
+
+function makeEditGrid() {
+  // Edit grid overlays the stage and is used to edit cells
+  // wip
+
+  // Make stage edge:
+  const editStage = document.createElement('div');
+  editStage.classList.add('edit-stage')
+  editStage.style.width = (_boardSize.width * _squareSize) + 'px';
+  editStage.style.height = (_boardSize.height * _squareSize) + 'px';
+  editStage.style.transform = `translate(${_worldOffset}px, ${_worldOffset}px)`
+  _stage.appendChild(editStage);
+
+  // Make cells:
+  for (let y = 0; y < _boardSize.height; y++) {
+    for (let x = 0; x < _boardSize.width; x++) {
+
+      const i = convertPosToMapIndex({x,y})
+
+      // Make cell:
+      const div = makeSquare(
+        {x,y},
+        editStage,
+        [
+          'cell',
+        ],
+      );
+
+      // Handle cell click:
+      div.onmousedown = e => {
+
+        e.stopPropagation();
+
+        if(!_mode) return;
+
+        if (_mode === 'player') { // Move player...
+          state.player.pos.x = x + state.level.pos.x;
+          state.player.pos.y = y + state.level.pos.y;
+          updatePlayer();
+
+        } else if (_mode) { // Change cell...
+          changeCell(i, _mode);
+        }
+
+      }
+
+    }
+  }
 
 }
 
@@ -262,7 +327,7 @@ function facePlayer(direction) {
 function setEventHandlers() {
 
   const btnExport = document.querySelector('.btn-export');
-  btnExport.onclick = e => util.downloadFile(JSON.stringify(state.level), 'application/json', 'level');
+  btnExport.onclick = e => util.downloadFile(JSON.stringify(state.level), 'application/json', 'room-' + state.level.id);
 
   const btnModeClear = document.querySelector('.btn-clear');
   btnModeClear.onclick = e => clearCell();
@@ -281,6 +346,31 @@ function setEventHandlers() {
 
   const btnModePlayer = document.querySelector('.btn-mode-player');
   btnModePlayer.onclick = e => changeMode('player');
+
+  const btnMoveRoomUp = document.querySelector('.btn-move-room-up');
+  btnMoveRoomUp.onclick = e => moveRoom({x:0, y:-1});
+
+  const btnMoveRoomDown = document.querySelector('.btn-move-room-down');
+  btnMoveRoomDown.onclick = e => moveRoom({x:0, y:1});
+
+  const btnMoveRoomLeft = document.querySelector('.btn-move-room-left');
+  btnMoveRoomLeft.onclick = e => moveRoom({x:-1, y:0});
+
+  const btnMoveRoomRight = document.querySelector('.btn-move-room-right');
+  btnMoveRoomRight.onclick = e => moveRoom({x:1, y:0});
+
+}
+
+function moveRoom(offset) {
+  state.level.pos.x += offset.x;
+  state.level.pos.y += offset.y;
+
+  // Re-make room:
+  state.level.div.remove();
+  state.level.div = null;
+  makeRoom(state.level);
+  // todo: move into correct node stack order.
+  state.level.div.classList.remove('hidden');
 
 }
 
@@ -323,6 +413,17 @@ function changeRoom(roomId) {
   setTimeout(() => {
     state.level.div.classList.remove('hidden');
   }, 50);
+
+  { // Edit mode:
+    const thisButton = document.querySelector('.btn-room-' + roomId);
+    const allButtons = document.querySelectorAll('.btn-room');
+
+    allButtons.forEach(b => {
+      b.classList.remove('active');
+    });
+
+    thisButton.classList.add('active');
+  }
 
 }
 
@@ -708,20 +809,6 @@ function makeRoom(room) {
             'type-' + e.id,
           ],
         );
-
-        // Handle cell click:
-        div.onmousedown = e => {
-
-          if (_mode === 'player') { // Move player...
-            state.player.pos.x = x;
-            state.player.pos.y = y;
-            updatePlayer();
-
-          } else if (_mode) { // Change cell...
-            changeCell(i, _mode);
-          }
-
-        }
 
       }
     }

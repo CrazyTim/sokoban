@@ -24,7 +24,7 @@ export function downloadFile(content, type, fileName) {
   const file = new Blob([content], {type: type});
   const a = document.createElement('a');
   a.href = URL.createObjectURL(file);
-  a.download = name;
+  a.download = fileName;
   a.click();
 }
 
