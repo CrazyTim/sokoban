@@ -205,7 +205,7 @@ function onLoad() {
 
   setEventHandlers();
 
-  changeRoom(0);
+  changeRoom(0, 0);
 
   // Make player:
   const div = makeSquare(
@@ -278,17 +278,20 @@ function onWinEventFactory(roomId) {
 
   if (roomId === 0) {
 
-    return () => {
-      makeRoom(state.levels[1]);
+    return async () => {
       openDoor(0, 0);
+      makeRoom(state.levels[1]);
     }
 
   } else if (roomId === 1) {
 
-    return () => {
-      facePlayer('se');
+    return async () => {
+      facePlayer('sw');
       makeRoom(state.levels[2]);
+      await moveViewPort(state.levels[0].pos);
       openDoor(0, 1);
+      await util.delay(1000);
+      await moveViewPort(state.levels[1].pos, 800);
     }
 
   } else if (roomId === 2) {
@@ -315,12 +318,31 @@ function onWinEventFactory(roomId) {
 
 }
 
+window.moveViewPort = async function moveViewPort(pos = {x:0, y:0}, duration = _roomTransitionDuration * 1000, easing = 'ease-in-out') {
+
+  const translate = `translate(${_worldOffset - (pos.x * _squareSize)}px, ${_worldOffset - (pos.y * _squareSize)}px)`;
+
+  await _world.animate(
+    [
+      { transform: translate },
+    ],
+    {
+      duration,
+      easing,
+      fill: 'forwards',
+    },
+  ).finished;
+
+  _world.style.transform = translate; // Preserve the effect after animation has finished.
+
+  hideDistantRooms(); // Todo: test this works.
+
+}
+
 function openDoor(roomIndex, doorIndex) {
 
   const room = state.levels[roomIndex];
   const door = room.doors[doorIndex];
-
-  // todo: animate door
 
   door.state = 'open';
   updateDoor(room, door);
@@ -407,22 +429,22 @@ function changeMode(m) {
 
 }
 
-function changeRoom(roomId) {
+function changeRoom(roomId, animationDuration) {
 
   state.level = state.levels[roomId];
 
   // ensure room has been made:
   makeRoom(state.level);
 
-  // Center viewport on the room:
-  _world.style.transform = `translate(${_worldOffset - (state.level.pos.x * _squareSize)}px, ${_worldOffset - (state.level.pos.y * _squareSize)}px)`
-
   // Wait until node has been added to DOM:
   setTimeout(() => {
     state.level.div.classList.remove('hidden');
   }, 50);
 
-  { // Edit mode:
+  // Center viewport on the room:
+  moveViewPort(state.level.pos, animationDuration, 'ease');
+
+  { // Edit mode - activate button for this level:
     const thisButton = document.querySelector('.btn-room-' + roomId);
     const allButtons = document.querySelectorAll('.btn-room');
 
@@ -435,7 +457,7 @@ function changeRoom(roomId) {
 
 }
 
-function onKeyDown(e) {
+async function onKeyDown(e) {
 
   //console.log(e);
 
@@ -531,25 +553,38 @@ function onKeyDown(e) {
     // Move player:
     state.player.pos.x += x;
     state.player.pos.y += y;
+    updatePlayer();
 
     enterRoom();
 
     // Wait for move animation to finish:
     state.isPendingMove = true;
-    setTimeout(() => {
+    await util.delay(_moveDuration * 1000);
 
-      // Change state from 'push' to 'idle' if the box can't be pushed any further.
+    { // Change state from 'push' to 'idle' if the box can't be pushed any further.
       let adj = getObject(state.player.getLocalPos(), {x, y});
       if (adj.type !== 'box' || !canBePushed(adj, {x, y}) ) {
         state.player.state = 'idle';
         updatePlayer();
       }
+    }
 
-      state.isPendingMove = false;
-      checkWin();
-      sendQueuedInput();
+    await checkWin()
 
-    }, _moveDuration * 1000);
+    state.isPendingMove = false;
+
+    { // Send queued input:
+
+      // Truncate stack if its too bog.
+      if (_inputStack.length > _inputStackLength) {
+        _inputStack.length = _inputStackLength;
+      }
+
+      if (_inputStack.length > 0) {
+        await onKeyDown(_inputStack.shift());
+      }
+
+    }
 
   }
 
@@ -635,20 +670,7 @@ function canBePushed(item, direction = {x:0, y:0}) {
 
 }
 
-function sendQueuedInput() {
-
-  // Truncate stack if its too bog.
-  if (_inputStack.length > _inputStackLength) {
-    _inputStack.length = _inputStackLength;
-  }
-
-  if (_inputStack.length > 0) {
-    onKeyDown(_inputStack.shift());
-  }
-
-}
-
-function checkWin() {
+async function checkWin() {
 
   if (state.level.hasWon) return;
 
@@ -663,20 +685,20 @@ function checkWin() {
   updatePlayer();
 
   // Wait for win animation to finish:
-  setTimeout(() => {
+  await util.delay(_winDuration * 1000);
 
-    state.level.onWin();
-    state.level.hasWon = true;
+  state.player.state = 'idle';
+  state.level.hasWon = true;
 
-    state.canInput = true;
+  await state.level.onWin();
 
-    state.player.state = 'idle';
+  state.canInput = true;
 
-    updateGui();
+  updateGui();
 
-    updatePlayer(); // Update classes on player div.
+  updatePlayer(); // Update classes on player div.
 
-  }, _winDuration * 1000);
+  return true;
 
 }
 

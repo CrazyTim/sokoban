@@ -62,3 +62,9 @@ export function makeSvg(viewbox, classes, html) {
   return svg;
 
 }
+
+// Wrapper for `setTimeout` that can be awaited.
+// Resolve after a certain duration (in milliseconds).
+export async function delay(duration) {
+  return new Promise(resolve => setTimeout(resolve, duration));
+}
