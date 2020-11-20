@@ -8,8 +8,6 @@ todo:
 
 - take screen shots of rooms so easier to piece them together.
 
-- convert to class so easier to expose methods and debug.
-
 - rename 'level' to 'room'.
 
 - tweak push-down img:
@@ -26,7 +24,7 @@ todo:
 
 */
 
-window.state = {
+const state = {
 
   player: {
     id: 0,
@@ -100,9 +98,6 @@ const entity = { // These entities are stateless and do not change.
 
 }
 
-window.onload = onLoad;
-window.onkeydown = onKeyDown;
-
 // Clone room data from `level.js` and set default values.
 function roomFactory(i) {
 
@@ -147,7 +142,7 @@ function roomFactory(i) {
 
 }
 
-function onLoad() {
+function onLoad(props = {stage: null}) {
 
   // Add styles for animations:
   var style = document.createElement('style');
@@ -318,7 +313,7 @@ function onWinEventFactory(roomId) {
 
 }
 
-window.moveViewPort = async function moveViewPort(pos = {x:0, y:0}, duration = _roomTransitionDuration * 1000, easing = 'ease-in-out') {
+async function moveViewPort(pos = {x:0, y:0}, duration = 1000, easing = 'ease-in-out') {
 
   const translate = `translate(${_worldOffset - (pos.x * _squareSize)}px, ${_worldOffset - (pos.y * _squareSize)}px)`;
 
@@ -1079,4 +1074,12 @@ function hideDistantRooms() {
 
   });
 
+}
+
+// Expose public methods:
+export default {
+  state,
+  moveViewPort,
+  onLoad,
+  onKeyDown,
 }
