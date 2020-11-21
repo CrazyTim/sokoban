@@ -1,4 +1,4 @@
-import data from './levels.js';
+import data from './rooms.js';
 import * as util from './util.js';
 /*
 
@@ -8,7 +8,11 @@ todo:
 
 - take screen shots of rooms so easier to piece them together.
 
-- rename 'level' to 'room'.
+- rename state -> _state
+
+- add faux lighting effects (and shadows ??).
+
+- rename 'level' -> 'room'.
 
 - tweak push-down img:
   - move to bottom edge
@@ -74,7 +78,7 @@ const _moveDuration = .2;
 const _winDuration = 1;
 const _roomTransitionDuration = 1;
 
-const entity = { // These entities are stateless and do not change.
+const entity = { // These entity types are stateless in the world and do not change.
 
   empty: {
     id: 0,
