@@ -73,7 +73,7 @@ const _boardSize = {
 const _squareSize = 60; // Pixels.
 const _worldOffset = _squareSize * 1; // Number of squares to offset the world
 const _moveDuration = .2;
-const _winDuration = 1;
+const _winDuration = .8;
 const _roomTransitionDuration = 1;
 
 const entity = { // These entity types are stateless in the world and do not change.
@@ -276,6 +276,7 @@ function onWinEventFactory(roomId) {
   if (roomId === 0) {
 
     return async () => {
+      await util.delay(200); // slight delay for the first time we see a door opening.
       openDoor(0, 0);
       makeRoom(_state.levels[1]);
     }
@@ -283,12 +284,15 @@ function onWinEventFactory(roomId) {
   } else if (roomId === 1) {
 
     return async () => {
+      // Move viewport back to level 0 to see the door opening:
+      _state.canInput = false;
       facePlayer('sw');
       makeRoom(_state.levels[2]);
       await moveViewPort(_state.levels[0].pos);
       openDoor(0, 1);
       await util.delay(1000);
       await moveViewPort(_state.levels[1].pos, 800);
+      _state.canInput = true;
     }
 
   } else if (roomId === 2) {
@@ -572,7 +576,7 @@ async function onKeyDown(e) {
 
     { // Send queued input:
 
-      // Truncate stack if its too bog.
+      // Truncate stack if its too long.
       if (_inputStack.length > _inputStackLength) {
         _inputStack.length = _inputStackLength;
       }
@@ -684,16 +688,14 @@ async function checkWin() {
   // Wait for win animation to finish:
   await util.delay(_winDuration * 1000);
 
+  _state.canInput = true;
   _state.player.state = 'idle';
   _state.level.hasWon = true;
-
-  await _state.level.onWin();
-
-  _state.canInput = true;
-
   updateGui();
+  updatePlayer();
+  _inputStack.length = 0; // Truncate input stack
 
-  updatePlayer(); // Update classes on player div.
+  _state.level.onWin();
 
   return true;
 
