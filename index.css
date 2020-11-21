@@ -18,24 +18,28 @@ body, html {
 }
 
 body {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: auto min-content;
+  grid-template-rows: min-content auto;
 }
 
 .stage {
   position: relative;
-  margin: 70px auto;
   overflow: hidden;
   background-color: #272626;
   border: solid 2px #736f5e;
+  grid-column-start: 1;
+  justify-self: center;
+  align-self: center;
 }
 
 .toolbar {
   display: flex;
-  align-items: stretch;
-  width: 100%;
+  flex-wrap: wrap;
   background-color: white;
-  flex-basis: 100%;
+  grid-column-start: 1;
+  grid-column-end: 3;
+  padding: 0 10px 10px 0;
 }
 
 .buttons {
@@ -43,13 +47,14 @@ body {
   gap: 10px;
   flex-direction: column;
   padding: 10px;
-  width: 20%;
   background-color: white;
   overflow-y: scroll;
+  grid-column-start: 2;
 }
 
-.toolbar .btn {
+.btn {
   padding: 5px 15px;
+  white-space: nowrap;
 }
 
 .btn.active {
@@ -97,11 +102,10 @@ body {
 }
 
 .toggle-btn-group {
-  padding: 5px 10px;
+  padding: 10px 0 0 10px;
   display: flex;
   align-items: center;
   gap: 10px;
-  border-left: solid 1px #d3d3d3;
 }
 
 .toggle-btn-group:first-child {
