@@ -8,8 +8,6 @@ todo:
 
 - take screen shots of rooms so easier to piece them together.
 
-- rename state -> _state
-
 - add faux lighting effects (and shadows ??).
 
 - rename 'level' -> 'room'.
@@ -28,7 +26,7 @@ todo:
 
 */
 
-const state = {
+const _state = {
 
   player: {
     id: 0,
@@ -38,11 +36,11 @@ const state = {
     state: '',
     getLocalPos: function(roomId) {
 
-      if (roomId === undefined) roomId = state.level.id;
+      if (roomId === undefined) roomId = _state.level.id;
 
       return {
-        x: this.pos.x - state.levels[roomId].pos.x,
-        y: this.pos.y - state.levels[roomId].pos.y,
+        x: this.pos.x - _state.levels[roomId].pos.x,
+        y: this.pos.y - _state.levels[roomId].pos.y,
       };
 
     }
@@ -178,7 +176,7 @@ function onLoad(props = {stage: null}) {
   for (let i = 0; i < data.length; i++) {
 
     const r = roomFactory(i);
-    state.levels.push(r);
+    _state.levels.push(r);
     makeRoom(r);
 
     // Make button to edit room:
@@ -192,9 +190,9 @@ function onLoad(props = {stage: null}) {
       changeRoom(i);
 
       // Move player to room:
-      const room = state.levels[i];
-      state.player.pos.x = room.startPos.x + room.pos.x;
-      state.player.pos.y = room.startPos.y + room.pos.y;
+      const room = _state.levels[i];
+      _state.player.pos.x = room.startPos.x + room.pos.x;
+      _state.player.pos.y = room.startPos.y + room.pos.y;
       updatePlayer();
 
     }
@@ -208,18 +206,18 @@ function onLoad(props = {stage: null}) {
 
   // Make player:
   const div = makeSquare(
-    state.player.pos,
+    _state.player.pos,
     _world,
     [
       'player',
-      'player-' + state.player.id,
+      'player-' + _state.player.id,
       'state-idle',
     ],
   );
 
   updatePlayer();
 
-  state.canInput = true;
+  _state.canInput = true;
 
 }
 
@@ -258,8 +256,8 @@ function makeEditGrid() {
         if(!_mode) return;
 
         if (_mode === 'player') { // Move player...
-          state.player.pos.x = x + state.level.pos.x;
-          state.player.pos.y = y + state.level.pos.y;
+          _state.player.pos.x = x + _state.level.pos.x;
+          _state.player.pos.y = y + _state.level.pos.y;
           updatePlayer();
 
         } else if (_mode) { // Change cell...
@@ -279,25 +277,25 @@ function onWinEventFactory(roomId) {
 
     return async () => {
       openDoor(0, 0);
-      makeRoom(state.levels[1]);
+      makeRoom(_state.levels[1]);
     }
 
   } else if (roomId === 1) {
 
     return async () => {
       facePlayer('sw');
-      makeRoom(state.levels[2]);
-      await moveViewPort(state.levels[0].pos);
+      makeRoom(_state.levels[2]);
+      await moveViewPort(_state.levels[0].pos);
       openDoor(0, 1);
       await util.delay(1000);
-      await moveViewPort(state.levels[1].pos, 800);
+      await moveViewPort(_state.levels[1].pos, 800);
     }
 
   } else if (roomId === 2) {
 
     return () => {
       facePlayer('se');
-      makeRoom(state.levels[3]);
+      makeRoom(_state.levels[3]);
       openDoor(2, 1);
     }
 
@@ -340,7 +338,7 @@ async function moveViewPort(pos = {x:0, y:0}, duration = 1000, easing = 'ease-in
 
 function openDoor(roomIndex, doorIndex) {
 
-  const room = state.levels[roomIndex];
+  const room = _state.levels[roomIndex];
   const door = room.doors[doorIndex];
 
   door.state = 'open';
@@ -349,14 +347,14 @@ function openDoor(roomIndex, doorIndex) {
 }
 
 function facePlayer(direction) {
-  state.player.face = direction;
+  _state.player.face = direction;
   updatePlayer();
 }
 
 function setEventHandlers() {
 
   const btnExport = document.querySelector('.btn-export');
-  btnExport.onclick = e => util.downloadFile(JSON.stringify(state.level), 'application/json', 'room-' + state.level.id);
+  btnExport.onclick = e => util.downloadFile(JSON.stringify(_state.level), 'application/json', 'room-' + _state.level.id);
 
   const btnModeClear = document.querySelector('.btn-clear');
   btnModeClear.onclick = e => clearCell();
@@ -391,15 +389,15 @@ function setEventHandlers() {
 }
 
 function moveRoom(offset) {
-  state.level.pos.x += offset.x;
-  state.level.pos.y += offset.y;
+  _state.level.pos.x += offset.x;
+  _state.level.pos.y += offset.y;
 
   // Re-make room:
-  state.level.div.remove();
-  state.level.div = null;
-  makeRoom(state.level);
+  _state.level.div.remove();
+  _state.level.div = null;
+  makeRoom(_state.level);
   // todo: move into correct node stack order.
-  state.level.div.classList.remove('hidden');
+  _state.level.div.classList.remove('hidden');
 
 }
 
@@ -430,18 +428,18 @@ function changeMode(m) {
 
 function changeRoom(roomId, animationDuration) {
 
-  state.level = state.levels[roomId];
+  _state.level = _state.levels[roomId];
 
   // ensure room has been made:
-  makeRoom(state.level);
+  makeRoom(_state.level);
 
   // Wait until node has been added to DOM:
   setTimeout(() => {
-    state.level.div.classList.remove('hidden');
+    _state.level.div.classList.remove('hidden');
   }, 50);
 
   // Center viewport on the room:
-  moveViewPort(state.level.pos, animationDuration, 'ease');
+  moveViewPort(_state.level.pos, animationDuration, 'ease');
 
   { // Edit mode - activate button for this level:
     const thisButton = document.querySelector('.btn-room-' + roomId);
@@ -460,11 +458,11 @@ async function onKeyDown(e) {
 
   //console.log(e);
 
-  if (!state.canInput) return;
+  if (!_state.canInput) return;
 
   // Wait for prev input to finish:
   _inputStack.push(e);
-  if (state.isPendingMove) return;
+  if (_state.isPendingMove) return;
   _inputStack.shift();
 
   // Undo:
@@ -487,30 +485,30 @@ async function onKeyDown(e) {
   if (e.key === 'ArrowUp' || e.key === 'w') {
     dir = 'up';
     y -= 1;
-    state.player.face = state.player.face.includes('e') ? 'ne' : 'nw';
+    _state.player.face = _state.player.face.includes('e') ? 'ne' : 'nw';
   } else if (e.key === 'ArrowDown' || e.key === 's') {
     dir = 'down';
     y += 1;
-    state.player.face = state.player.face.includes('e') ? 'se' : 'sw';
+    _state.player.face = _state.player.face.includes('e') ? 'se' : 'sw';
   } else if (e.key === 'ArrowLeft' || e.key === 'a') {
     dir = 'left';
     x -= 1;
-    state.player.face = 'sw';
+    _state.player.face = 'sw';
   } else if (e.key === 'ArrowRight'  || e.key === 'd') {
     dir = 'right';
     x += 1;
-    state.player.face = 'se';
+    _state.player.face = 'se';
   } else {
     return; // ignore all other keys
   }
 
   let move = true;
-  state.player.state = 'idle';
+  _state.player.state = 'idle';
 
   if ( x === 0 && y === 0) move = false; // Cancel if no movement.
 
   // Check movement is valid:
-  let adj = getObject(state.player.getLocalPos(), {x, y});
+  let adj = getObject(_state.player.getLocalPos(), {x, y});
 
   if (adj.type === 'door' && adj.state === 'closed') {
     move = false;
@@ -527,15 +525,15 @@ async function onKeyDown(e) {
 
       const levelsCopy = [];
 
-      state.levels.forEach(l => {
+      _state.levels.forEach(l => {
         levelsCopy.push({
           id: l.id,
           boxes: util.deepCopy(l.boxes),
         });
       });
 
-      state.moves.push({
-        player: util.deepCopy(state.player),
+      _state.moves.push({
+        player: util.deepCopy(_state.player),
         levels: levelsCopy,
       });
 
@@ -546,31 +544,31 @@ async function onKeyDown(e) {
       adj.x += x;
       adj.y += y;
       updateBox(adj);
-      state.player.state = 'push-' + dir;
+      _state.player.state = 'push-' + dir;
     }
 
     // Move player:
-    state.player.pos.x += x;
-    state.player.pos.y += y;
+    _state.player.pos.x += x;
+    _state.player.pos.y += y;
     updatePlayer();
 
     enterRoom();
 
     // Wait for move animation to finish:
-    state.isPendingMove = true;
+    _state.isPendingMove = true;
     await util.delay(_moveDuration * 1000);
 
     { // Change state from 'push' to 'idle' if the box can't be pushed any further.
-      let adj = getObject(state.player.getLocalPos(), {x, y});
+      let adj = getObject(_state.player.getLocalPos(), {x, y});
       if (adj.type !== 'box' || !canBePushed(adj, {x, y}) ) {
-        state.player.state = 'idle';
+        _state.player.state = 'idle';
         updatePlayer();
       }
     }
 
     await checkWin()
 
-    state.isPendingMove = false;
+    _state.isPendingMove = false;
 
     { // Send queued input:
 
@@ -603,10 +601,10 @@ function enterRoom() {
 
     const r = currentRooms[i];
 
-    if (r.id === state.level.id) continue; // Ignore current room.
+    if (r.id === _state.level.id) continue; // Ignore current room.
 
     // Get cell in the new room.
-    const otherRoomAdj = getObject(state.player.getLocalPos(r.id));
+    const otherRoomAdj = getObject(_state.player.getLocalPos(r.id));
 
     if (otherRoomAdj.type === entity.empty.type) continue; // Ignore empty (only overlapping cells allow transition between rooms).
 
@@ -628,9 +626,9 @@ function getCurrentRooms() {
 
   const currentRooms = [];
 
-  state.levels.forEach(l => {
+  _state.levels.forEach(l => {
 
-    const playerLocalPos = state.player.getLocalPos(l.id)
+    const playerLocalPos = _state.player.getLocalPos(l.id)
 
     // check out of bounds
     if (playerLocalPos.x >= 0 && playerLocalPos.x < _boardSize.width &&
@@ -659,7 +657,7 @@ function canBePushed(item, direction = {x:0, y:0}) {
 
   // Prevent boxes from being moved once the level has been won
   // (otherwise player could move boxes out of level)
-  if (state.level.hasWon) return false;
+  if (_state.level.hasWon) return false;
 
   // Cancel if the next adjacent space isn't empty:
   let adj = getObject(item, direction);
@@ -671,27 +669,27 @@ function canBePushed(item, direction = {x:0, y:0}) {
 
 async function checkWin() {
 
-  if (state.level.hasWon) return;
+  if (_state.level.hasWon) return;
 
-  for (let i = 0; i < state.level.boxes.length; i++) {
-    if(!isBoxOnCrystal(state.level.boxes[i])) return;
+  for (let i = 0; i < _state.level.boxes.length; i++) {
+    if(!isBoxOnCrystal(_state.level.boxes[i])) return;
   }
 
-  state.canInput = false;
-  state.moves = []; // Clear undo.
+  _state.canInput = false;
+  _state.moves = []; // Clear undo.
 
-  state.player.state = 'win';
+  _state.player.state = 'win';
   updatePlayer();
 
   // Wait for win animation to finish:
   await util.delay(_winDuration * 1000);
 
-  state.player.state = 'idle';
-  state.level.hasWon = true;
+  _state.player.state = 'idle';
+  _state.level.hasWon = true;
 
-  await state.level.onWin();
+  await _state.level.onWin();
 
-  state.canInput = true;
+  _state.canInput = true;
 
   updateGui();
 
@@ -702,12 +700,12 @@ async function checkWin() {
 }
 
 function isBoxOnCrystal(box) {
-  return state.level.map[convertPosToMapIndex(box)] === entity.crystal.id;
+  return _state.level.map[convertPosToMapIndex(box)] === entity.crystal.id;
 }
 
 function undo() {
 
-  if (state.moves.length === 0) return;
+  if (_state.moves.length === 0) return;
 
   undoState();
 
@@ -715,9 +713,9 @@ function undo() {
 
 function resetRoom() {
 
-  if (state.moves.length === 0) return;
+  if (_state.moves.length === 0) return;
 
-  state.moves = [ state.moves[0] ]; // Reset to the first move;
+  _state.moves = [ _state.moves[0] ]; // Reset to the first move;
 
   undoState();
 
@@ -725,16 +723,16 @@ function resetRoom() {
 
 function undoState() {
 
-  const oldState = state.moves.pop();
+  const oldState = _state.moves.pop();
 
   // Restore boxes
   oldState.levels.forEach(l => {
-    state.levels[l.id].boxes = l.boxes;
+    _state.levels[l.id].boxes = l.boxes;
   });
   updateBoxes();
 
   // Restore player
-  state.player = oldState.player;
+  _state.player = oldState.player;
   updatePlayer();
 
   enterRoom();
@@ -757,18 +755,18 @@ function getObject(pos, offset = { x:0, y:0 }) {
   // todo: rename to `getCell()`
 
   // Check box:
-  for (let i = 0; i < state.level.boxes.length; i++) {
-    if(state.level.boxes[i].x === pos.x + offset.x &&
-       state.level.boxes[i].y === pos.y + offset.y) {
-      return state.level.boxes[i];
+  for (let i = 0; i < _state.level.boxes.length; i++) {
+    if(_state.level.boxes[i].x === pos.x + offset.x &&
+       _state.level.boxes[i].y === pos.y + offset.y) {
+      return _state.level.boxes[i];
     }
   }
 
   // Check door:
-  for (let i = 0; i < state.level.doors.length; i++) {
-    if(state.level.doors[i].pos.x === pos.x + offset.x &&
-       state.level.doors[i].pos.y === pos.y + offset.y) {
-      return state.level.doors[i];
+  for (let i = 0; i < _state.level.doors.length; i++) {
+    if(_state.level.doors[i].pos.x === pos.x + offset.x &&
+       _state.level.doors[i].pos.y === pos.y + offset.y) {
+      return _state.level.doors[i];
     }
   }
 
@@ -786,7 +784,7 @@ function getObject(pos, offset = { x:0, y:0 }) {
   }
 
   for (const value of Object.values(entity)) {
-    if (value.id === state.level.map[j]) return value;
+    if (value.id === _state.level.map[j]) return value;
   }
 
   return { // Player ran off the edge of board.
@@ -892,7 +890,7 @@ function changeCell(id, entityKey) {
 
   //console.log({id,entityKey});
 
-  const div = document.querySelector('.level-' + state.level.id + ' .cell-' + id);
+  const div = document.querySelector('.level-' + _state.level.id + ' .cell-' + id);
 
   // Get entity:
   let e;
@@ -910,12 +908,12 @@ function changeCell(id, entityKey) {
 
   div.classList.add('type-' + e.id);
 
-  state.level.map[id] = e.id;
+  _state.level.map[id] = e.id;
 
 }
 
 function clearCell() {
-  for (let i = 0; i < state.level.map.length; i++) {
+  for (let i = 0; i < _state.level.map.length; i++) {
     changeCell(i, 'empty');
   }
 }
@@ -926,7 +924,7 @@ function moveSquare(className, pos) {
 }
 
 function updateBoxes() {
-  state.level.boxes.forEach(b => {
+  _state.level.boxes.forEach(b => {
     updateBox(b);
   });
 }
@@ -937,13 +935,13 @@ function updatePlayer() {
 
   if (!div) return;
 
-  moveSquare('.player-' + state.player.id, state.player.pos);
+  moveSquare('.player-' + _state.player.id, _state.player.pos);
 
   div.classList.remove('face-ne');
   div.classList.remove('face-nw');
   div.classList.remove('face-se');
   div.classList.remove('face-sw');
-  div.classList.add('face-' + state.player.face);
+  div.classList.add('face-' + _state.player.face);
 
   div.classList.remove('state-idle');
   div.classList.remove('state-push-up');
@@ -952,9 +950,9 @@ function updatePlayer() {
   div.classList.remove('state-push-right');
   div.classList.remove('state-win');
 
-  if (state.player.state.includes('push')) {
-    div.classList.add('state-' + state.player.state);
-  } else if (state.player.state === 'win') {
+  if (_state.player.state.includes('push')) {
+    div.classList.add('state-' + _state.player.state);
+  } else if (_state.player.state === 'win') {
     div.classList.add('state-win');
   } else {
     div.classList.add('state-idle');
@@ -967,9 +965,9 @@ function updateGui() {
 }
 
 function updateBox(b) {
-  moveSquare('.level-' + state.level.id + ' .box-' + b.id, b);
+  moveSquare('.level-' + _state.level.id + ' .box-' + b.id, b);
 
-  const d = document.querySelector('.level-' + state.level.id + ' .box-' + b.id);
+  const d = document.querySelector('.level-' + _state.level.id + ' .box-' + b.id);
 
   if(isBoxOnCrystal(b)) {
     d.classList.add('state-win');
@@ -1057,12 +1055,12 @@ function updateDoor(room, door) {
 // This is based on the viewport size, and should improve performance.
 function hideDistantRooms() {
 
-  state.levels.forEach(r => {
+  _state.levels.forEach(r => {
 
-    if (r.id === state.level.id) return;
+    if (r.id === _state.level.id) return;
 
-    const xOffset = Math.abs(r.pos.x - state.level.pos.x);
-    const yOffset = Math.abs(r.pos.y - state.level.pos.y);
+    const xOffset = Math.abs(r.pos.x - _state.level.pos.x);
+    const yOffset = Math.abs(r.pos.y - _state.level.pos.y);
 
     if (xOffset > (_boardSize.width + 2) ||
         yOffset > (_boardSize.height + 2)) {
@@ -1082,7 +1080,7 @@ function hideDistantRooms() {
 
 // Expose public methods:
 export default {
-  state,
+  _state,
   moveViewPort,
   onLoad,
   onKeyDown,
