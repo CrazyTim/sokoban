@@ -20,47 +20,56 @@ STYLE 0 - Vertical
   opacity: 0.7;
 }
 
-.door.style-0 svg .groove rect:nth-child(1) { /* groove */
-  width: 8px;
-  height: 60px;
-  x: 26px;
+.door.style-0 svg .groove rect:nth-child(1) { /* groove - border */
+  width: 6px;
+  height: 20px;
+  x: 7px;
   y: 0px;
-  fill: #424242;
-  stroke-width: 2.5px;
-  stroke: #b4b4b4;
-  opacity: 0.6;
+  fill: #d4d4d4;
+  opacity: 0.5;
+}
+.door.style-0 svg .groove rect:nth-child(2) { /* groove - fill */
+  width: 2px;
+  height: 20px;
+  x: 9px;
+  y: 0px;
+  fill: #505050;
 }
 
-.door.style-0 svg .div rect:nth-child(1) { /* groove */
-  width: 60px;
-  height: 30px;
-  x: -20px;
+.door.style-0 svg .div rect:nth-child(1) { /* shadow */
+  width: 20px;
+  height: 10px;
+  x: -6px;
   y: 0px;
   opacity: 0.1;
 }
-.door.style-0 svg .div rect:nth-child(2) { /* door part */
-  width: 18px;
-  height: 30px;
+.door.style-0 svg .div rect:nth-child(2) { /* door part - border */
+  width: 8px;
+  height: 10px;
   x: 0px;
   y: 0px;
-  stroke: #56514e;
+  fill: #56514e;
+}
+.door.style-0 svg .div rect:nth-child(3) { /* door part - fill */
+  width: 6px;
+  height: 10px;
+  x: 1px;
+  y: 0px;
   fill: #3f3834;
-  stroke-width: 3px;
-  stroke-dasharray: 0 18 30 18 30 0;
 }
 
 .door.style-0 svg .div-1 {
-  transform: translate(21px, 0px);
+  transform: translate(6px, 0px);
 }
 .door.style-0 svg .div-2 {
-  transform: translate(21px, 30px);
+  transform: translate(6px, 10px);
 }
 
 .door.style-0.state-open svg .div-1 {
-  transform: translate(21px, -27px);
+  transform: translate(6px, -9px);
 }
 .door.style-0.state-open svg .div-2 {
-  transform: translate(21px, 57.5px);
+  transform: translate(6px, 19px);
 }
 
 /*

@@ -988,7 +988,7 @@ function makeDoor(door, div) {
 
   // Note: svg is styled entirely in css.
   d.appendChild(util.makeSvg(
-    '0 0 60 60',
+    '0 0 20 20',
     ['opener'],
     `
     <defs>
@@ -1002,13 +1002,16 @@ function makeDoor(door, div) {
 
     <g class="groove">
       <rect />
+      <rect />
     </g>
     <g class="div div-1">
       <rect fill="url(#grad-1)" />
       <rect />
+      <rect />
     </g>
     <g class="div div-2">
       <rect fill="url(#grad-1)" />
+      <rect />
       <rect />
     </g>
     `
