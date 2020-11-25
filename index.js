@@ -192,7 +192,7 @@ function onLoad(props = {stage: null}) {
 
   updatePlayer();
 
-  _state.canInput = true;
+  input(true);
 
 }
 
@@ -251,7 +251,7 @@ function onWinEventFactory(roomId) {
   if (roomId === 0) {
 
     return async () => {
-      await util.delay(200); // slight delay for the first time we see a door opening.
+      await wait(.2); // slight delay for the first time we see a door opening.
       openDoor(0, 0);
       makeRoom(_state.levels[1]);
     }
@@ -260,14 +260,14 @@ function onWinEventFactory(roomId) {
 
     return async () => {
       // Move viewport back to level 0 to see the door opening:
-      _state.canInput = false;
+      input(false);
       facePlayer('sw');
       makeRoom(_state.levels[2]);
       await moveViewPort(_state.levels[0].pos);
       openDoor(0, 1);
-      await util.delay(1000);
+      await wait(1);
       await moveViewPort(_state.levels[1].pos, 800);
-      _state.canInput = true;
+      input(true);
     }
 
   } else if (roomId === 2) {
@@ -437,7 +437,7 @@ async function onKeyDown(e) {
 
   //console.log(e);
 
-  if (!_state.canInput) return;
+  if (!input()) return;
 
   // Wait for prev input to finish:
   _inputStack.push(e);
@@ -535,7 +535,7 @@ async function onKeyDown(e) {
 
     // Wait for move animation to finish:
     _state.isPendingMove = true;
-    await util.delay(_moveDuration * 1000);
+    await wait(_moveDuration);
 
     { // Change state from 'push' to 'idle' if the box can't be pushed any further.
       let adj = getObject(_state.player.getLocalPos(), {x, y});
@@ -654,16 +654,16 @@ async function checkWin() {
     if(!isBoxOnCrystal(_state.level.boxes[i])) return;
   }
 
-  _state.canInput = false;
+  input(false);
   _state.moves = []; // Clear undo.
 
   _state.player.state = 'win';
   updatePlayer();
 
   // Wait for win animation to finish:
-  await util.delay(_winDuration * 1000);
+  await wait(_winDuration);
 
-  _state.canInput = true;
+  input(true);
   _state.player.state = 'idle';
   _state.level.hasWon = true;
   updateGui();
@@ -1053,6 +1053,18 @@ function hideDistantRooms() {
 
   });
 
+}
+
+// Get/set whether or not the users input is allowed.
+function input(canInput = null) {
+  if (canInput !== null) {
+    _state.canInput = canInput;
+  }
+  return _state.canInput;
+}
+
+async function wait(seconds) {
+  await util.delay(seconds * 1000);
 }
 
 // Expose public methods:
