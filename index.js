@@ -266,7 +266,7 @@ function onWinEventFactory(roomId) {
       await moveViewPort(_state.levels[0].pos);
       openDoor(0, 1);
       await wait(1);
-      await moveViewPort(_state.levels[1].pos, 800);
+      await moveViewPort(_state.levels[1].pos, .8);
       input(true);
     }
 
@@ -294,7 +294,7 @@ function onWinEventFactory(roomId) {
 
 }
 
-async function moveViewPort(pos = {x:0, y:0}, duration = 1000, easing = 'ease-in-out') {
+async function moveViewPort(pos = {x:0, y:0}, durationSeconds = 1, easing = 'ease-in-out') {
 
   const translate = `translate(${_worldOffset - (pos.x * _squareSize)}px, ${_worldOffset - (pos.y * _squareSize)}px)`;
 
@@ -303,7 +303,7 @@ async function moveViewPort(pos = {x:0, y:0}, duration = 1000, easing = 'ease-in
       { transform: translate },
     ],
     {
-      duration,
+      duration: durationSeconds * 1000,
       easing,
       fill: 'forwards',
     },
@@ -586,8 +586,6 @@ function enterRoom() {
     const otherRoomAdj = getObject(_state.player.getLocalPos(r.id));
 
     if (otherRoomAdj.type === entity.empty.type) continue; // Ignore empty (only overlapping cells allow transition between rooms).
-
-    console.log('Enter room ' + r.id);
 
     changeRoom(r.id);
 
