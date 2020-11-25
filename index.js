@@ -1,30 +1,5 @@
 import data from './rooms.js';
 import * as util from './util.js';
-/*
-
-todo:
-
-- store state in local storage.
-
-- take screen shots of rooms so easier to piece them together.
-
-- add faux lighting effects (and shadows ??).
-
-- rename 'level' -> 'room'.
-
-- tweak push-down img:
-  - move to bottom edge
-  - make head wider
-  - adjust face perspective
-
-- add physical boundries inside a room that you can't push over (groves in floor).
-  - Use these as a mechanic to sopt user from pushing boxes into adjacent rooms, when it makes sense in the level design.
-
-- idea: allow push boxes between rooms.
-  - instead of transitioning (always in one room), keep track of the 'rooms' player is in and
-    check move rules against each room (loop). This means we also need to check colisions against objects in both rooms.
-
-*/
 
 const _state = {
 
