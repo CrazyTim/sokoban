@@ -132,6 +132,15 @@ function onLoad(props = {viewport: null}) {
     .world {
       transition: transform ${_roomTransitionDuration}s;
     }
+
+    .cell,
+    .box,
+    .player,
+    .door {
+      position: absolute;
+      width: ${_squareSize}px;
+      height: ${_squareSize}px;
+    }
   `;
   document.head.appendChild(style);
 
@@ -859,9 +868,6 @@ function makeSquare(pos, div, classes) {
   let d = document.createElement('div');
   div.appendChild(d);
 
-  d.style.position = 'absolute';
-  d.style.width = _squareSize + 'px';
-  d.style.height = _squareSize + 'px';
   d.style.transform = `translate(${pos.x * _squareSize}px, ${pos.y * _squareSize}px)`
   classes.forEach(c => {
     d.classList.add(c);
@@ -967,7 +973,6 @@ function makeLabel(label, div) {
   let d = document.createElement('div');
   div.appendChild(d);
 
-  d.style.position = 'absolute';
   d.style.width = (_squareSize * label.width) + 'px';
   d.style.height = (_squareSize * label.height) + 'px';
   d.style.transform = `translate(${label.pos.x * _squareSize}px, ${label.pos.y * _squareSize}px)`
@@ -983,9 +988,6 @@ function makeDoor(door, div) {
   let d = document.createElement('div');
   div.appendChild(d);
 
-  d.style.position = 'absolute';
-  d.style.width = (_squareSize * 1) + 'px';
-  d.style.height = (_squareSize * 1) + 'px';
   d.style.transform = `translate(${door.pos.x * _squareSize}px, ${door.pos.y * _squareSize}px)`
   d.classList.add('door');
   d.classList.add('door-' + door.id);

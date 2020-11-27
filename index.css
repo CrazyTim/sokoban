@@ -21,6 +21,7 @@ body {
   display: grid;
   grid-template-columns: auto min-content;
   grid-template-rows: min-content auto;
+  user-select: none;
 }
 
 .viewport {
@@ -80,6 +81,7 @@ body {
 }
 
 .label {
+  position: absolute;
   display: flex;
   align-items: center;
   font-family: 'Yantramanav', sans-serif;
@@ -115,8 +117,6 @@ body {
 .player,
 .box,
 .label {
-  pointer-events: none;
-  position: relative;
   z-index: 1;
 }
 
