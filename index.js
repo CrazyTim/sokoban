@@ -5,10 +5,10 @@ const _state = {
 
   player: {
     id: 0,
-    pos: { x:2, y:2}, // Start position.
-    name: '',
+    div: null, // DOM node representing the player.
     face: 'se', // Facing direction (ne|nw|se|sw).
-    state: '',
+    pos: { x:2, y:2}, // position (world coordinates).
+    state: '', // String.
     getLocalPos: function(roomId) {
 
       if (roomId === undefined) roomId = _state.level.id;
@@ -180,7 +180,7 @@ function onLoad(props = {viewport: null}) {
   changeRoom(0, 0);
 
   // Make player:
-  const div = makeSquare(
+  _state.player.div = makeSquare(
     _state.player.pos,
     _world,
     [
@@ -513,7 +513,11 @@ async function onKeyDown(e) {
       });
 
       _state.moves.push({
-        player: util.deepCopy(_state.player),
+        player: {
+          face: _state.player.face,
+          pos: util.deepCopy(_state.player.pos),
+          state: _state.player.state,
+        },
         levels: levelsCopy,
       });
 
@@ -702,14 +706,16 @@ function undoState() {
 
   const oldState = _state.moves.pop();
 
-  // Restore boxes
+  // Restore boxes:
   oldState.levels.forEach(l => {
     _state.levels[l.id].boxes = l.boxes;
   });
   updateBoxes();
 
-  // Restore player
-  _state.player = oldState.player;
+  // Restore player:
+  _state.player.pos = oldState.player.pos;
+  _state.player.face = oldState.player.face;
+  _state.player.state = oldState.player.state;
   updatePlayer();
 
   enterRoom();
@@ -910,7 +916,7 @@ function updateBoxes() {
 
 function updatePlayer() {
 
-  const div = document.querySelector('.player');
+  const div = _state.player.div;
 
   if (!div) return;
 
