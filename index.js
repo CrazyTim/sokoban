@@ -40,7 +40,7 @@ let _world; // The DOM node that holds all the rooms stiched together.
 let _viewport; // The DOM node that holds the world. The world is moved inside the viewport as the player transitions from room-to-room.
 let _mode = null;
 
-const _boardSize = {
+const _viewportSize = {
   width: 11,
   height: 11,
 }
@@ -137,8 +137,8 @@ function onLoad(props = {viewport: null}) {
 
   // Make viewport:
   _viewport = props.viewport;
-  _viewport.style.width = (_worldOffset * 2) + (_boardSize.width * _squareSize) + 'px';
-  _viewport.style.height = (_worldOffset * 2) + (_boardSize.height * _squareSize) + 'px';
+  _viewport.style.width = (_worldOffset * 2) + (_viewportSize.width * _squareSize) + 'px';
+  _viewport.style.height = (_worldOffset * 2) + (_viewportSize.height * _squareSize) + 'px';
 
   // Make world:
   _world = document.createElement('div');
@@ -202,14 +202,14 @@ function makeEditGrid() {
   // Make viewport edge:
   const editGrid = document.createElement('div');
   editGrid.classList.add('edit-grid')
-  editGrid.style.width = (_boardSize.width * _squareSize) + 'px';
-  editGrid.style.height = (_boardSize.height * _squareSize) + 'px';
+  editGrid.style.width = (_viewportSize.width * _squareSize) + 'px';
+  editGrid.style.height = (_viewportSize.height * _squareSize) + 'px';
   editGrid.style.transform = `translate(${_worldOffset}px, ${_worldOffset}px)`
   _viewport.appendChild(editGrid);
 
   // Make cells:
-  for (let y = 0; y < _boardSize.height; y++) {
-    for (let x = 0; x < _boardSize.width; x++) {
+  for (let y = 0; y < _viewportSize.height; y++) {
+    for (let x = 0; x < _viewportSize.width; x++) {
 
       const i = convertPosToMapIndex({x,y})
 
@@ -611,8 +611,8 @@ function getCurrentRooms() {
     const playerLocalPos = _state.player.getLocalPos(room.id)
 
     // check out of bounds
-    if (playerLocalPos.x >= 0 && playerLocalPos.x < _boardSize.width &&
-        playerLocalPos.y >= 0 && playerLocalPos.y < _boardSize.height) {
+    if (playerLocalPos.x >= 0 && playerLocalPos.x < _viewportSize.width &&
+        playerLocalPos.y >= 0 && playerLocalPos.y < _viewportSize.height) {
 
       const cell = room.map[ convertPosToMapIndex(playerLocalPos) ];
 
@@ -721,7 +721,7 @@ function undoState() {
 // Return the map index for the given position.
 // local coords.
 function convertPosToMapIndex(pos) {
-  return pos.x + (pos.y * _boardSize.width);
+  return pos.x + (pos.y * _viewportSize.width);
 }
 
 
@@ -752,9 +752,9 @@ function getObject(pos, offset = { x:0, y:0 }) {
   let i = convertPosToMapIndex(pos);
   let j;
   if (offset.y === -1) {
-    j = i - _boardSize.width;
+    j = i - _viewportSize.width;
   } else if (offset.y === 1) {
-    j = i + _boardSize.width;
+    j = i + _viewportSize.width;
   } else if (offset.x === -1) {
     j = i - 1;
   } else if (offset.x === 1) {
@@ -789,8 +789,8 @@ function makeRoom(room) {
     room.div.style.transform = `translate(${room.pos.x * _squareSize}px, ${room.pos.y * _squareSize}px)`
 
     // Make cells:
-    for (let y = 0; y < _boardSize.height; y++) {
-      for (let x = 0; x < _boardSize.width; x++) {
+    for (let y = 0; y < _viewportSize.height; y++) {
+      for (let x = 0; x < _viewportSize.width; x++) {
 
         const i = convertPosToMapIndex({x,y})
 
@@ -1046,8 +1046,8 @@ function hideDistantRooms() {
     const xOffset = Math.abs(r.pos.x - _state.level.pos.x);
     const yOffset = Math.abs(r.pos.y - _state.level.pos.y);
 
-    if (xOffset > (_boardSize.width + 2) ||
-        yOffset > (_boardSize.height + 2)) {
+    if (xOffset > (_viewportSize.width + 2) ||
+        yOffset > (_viewportSize.height + 2)) {
 
       // This room is definitely outside the viewport
       r.div.style.display = 'none';
