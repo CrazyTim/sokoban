@@ -23,7 +23,7 @@ body {
   grid-template-rows: min-content auto;
 }
 
-.stage {
+.viewport {
   position: relative;
   overflow: hidden;
   background-color: #272626;
@@ -90,14 +90,14 @@ body {
   user-select: none;
 }
 
-.stage.edit .edit-stage {
+.viewport.edit .edit-grid {
   border: dashed 3px #186f9280;
   box-shadow: 0 0 0px 500px #186f9224;
   box-sizing: content-box;
   margin: -3px; /* border offset */
 }
 
-.stage.edit .edit-stage .cell {
+.viewport.edit .edit-grid .cell {
   box-shadow: 0 0 0px 1px #404040;
 }
 

@@ -36,8 +36,8 @@ const _state = {
 let _inputStack = [];
 const _inputStackLength = 1;
 
-let _stage; // The DOM node we are drawing inside of.
-let _world; // The DOM node that wraps everything inside the stage. Used to easily adjust the users viewpoint.
+let _world; // The DOM node that holds all the rooms stiched together.
+let _viewport; // The DOM node that holds the world. The world is moved inside the viewport as the player transitions from room-to-room.
 let _mode = null;
 
 const _boardSize = {
@@ -109,7 +109,7 @@ function roomFactory(i) {
 
     if (!door.state) door.state = 'open'; // Open door if not specified.
 
-    // Ensure ground is always under a door (for convenience when joining rooms tolgether):
+    // Ensure ground is always under a door (for convenience when joining rooms together):
     const cellIndex = convertPosToMapIndex(door.pos)
     l.map[cellIndex] = entity.ground.id;
 
@@ -119,7 +119,7 @@ function roomFactory(i) {
 
 }
 
-function onLoad(props = {stage: null}) {
+function onLoad(props = {viewport: null}) {
 
   // Add styles for animations:
   var style = document.createElement('style');
@@ -135,15 +135,15 @@ function onLoad(props = {stage: null}) {
   `;
   document.head.appendChild(style);
 
-  // Make stage:
-  _stage = document.querySelector('.stage');
-  _stage.style.width = (_worldOffset * 2) + (_boardSize.width * _squareSize) + 'px';
-  _stage.style.height = (_worldOffset * 2) + (_boardSize.height * _squareSize) + 'px';
+  // Make viewport:
+  _viewport = props.viewport;
+  _viewport.style.width = (_worldOffset * 2) + (_boardSize.width * _squareSize) + 'px';
+  _viewport.style.height = (_worldOffset * 2) + (_boardSize.height * _squareSize) + 'px';
 
   // Make world:
   _world = document.createElement('div');
   _world.classList.add('world')
-  _stage.appendChild(_world);
+  _viewport.appendChild(_world);
 
   makeEditGrid();
 
@@ -197,16 +197,15 @@ function onLoad(props = {stage: null}) {
 }
 
 function makeEditGrid() {
-  // Edit grid overlays the stage and is used to edit cells
-  // wip
+  // Note: the edit grid overlays the viewport and is only used for edit mode.
 
-  // Make stage edge:
-  const editStage = document.createElement('div');
-  editStage.classList.add('edit-stage')
-  editStage.style.width = (_boardSize.width * _squareSize) + 'px';
-  editStage.style.height = (_boardSize.height * _squareSize) + 'px';
-  editStage.style.transform = `translate(${_worldOffset}px, ${_worldOffset}px)`
-  _stage.appendChild(editStage);
+  // Make viewport edge:
+  const editGrid = document.createElement('div');
+  editGrid.classList.add('edit-grid')
+  editGrid.style.width = (_boardSize.width * _squareSize) + 'px';
+  editGrid.style.height = (_boardSize.height * _squareSize) + 'px';
+  editGrid.style.transform = `translate(${_worldOffset}px, ${_worldOffset}px)`
+  _viewport.appendChild(editGrid);
 
   // Make cells:
   for (let y = 0; y < _boardSize.height; y++) {
@@ -217,7 +216,7 @@ function makeEditGrid() {
       // Make cell:
       const div = makeSquare(
         {x,y},
-        editStage,
+        editGrid,
         [
           'cell',
         ],
@@ -230,12 +229,14 @@ function makeEditGrid() {
 
         if(!_mode) return;
 
-        if (_mode === 'player') { // Move player...
+        if (_mode === 'player') {
+          // Move player:
           _state.player.pos.x = x + _state.level.pos.x;
           _state.player.pos.y = y + _state.level.pos.y;
           updatePlayer();
 
-        } else if (_mode) { // Change cell...
+        } else if (_mode) {
+          // Change cell:
           changeCell(i, _mode);
         }
 
@@ -388,7 +389,7 @@ function changeMode(m) {
   if (btn.classList.contains('active')) {
 
     btn.classList.remove('active');
-    _stage.classList.remove('edit');
+    _viewport.classList.remove('edit');
     _mode = null;
 
   } else {
@@ -398,7 +399,7 @@ function changeMode(m) {
     });
 
     btn.classList.add('active');
-    _stage.classList.add('edit');
+    _viewport.classList.add('edit');
     _mode = m;
 
   }
@@ -595,28 +596,29 @@ function enterRoom() {
 
 }
 
-// Return an array of room ids that the player is currently over.
-// The player is considered to be in a room if they are over a cell that != empty.
+/**
+ * Return an array of room ids that the player is currently over.
+ * The player is considered to be in a room if they are over a cell that != empty.
+ */
 function getCurrentRooms() {
-  // Can use this to loop over each room when checking for collisions,
-  // and push boxes between rooms.
+
+  // todo: to push boxes between rooms, use this to loop over each room when checking for collisions.
 
   const currentRooms = [];
 
-  _state.levels.forEach(l => {
+  _state.levels.forEach(room => {
 
-    const playerLocalPos = _state.player.getLocalPos(l.id)
+    const playerLocalPos = _state.player.getLocalPos(room.id)
 
     // check out of bounds
     if (playerLocalPos.x >= 0 && playerLocalPos.x < _boardSize.width &&
         playerLocalPos.y >= 0 && playerLocalPos.y < _boardSize.height) {
 
-      const i = convertPosToMapIndex(playerLocalPos);
-      const cell = l.map[i];
+      const cell = room.map[ convertPosToMapIndex(playerLocalPos) ];
 
       // Ensure cell is not empty
       if (cell !== entity.empty.id) {
-        currentRooms.push(l);
+        currentRooms.push(room);
       }
 
     }
@@ -666,7 +668,7 @@ async function checkWin() {
   _state.level.hasWon = true;
   updateGui();
   updatePlayer();
-  _inputStack.length = 0; // Truncate input stack
+  _inputStack.length = 0; // Truncate input stack.
 
   _state.level.onWin();
 
@@ -690,7 +692,7 @@ function resetRoom() {
 
   if (_state.moves.length === 0) return;
 
-  _state.moves = [ _state.moves[0] ]; // Reset to the first move;
+  _state.moves = [ _state.moves[0] ]; // Reset to the first move.
 
   undoState();
 
@@ -723,11 +725,12 @@ function convertPosToMapIndex(pos) {
 }
 
 
-// Return either a box object, or an entity object.
-// local coords.
+/**
+ * Return either a box object, or an entity object.
+ * `pos` = local coords.
+ * todo: rename to `getCell()`
+ */
 function getObject(pos, offset = { x:0, y:0 }) {
-
-  // todo: rename to `getCell()`
 
   // Check box:
   for (let i = 0; i < _state.level.boxes.length; i++) {
@@ -762,7 +765,8 @@ function getObject(pos, offset = { x:0, y:0 }) {
     if (value.id === _state.level.map[j]) return value;
   }
 
-  return { // Player ran off the edge of board.
+  // Player ran off the edge of board.
+  return {
     type: 'null',
   };
 
@@ -1029,8 +1033,10 @@ function updateDoor(room, door) {
 
 }
 
-// Un-render rooms that are too far away from the current room.
-// This is based on the viewport size, and should improve performance.
+/**
+ * Hide rooms that are too far away from the current room.
+ * This is based on viewport size, and should improve performance.
+ */
 function hideDistantRooms() {
 
   _state.levels.forEach(r => {
