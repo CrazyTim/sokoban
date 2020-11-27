@@ -545,7 +545,7 @@ async function onKeyDown(e) {
     _state.player.pos.y += y;
     updatePlayer();
 
-    enterRoom();
+    checkChangeRoom();
 
     // Wait for move animation to finish:
     _state.isPendingMove = true;
@@ -585,7 +585,7 @@ async function onKeyDown(e) {
 
 // Check if we need to transition to a new room.
 // Return the room id if we have moved onto a non-null square in another room, otherwise return null
-function enterRoom() {
+function checkChangeRoom() {
 
   const currentRooms = getCurrentRooms();
 
@@ -727,7 +727,7 @@ function undoState() {
   _state.player.state = oldState.player.state;
   updatePlayer();
 
-  enterRoom();
+  checkChangeRoom();
 
   updateGui();
 
