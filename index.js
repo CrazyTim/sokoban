@@ -8,7 +8,7 @@ const _state = {
     div: null, // DOM node representing the player.
     face: 'se', // Facing direction (ne|nw|se|sw).
     pos: { x:2, y:2}, // position (world coordinates).
-    state: '', // String.
+    state: '',
     getLocalPos: function(roomId) {
 
       if (roomId === undefined) roomId = _state.level.id;
@@ -33,24 +33,21 @@ const _state = {
 
 }
 
-let _inputStack = [];
-const _inputStackLength = 1;
-
-let _world; // The DOM node that holds all the rooms stiched together.
-let _viewport; // The DOM node that holds the world. The world is moved inside the viewport as the player transitions from room-to-room.
-let _mode = null;
-
-const _viewportSize = {
-  width: 11,
-  height: 11,
-}
-
-const _lastRoomIds  = [];
+// Settings:
+const _viewportSize = {width: 11, height: 11}
 const _squareSize = 60; // Pixels.
 const _worldOffset = _squareSize * 1; // Number of squares to offset the world
 const _moveDuration = .2;
 const _winDuration = .8;
 const _roomTransitionDuration = 1;
+const _inputStackLength = 1; // number of keyboard presses to store on the stack.
+
+// Constants:
+let _world; // The DOM node that holds all the rooms stiched together.
+let _viewport; // The DOM node that holds the world. The world is moved inside the viewport as the player transitions from room-to-room.
+let _mode = null;
+const _lastRoomIds  = [];
+const _inputStack = [];
 
 const entity = { // These entity types are stateless in the world and do not change.
 

@@ -14,9 +14,9 @@
 
 - Use icons for edit buttons (instead of text).
 
-- Store state in local storage.
+- Save game progress in local storage.
 
-- Take screen shots of rooms so easier to piece them together.
+- Design: take screen shots of rooms so easier to piece them together.
 
 - Add faux lighting effects (and shadows ??).
 
@@ -25,9 +25,9 @@
   - make head wider
   - adjust face perspective
 
-- Add physical boundries inside a room that you can't push over (groves in floor).
-  - Use these as a mechanic to sopt user from pushing boxes into adjacent rooms, when it makes sense in the level design.
+- Add physical boundaries inside a room that you can't push over (groves in floor).
+  - Use these as a mechanic to stop user from pushing boxes into adjacent rooms, when it makes sense in the level design.
 
 - Idea: allow push boxes between rooms.
   - instead of transitioning (always in one room), keep track of the 'rooms' player is in and
-    check move rules against each room (loop). This means we also need to check colisions against objects in both rooms.
+    check move rules against each room (loop). This means we also need to check collisions against objects in both rooms.
