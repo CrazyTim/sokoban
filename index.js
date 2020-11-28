@@ -45,6 +45,7 @@ const _viewportSize = {
   height: 11,
 }
 
+const _lastRoomIds  = [];
 const _squareSize = 60; // Pixels.
 const _worldOffset = _squareSize * 1; // Number of squares to offset the world
 const _moveDuration = .2;
@@ -417,6 +418,7 @@ function changeMode(m) {
 
 function changeRoom(roomId, animationDuration) {
 
+  // Set the new room as the current room:
   _state.level = _state.levels[roomId];
 
   // ensure room has been made:
@@ -583,13 +585,26 @@ async function onKeyDown(e) {
 
 }
 
-// Check if we need to transition to a new room.
-// Return the room id if we have moved onto a non-null square in another room, otherwise return null
+/**
+ * Check if we need to transition into a new room.
+ * A transition point is where any 'ground' cell in one room overlaps a 'ground' cell in another room.
+ */
 function checkChangeRoom() {
 
   const currentRooms = getCurrentRooms();
+  const currentRoomIds = currentRooms.map(room => room.id);
 
-  // Find the first room that is not the current room and switch to it.
+  // Only trigger a room transition if the rooms the player has moved into are different than the last time.
+  // This prevents the player constantly switching rooms when moving over identical adjacent transition cells.
+  if (util.areArraysIdentical(_lastRoomIds, currentRoomIds)) return;
+
+  // Remember the rooms the player was in for the next time:
+  _lastRoomIds.length = 0;
+  currentRoomIds.forEach(id => {
+    _lastRoomIds.push(id);
+  })
+
+  // Find the first (top-most) room that is not the current room and transition into it.
   for (let i = 0; i < currentRooms.length; i++) {
 
     const r = currentRooms[i];
@@ -1079,8 +1094,10 @@ async function wait(seconds) {
 
 // Expose public methods:
 export default {
+  _lastRoomIds,
   _state,
   moveViewPort,
+  getCurrentRooms,
   onLoad,
   onKeyDown,
 }

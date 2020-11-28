@@ -45,9 +45,11 @@ export function pad(str, x, char = '0') {
   return str.length >= x ? str : new Array(x - str.length + 1).join(char) + str;
 }
 
-export function areArraysIdentical(a1, a2) {
-  // Todo: not efficient.
-  JSON.stringify(a1) === JSON.stringify(a2);
+/**
+ * Return true if the given arrays are the same.
+ */
+export function areArraysIdentical(a, b) {
+  return a.length === b.length && a.every((v, i) => v === b[i]);
 }
 
 export function makeSvg(viewbox, classes, html) {

@@ -25,12 +25,7 @@ export default {
 
   doors: [
     {
-      pos: { x:2, y:0 },
-      portal: 0,
-     },
-    {
       pos: { x:5, y:5 },
-      portal: 3,
       style: 0,
       horizontal: true,
       state: 'closed',

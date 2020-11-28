@@ -24,10 +24,6 @@ export default {
   ],
 
   doors: [
-    {
-      pos: { x:0, y:1 },
-      portal: 0,
-     },
   ],
 
 };
