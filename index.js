@@ -27,7 +27,7 @@ const _state = {
 
   isPendingMove: false,
 
-  moves: [],
+  history: [], // Undo stack.
 
   level: {}, // The current room.
 
@@ -95,8 +95,6 @@ function roomFactory(i) {
 
   // Set onWin event:
   l.onWin = onWinEventFactory(i);
-
-  l.moves = [];
 
   // Create doors if it doesn't exist
   if (!l.doors) l.doors = [];
@@ -512,7 +510,7 @@ async function onKeyDown(e) {
   if (move) {
 
 
-    { // store history
+    { // Store history (undo)
 
       const levelsCopy = [];
 
@@ -523,7 +521,7 @@ async function onKeyDown(e) {
         });
       });
 
-      _state.moves.push({
+      _state.history.push({
         player: {
           face: _state.player.face,
           pos: util.deepCopy(_state.player.pos),
@@ -678,7 +676,7 @@ async function checkWin() {
   }
 
   input(false);
-  _state.moves = []; // Clear undo.
+  _state.history.length = 0; // Clear undo.
 
   _state.player.state = 'win';
   updatePlayer();
@@ -705,7 +703,7 @@ function isBoxOnCrystal(box) {
 
 function undo() {
 
-  if (_state.moves.length === 0) return;
+  if (_state.history.length === 0) return;
 
   undoState();
 
@@ -713,9 +711,9 @@ function undo() {
 
 function resetRoom() {
 
-  if (_state.moves.length === 0) return;
+  if (_state.history.length === 0) return;
 
-  _state.moves = [ _state.moves[0] ]; // Reset to the first move.
+  _state.history = [ _state.history[0] ]; // Reset to the first move.
 
   undoState();
 
@@ -723,7 +721,7 @@ function resetRoom() {
 
 function undoState() {
 
-  const oldState = _state.moves.pop();
+  const oldState = _state.history.pop();
 
   // Restore boxes:
   oldState.levels.forEach(l => {
