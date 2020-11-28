@@ -596,11 +596,6 @@ function checkChangeRoom() {
 
     if (r.id === _state.level.id) continue; // Ignore current room.
 
-    // Get cell in the new room.
-    const otherRoomAdj = getObject(_state.player.getLocalPos(r.id));
-
-    if (otherRoomAdj.type === entity.empty.type) continue; // Ignore empty (only overlapping cells allow transition between rooms).
-
     changeRoom(r.id);
 
     return;
