@@ -106,7 +106,9 @@ function roomFactory(i) {
     door.id = j;
     door.type = 'door';
 
-    if (!door.state) door.state = 'open'; // Open door if not specified.
+    if (!door.state) door.state = 'open'; // Default value if not specified.
+
+    if (!door.canBlockBoxes) door.allowBox = false; // Default value if not specified.
 
     // Ensure ground is always under a door (for convenience when joining rooms together):
     const cellIndex = convertPosToMapIndex(door.pos)
@@ -658,14 +660,22 @@ function canBePushed(item, direction = {x:0, y:0}) {
   if (item.type === 'wall') return false;
 
   // Prevent boxes from being moved once the level has been won
-  // (otherwise player could move boxes out of level)
+  // (otherwise player could move boxes out of the level)
   if (_state.level.hasWon) return false;
 
-  // Cancel if the next adjacent space isn't empty:
+  // Cancel if the box can't be pushed into the next adjacent space...
   let adj = getObject(item, direction);
-  if (adj.type === 'box' || adj.type === 'wall' || adj.type === 'door') return false;
 
-  return true
+  if (adj.type === 'box' || adj.type === 'empty' || adj.type === 'wall') {
+    return false;
+  }
+
+  if (adj.type === 'door') {
+    if (adj.state === 'closed') return;
+    if (adj.allowBoxes === true) return;
+  }
+
+  return true;
 
 }
 
@@ -765,6 +775,8 @@ function getObject(pos, offset = { x:0, y:0 }) {
     }
   }
 
+  // todo: check doors at this position in each room
+  // pass in pos to getCurrentRooms()
   // Check door:
   for (let i = 0; i < _state.level.doors.length; i++) {
     if(_state.level.doors[i].pos.x === pos.x + offset.x &&
@@ -1098,4 +1110,5 @@ export default {
   getCurrentRooms,
   onLoad,
   onKeyDown,
+  openDoor,
 }
