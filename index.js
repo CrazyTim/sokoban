@@ -336,7 +336,7 @@ function openDoor(roomIndex, doorIndex) {
   const door = room.doors[doorIndex];
 
   door.state = 'open';
-  updateDoor(room, door);
+  updateDoor(door);
 
 }
 
@@ -999,8 +999,10 @@ function makeLabel(label, div) {
 
 function makeDoor(door, div) {
 
-  let d = document.createElement('div');
+  const d = document.createElement('div');
   div.appendChild(d);
+
+  door.div = d;
 
   d.style.transform = `translate(${door.pos.x * _squareSize}px, ${door.pos.y * _squareSize}px)`
   d.classList.add('door');
@@ -1045,14 +1047,10 @@ function makeDoor(door, div) {
 
 }
 
-function updateDoor(room, door) {
-
-  const d = document.querySelector('.level-' + room.id + ' .door-' + door.id);
-
-  d.classList.remove('state-open');
-  d.classList.remove('state-closed');
-  d.classList.add('state-' + door.state);
-
+function updateDoor(door) {
+  door.div.classList.remove('state-open');
+  door.div.classList.remove('state-closed');
+  door.div.classList.add('state-' + door.state);
 }
 
 /**
