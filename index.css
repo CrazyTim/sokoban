@@ -93,8 +93,7 @@ body {
 }
 
 .viewport.edit .edit-grid {
-  border: dashed 3px #186f9280;
-  box-shadow: 0 0 0px 500px #186f9224;
+  border: dashed 3px #ffbe00bd;
   box-sizing: content-box;
   margin: -3px; /* border offset */
 }
