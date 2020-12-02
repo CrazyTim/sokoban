@@ -270,7 +270,6 @@ function onWinEventFactory(roomId) {
     return async () => {
       await wait(.2); // slight delay for the first time we see a door opening.
       openDoor(0, 0);
-      makeRoom(_state.levels[1]);
     }
 
   } else if (roomId === 1) {
@@ -279,7 +278,6 @@ function onWinEventFactory(roomId) {
       // Move viewport back to level 0 to see the door opening:
       input(false);
       facePlayer('sw');
-      makeRoom(_state.levels[2]);
       await moveViewPort(_state.levels[0].pos);
       openDoor(0, 1);
       await wait(1);
@@ -291,7 +289,6 @@ function onWinEventFactory(roomId) {
 
     return () => {
       facePlayer('se');
-      makeRoom(_state.levels[3]);
       openDoor(2, 1);
     }
 
@@ -426,9 +423,6 @@ function changeRoom(roomId, animationDuration) {
 
   // Set the new room as the current room:
   _state.level = _state.levels[roomId];
-
-  // ensure room has been made:
-  makeRoom(_state.level);
 
   // Wait until node has been added to DOM:
   setTimeout(() => {
