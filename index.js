@@ -7,7 +7,7 @@ const _state = {
     id: 0,
     div: null, // DOM node representing the player.
     face: 'se', // Facing direction (ne|nw|se|sw).
-    pos: { x:2, y:2}, // position (world coordinates).
+    pos: {x:0, y:0}, // Position (world coordinates).
     state: '',
     getLocalPos: function(roomId) {
 
@@ -36,13 +36,14 @@ const _state = {
 // Settings:
 const _viewportSize = {width: 11, height: 11}
 const _squareSize = 60; // Pixels.
-const _worldOffset = _squareSize * 1; // Number of squares to offset the world
+const _worldOffset = _squareSize * 1; // Number of squares to offset the world.
 const _moveDuration = .2;
 const _winDuration = .8;
 const _roomTransitionDuration = 1;
 const _inputStackLength = 1; // number of keyboard presses to store on the stack.
 
 // Constants:
+const _startRoomId = 0;
 let _world; // The DOM node that holds all the rooms stiched together.
 let _viewport; // The DOM node that holds the world. The world is moved inside the viewport as the player transitions from room-to-room.
 let _mode = null;
@@ -182,22 +183,30 @@ function onLoad(props = {viewport: null}) {
 
   setEventHandlers();
 
-  changeRoom(0, 0);
+  changeRoom(_startRoomId, 0);
 
-  // Make player:
+  _state.player.pos.x = _state.level.startPos.x;
+  _state.player.pos.y = _state.level.startPos.y;
+
+  makePlayer(_state.player.id);
+
+  input(true);
+
+}
+
+function makePlayer(id) {
+
   _state.player.div = makeSquare(
     _state.player.pos,
     _world,
     [
       'player',
-      'player-' + _state.player.id,
+      'player-' + id,
       'state-idle',
     ],
   );
 
   updatePlayer();
-
-  input(true);
 
 }
 
