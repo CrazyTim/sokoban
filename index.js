@@ -89,7 +89,9 @@ function roomFactory(i) {
   }
 
   // Compose text for first label:
-  l.labels[0].text = util.pad(i + 1, 2);
+  if (l.labels.length) {
+    l.labels[0].text = util.pad(i + 1, 2);
+  }
 
   // Set onWin event:
   l.onWin = onWinEventFactory(i);
