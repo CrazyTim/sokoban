@@ -289,7 +289,7 @@ function onWinEventFactory(roomId) {
 
     return () => {
       facePlayer('se');
-      openDoor(2, 1);
+      openDoor(2, 0);
     }
 
   } else if (roomId === 3) {
