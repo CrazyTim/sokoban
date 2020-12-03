@@ -118,9 +118,9 @@ function roomFactory(i) {
     door.id = j;
     door.type = 'door';
 
-    if (!door.state) door.state = 'open'; // Default value if not specified.
+    if (door.state === undefined) door.state = 'open'; // Default value if not specified.
 
-    if (!door.canBlockBoxes) door.allowBox = false; // Default value if not specified.
+    if (door.allowPushThrough === undefined) door.allowPushThrough = false; // Default value if not specified.
 
     // Ensure ground is always under a door (for convenience when joining rooms together):
     const cellIndex = convertPosToMapIndex(door.pos)
@@ -698,7 +698,7 @@ function canBePushed(item, direction = {x:0, y:0}) {
 
   if (adj.type === 'door') {
     if (adj.state === 'closed') return;
-    if (adj.allowBoxes === true) return;
+    if (!adj.allowPushThrough) return;
   }
 
   return true;
@@ -801,14 +801,19 @@ function getObject(pos) {
     }
   }
 
-  // todo: check doors at this position in each room
-  // pass in pos to getRoomsAtGlobalPos()
-  // Check door:
-  for (let i = 0; i < _state.level.doors.length; i++) {
-    const door = _state.level.doors[i];
-    if(door.pos.x === pos.x &&
-       door.pos.y === pos.y) {
-      return door;
+  { // Check doors at this position in each room:
+    const globalPos = getGlobalPos(pos);
+    const currentRooms = getRoomsAtGlobalPos(globalPos);
+    for (let j = 0; j < currentRooms.length; j++) {
+      const room = currentRooms[j];
+      for (let i = 0; i < room.doors.length; i++) {
+        const door = room.doors[i];
+        const doorGlobalPos = getGlobalPos(door.pos, room.id);
+        if(doorGlobalPos.x === globalPos.x &&
+           doorGlobalPos.y === globalPos.y) {
+          return door;
+        }
+      }
     }
   }
 
