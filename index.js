@@ -501,7 +501,11 @@ async function onKeyDown(e) {
   if ( x === 0 && y === 0) move = false; // Cancel if no movement.
 
   // Check movement is valid:
-  let adj = getObject(_state.player.getLocalPos(), {x, y});
+  const playerLocalPos = _state.player.getLocalPos();
+  let adj = getObject({
+    x: playerLocalPos.x + x, 
+    y: playerLocalPos.y + y,
+  });
 
   if (adj.type === 'door' && adj.state === 'closed') {
     move = false;
@@ -556,11 +560,18 @@ async function onKeyDown(e) {
     await wait(_moveDuration);
 
     { // Change state from 'push' to 'idle' if the box can't be pushed any further.
-      let adj = getObject(_state.player.getLocalPos(), {x, y});
+      
+      const playerLocalPos = _state.player.getLocalPos();
+      let adj = getObject({
+        x: playerLocalPos.x + x, 
+        y: playerLocalPos.y + y,
+      });
+
       if (adj.type !== 'box' || !canBePushed(adj, {x, y}) ) {
         _state.player.state = 'idle';
         updatePlayer();
       }
+
     }
 
     await checkWin()
@@ -664,7 +675,10 @@ function canBePushed(item, direction = {x:0, y:0}) {
   if (_state.level.hasWon) return false;
 
   // Cancel if the box can't be pushed into the next adjacent space...
-  let adj = getObject(item, direction);
+  const adj = getObject({
+    x: item.x + direction.x, 
+    y: item.y + direction.y,
+  });
 
   if (adj.type === 'box' || adj.type === 'empty' || adj.type === 'wall') {
     return false;
@@ -761,17 +775,17 @@ function convertPosToMapIndex(pos) {
 
 
 /**
- * Return either a box object, or an entity object.
- * `pos` = local coords.
- * todo: rename to `getCell()`
+ * Return the entity object that is located at `pos` 
+ * (local room coords).
  */
-function getObject(pos, offset = { x:0, y:0 }) {
-
+function getObject(pos) {
+ 
   // Check box:
   for (let i = 0; i < _state.level.boxes.length; i++) {
-    if(_state.level.boxes[i].x === pos.x + offset.x &&
-       _state.level.boxes[i].y === pos.y + offset.y) {
-      return _state.level.boxes[i];
+    const box = _state.level.boxes[i];
+    if(box.x === pos.x &&
+       box.y === pos.y) {
+      return box;
     }
   }
 
@@ -779,30 +793,20 @@ function getObject(pos, offset = { x:0, y:0 }) {
   // pass in pos to getCurrentRooms()
   // Check door:
   for (let i = 0; i < _state.level.doors.length; i++) {
-    if(_state.level.doors[i].pos.x === pos.x + offset.x &&
-       _state.level.doors[i].pos.y === pos.y + offset.y) {
-      return _state.level.doors[i];
+    const door = _state.level.doors[i];
+    if(door.pos.x === pos.x &&
+       door.pos.y === pos.y) {
+      return door;
     }
   }
 
   // Check wall:
   let i = convertPosToMapIndex(pos);
-  let j;
-  if (offset.y === -1) {
-    j = i - _viewportSize.width;
-  } else if (offset.y === 1) {
-    j = i + _viewportSize.width;
-  } else if (offset.x === -1) {
-    j = i - 1;
-  } else if (offset.x === 1) {
-    j = i + 1;
-  }
-
   for (const value of Object.values(entity)) {
-    if (value.id === _state.level.map[j]) return value;
+    if (value.id === _state.level.map[i]) return value;
   }
 
-  // Player ran off the edge of board.
+  // Player ran off the edge of board...
   return {
     type: 'null',
   };
