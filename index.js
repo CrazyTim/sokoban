@@ -9,16 +9,6 @@ const _state = {
     face: 'se', // Facing direction (ne|nw|se|sw).
     pos: {x:0, y:0}, // Position (world coordinates).
     state: '',
-    getLocalPos: function(roomId) {
-
-      if (roomId === undefined) roomId = _state.level.id;
-
-      return {
-        x: this.pos.x - _state.levels[roomId].pos.x,
-        y: this.pos.y - _state.levels[roomId].pos.y,
-      };
-
-    }
   },
 
   levels: [],
@@ -71,6 +61,28 @@ const entity = { // These entity types are stateless in the world and do not cha
     id: 3,
     type: 'crystal',
   },
+
+}
+
+function getLocalPos(globalPos, roomId) {
+
+  if (roomId === undefined) roomId = _state.level.id;
+
+  return {
+    x: globalPos.x - _state.levels[roomId].pos.x,
+    y: globalPos.y - _state.levels[roomId].pos.y,
+  };
+
+}
+
+function getGlobalPos(pos, roomId) {
+
+  if (roomId === undefined) roomId = _state.level.id;
+
+  return {
+    x: pos.x + _state.levels[roomId].pos.x,
+    y: pos.y + _state.levels[roomId].pos.y,
+  };
 
 }
 
@@ -501,7 +513,7 @@ async function onKeyDown(e) {
   if ( x === 0 && y === 0) move = false; // Cancel if no movement.
 
   // Check movement is valid:
-  const playerLocalPos = _state.player.getLocalPos();
+  const playerLocalPos = getLocalPos(_state.player.pos);
   let adj = getObject({
     x: playerLocalPos.x + x, 
     y: playerLocalPos.y + y,
@@ -561,7 +573,7 @@ async function onKeyDown(e) {
 
     { // Change state from 'push' to 'idle' if the box can't be pushed any further.
       
-      const playerLocalPos = _state.player.getLocalPos();
+      const playerLocalPos = getLocalPos(_state.player.pos);
       let adj = getObject({
         x: playerLocalPos.x + x, 
         y: playerLocalPos.y + y,
@@ -604,7 +616,7 @@ async function onKeyDown(e) {
  */
 function checkChangeRoom() {
 
-  const currentRooms = getCurrentRooms();
+  const currentRooms = getRoomsAtGlobalPos(_state.player.pos);
   const currentRoomIds = currentRooms.map(room => room.id);
 
   // Only trigger a room transition if the rooms the player has moved into are different than the last time.
@@ -636,7 +648,7 @@ function checkChangeRoom() {
  * Return an array of room ids that the player is currently over.
  * The player is considered to be in a room if they are over a cell that != empty.
  */
-function getCurrentRooms() {
+function getRoomsAtGlobalPos(globalPos) {
 
   // todo: to push boxes between rooms, use this to loop over each room when checking for collisions.
 
@@ -644,13 +656,13 @@ function getCurrentRooms() {
 
   _state.levels.forEach(room => {
 
-    const playerLocalPos = _state.player.getLocalPos(room.id)
+    const pos = getLocalPos(globalPos, room.id)
 
     // check out of bounds
-    if (playerLocalPos.x >= 0 && playerLocalPos.x < _viewportSize.width &&
-        playerLocalPos.y >= 0 && playerLocalPos.y < _viewportSize.height) {
+    if (pos.x >= 0 && pos.x < _viewportSize.width &&
+        pos.y >= 0 && pos.y < _viewportSize.height) {
 
-      const cell = room.map[ convertPosToMapIndex(playerLocalPos) ];
+      const cell = room.map[ convertPosToMapIndex(pos) ];
 
       // Ensure cell is not empty
       if (cell !== entity.empty.id) {
@@ -790,7 +802,7 @@ function getObject(pos) {
   }
 
   // todo: check doors at this position in each room
-  // pass in pos to getCurrentRooms()
+  // pass in pos to getRoomsAtGlobalPos()
   // Check door:
   for (let i = 0; i < _state.level.doors.length; i++) {
     const door = _state.level.doors[i];
@@ -1111,8 +1123,10 @@ export default {
   _lastRoomIds,
   _state,
   moveViewPort,
-  getCurrentRooms,
+  getRoomsAtGlobalPos,
   onLoad,
   onKeyDown,
   openDoor,
+  getLocalPos,
+  getGlobalPos,
 }
