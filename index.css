@@ -93,13 +93,14 @@ body {
 }
 
 .viewport.edit .edit-grid {
-  border: dashed 3px #ffbe00bd;
-  box-sizing: content-box;
-  margin: -3px; /* border offset */
+  border-bottom: 1px solid #ffffffb0;
+  border-right: 1px solid #ffffffb0;
 }
 
 .viewport.edit .edit-grid .cell {
-  box-shadow: 0 0 0px 1px #404040;
+  border-top: 1px solid #ffffffb0;
+  border-left: 1px solid #ffffffb0;
+  cursor: pointer;
 }
 
 .toggle-btn-group {
@@ -159,4 +160,14 @@ body {
 
 .room {
   transition: opacity 1s;
+}
+
+.tippy-box .tippy-content {
+  font-family: 'consolas', monospace, sans-serif;
+  font-size: 14px;
+  border: 1px solid #000000e3;
+  background-color: #fff;
+  color: #000;
+  padding: 2px 6px;
+  border-radius: 2px;
 }

@@ -39,7 +39,7 @@ let _viewport; // The DOM node that holds the world. The world is moved inside t
 let _mode = null;
 const _lastRoomIds  = [];
 const _inputStack = [];
-
+let _tippy = null;
 const entity = { // These entity types are stateless in the world and do not change.
 
   empty: {
@@ -272,8 +272,19 @@ function makeEditGrid() {
 
       }
 
+      div.dataset.tippyContent = `${x},${y}`;
+
     }
   }
+
+  _tippy = tippy.createSingleton(tippy('[data-tippy-content]'), {
+    placement: 'bottom',
+    arrow: false,
+    hideOnClick: false,
+    offset: [0, -2],
+  });
+
+  _tippy.disable();
 
 }
 
@@ -418,6 +429,7 @@ function changeMode(m) {
     btn.classList.remove('active');
     _viewport.classList.remove('edit');
     _mode = null;
+    _tippy.disable();
 
   } else {
 
@@ -428,6 +440,7 @@ function changeMode(m) {
     btn.classList.add('active');
     _viewport.classList.add('edit');
     _mode = m;
+    _tippy.enable();
 
   }
 
