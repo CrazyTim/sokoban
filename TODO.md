@@ -2,8 +2,6 @@
 
 ## High
 
-- Move (animate) player slightly slower when pushing a box.
-
 - Hold down key to move instead of tapping.
 
 - Rename 'level' -> 'room'.

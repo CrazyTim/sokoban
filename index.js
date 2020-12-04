@@ -27,10 +27,11 @@ const _state = {
 const _viewportSize = {width: 11, height: 11}
 const _squareSize = 60; // Pixels.
 const _worldOffset = _squareSize * 1; // Number of squares to offset the world.
-const _moveDuration = .2;
+const _moveDuration = .15;
 const _winDuration = .8;
 const _roomTransitionDuration = 1;
 const _inputStackLength = 1; // number of keyboard presses to store on the stack.
+const _pushFriction = 1.3;
 
 // Constants:
 const _startRoomId = 0;
@@ -137,9 +138,12 @@ function onLoad(props = {viewport: null}) {
   // Add styles for animations:
   var style = document.createElement('style');
   style.innerHTML = `
-    .player,
+    .player {
+      transition: transform ${_moveDuration}s ease;
+    }
+
     .box {
-      transition: transform ${_moveDuration}s;
+      transition: transform ${_moveDuration * _pushFriction}s linear;
     }
 
     .world {
@@ -528,7 +532,7 @@ async function onKeyDown(e) {
   // Check movement is valid:
   const playerLocalPos = getLocalPos(_state.player.pos);
   let adj = getObject({
-    x: playerLocalPos.x + x, 
+    x: playerLocalPos.x + x,
     y: playerLocalPos.y + y,
   });
 
@@ -565,15 +569,21 @@ async function onKeyDown(e) {
 
     }
 
+    let moveAdjust = 1;
+    let moveEasing = 'ease';
+
     if (adj.type === 'box') {
       // Move box:
       adj.x += x;
       adj.y += y;
       updateBox(adj);
       _state.player.state = 'push-' + dir;
+      moveAdjust = _pushFriction;
+      moveEasing = 'linear';
     }
 
     // Move player:
+    _state.player.div.style.transition = `transform ${_moveDuration * moveAdjust}s ${moveEasing}`;
     _state.player.pos.x += x;
     _state.player.pos.y += y;
     updatePlayer();
@@ -582,13 +592,15 @@ async function onKeyDown(e) {
 
     // Wait for move animation to finish:
     _state.isPendingMove = true;
-    await wait(_moveDuration);
+    await wait(_moveDuration * moveAdjust);
+
+    _state.player.div.style.transition = `transform ${_moveDuration}s ease`; // Reset.
 
     { // Change state from 'push' to 'idle' if the box can't be pushed any further.
-      
+
       const playerLocalPos = getLocalPos(_state.player.pos);
       let adj = getObject({
-        x: playerLocalPos.x + x, 
+        x: playerLocalPos.x + x,
         y: playerLocalPos.y + y,
       });
 
@@ -701,7 +713,7 @@ function canBePushed(item, direction = {x:0, y:0}) {
 
   // Cancel if the box can't be pushed into the next adjacent space...
   const adj = getObject({
-    x: item.x + direction.x, 
+    x: item.x + direction.x,
     y: item.y + direction.y,
   });
 
@@ -800,11 +812,11 @@ function convertPosToMapIndex(pos) {
 
 
 /**
- * Return the entity object that is located at `pos` 
+ * Return the entity object that is located at `pos`
  * (local room coords).
  */
 function getObject(pos) {
- 
+
   // Check box:
   for (let i = 0; i < _state.level.boxes.length; i++) {
     const box = _state.level.boxes[i];
