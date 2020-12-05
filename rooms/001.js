@@ -4,10 +4,7 @@ export default {
 
   pos: { x:7, y:0 },
 
-  startPos: {
-    x: 2,
-    y: 4,
-  },
+  startPos: { x:2, y:4 },
 
   boxes: [
     { x:1, y:3 },

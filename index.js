@@ -324,6 +324,13 @@ function onWinEventFactory(roomId) {
   } else if (roomId === 3) {
 
     return () => {
+      facePlayer('sw');
+      openDoor(0, 3);
+    }
+
+  } else if (roomId === 4) {
+
+    return () => {
       console.log('end game');
     }
 
