@@ -1115,8 +1115,6 @@ function hideDistantRooms() {
 
   _state.levels.forEach(r => {
 
-    if (r.id === _state.level.id) return;
-
     const xOffset = Math.abs(r.pos.x - _state.level.pos.x);
     const yOffset = Math.abs(r.pos.y - _state.level.pos.y);
 
@@ -1159,4 +1157,5 @@ export default {
   openDoor,
   getLocalPos,
   getGlobalPos,
+  hideDistantRooms,
 }
