@@ -308,7 +308,7 @@ function onWinEventFactory(roomId) {
       input(false);
       facePlayer('sw');
       await moveViewPort(_state.levels[0].pos);
-      openDoor(0, 1);
+      openDoor(1, 0);
       await wait(1);
       await moveViewPort(_state.levels[1].pos, .8);
       input(true);
@@ -318,7 +318,7 @@ function onWinEventFactory(roomId) {
 
     return () => {
       facePlayer('se');
-      openDoor(2, 0);
+      openDoor(0, 2);
     }
 
   } else if (roomId === 3) {
@@ -365,10 +365,12 @@ async function moveViewPort(pos = {x:0, y:0}, durationSeconds = 1, easing = 'eas
 
 }
 
-function openDoor(roomIndex, doorIndex) {
+function openDoor(doorId, roomId) {
 
-  const room = _state.levels[roomIndex];
-  const door = room.doors[doorIndex];
+  if (roomId === undefined) roomId = _state.level.id;
+
+  const room = _state.levels[roomId];
+  const door = room.doors[doorId];
 
   door.state = 'open';
   updateDoor(door);
