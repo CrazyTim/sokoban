@@ -25,15 +25,8 @@ STYLE 0 - Vertical
   height: 20px;
   x: 7px;
   y: 0px;
-  fill: #d4d4d4;
+  fill: #7d7d7d;
   opacity: 0.5;
-}
-.door.style-0 svg .groove rect:nth-child(2) { /* groove - fill */
-  width: 2px;
-  height: 20px;
-  x: 9px;
-  y: 0px;
-  fill: #505050;
 }
 
 .door.style-0 svg .div rect:nth-child(1) { /* shadow */

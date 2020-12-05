@@ -1093,7 +1093,6 @@ function makeDoor(door, div) {
 
     <g class="groove">
       <rect />
-      <rect />
     </g>
     <g class="div div-1">
       <rect fill="url(#grad-1)" />
