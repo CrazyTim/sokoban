@@ -420,16 +420,10 @@ function setEventHandlers() {
 }
 
 function moveRoom(offset) {
-  _state.level.pos.x += offset.x;
-  _state.level.pos.y += offset.y;
-
-  // Re-make room:
-  _state.level.div.remove();
-  _state.level.div = null;
-  makeRoom(_state.level);
-  // todo: move into correct node stack order.
-  _state.level.div.classList.remove('hidden');
-
+  const room = _state.level
+  room.pos.x += offset.x;
+  room.pos.y += offset.y;
+  room.div.style.transform = `translate(${room.pos.x * _squareSize}px, ${room.pos.y * _squareSize}px)`
 }
 
 function changeMode(m) {
