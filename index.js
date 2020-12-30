@@ -26,6 +26,7 @@ const _state = {
 // Settings:
 const _viewportSize = {width: 11, height: 11}
 const _squareSize = 60; // Pixels.
+const _pixelSize = _squareSize / 20;
 const _worldOffset = _squareSize * 1; // Number of squares to offset the world.
 const _moveDuration = .15;
 const _winDuration = .8;
@@ -158,6 +159,21 @@ function onLoad(props = {viewport: null}) {
       width: ${_squareSize}px;
       height: ${_squareSize}px;
     }
+
+    .label {
+      padding: ${_pixelSize}px;
+    }
+
+    .label span {
+      width: ${12 * _pixelSize}px;
+      height: ${16 * _pixelSize}px;
+      margin-right: ${_pixelSize}px;
+    }
+
+    .label .char-1 {
+      width: ${8 * _pixelSize};
+    }
+
   `;
   document.head.appendChild(style);
 
@@ -753,6 +769,7 @@ async function checkWin() {
   input(true);
   _state.player.state = 'idle';
   _state.level.hasWon = true;
+  _state.level.div.classList.add('win');
   updateGui();
   updatePlayer();
   _inputStack.length = 0; // Truncate input stack.
@@ -1046,11 +1063,18 @@ function makeLabel(label, div) {
 
   d.style.width = (_squareSize * label.width) + 'px';
   d.style.height = (_squareSize * label.height) + 'px';
-  d.style.transform = `translate(${label.pos.x * _squareSize}px, ${label.pos.y * _squareSize}px)`
-  d.textContent = label.text;
+  d.style.transform = `translate(${label.pos.x * _squareSize}px, ${label.pos.y * _squareSize}px)`;
   d.style.fontSize = (_squareSize + 10) + 'px';
   d.classList.add('label');
   d.classList.add('align-' + label.align);
+
+  // Add individual characters
+  label.text.split('').forEach(i => {
+    const span = document.createElement('span');
+    span.classList.add('char-' + i);
+    span.textContent = i;
+    d.appendChild(span);
+  });
 
 }
 

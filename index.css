@@ -1,7 +1,6 @@
-@import url('https://fonts.googleapis.com/css2?family=Yantramanav:wght@900&display=swap');
-
 @import url("player.css");
 @import url("door.css");
+@import url("font.css");
 
 * {
   box-sizing: border-box;
@@ -84,11 +83,7 @@ body {
   position: absolute;
   display: flex;
   align-items: center;
-  font-family: 'Yantramanav', sans-serif;
-  letter-spacing: 2px;
-  color: #1d1a1aa8;
-  text-shadow: 1px 1px 40px #00000063;
-  padding: 0 6px;
+  color: transparent;
   user-select: none;
 }
 
