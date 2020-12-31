@@ -1,3 +1,7 @@
+.player {
+  will-change: transform; /* Paint player in a separate render layer */
+}
+
 .player::before {
   background-repeat: no-repeat;
   background-size: 100%;
