@@ -15,7 +15,7 @@ const _state = {
 
   canInput: false,
 
-  isPendingMove: false,
+  isPendingMove: false, // Keypress mutex.
 
   history: [], // Undo stack.
 
@@ -147,10 +147,6 @@ function onLoad(props = {viewport: null}) {
       transition: transform ${_moveDuration * _pushFriction}s linear;
     }
 
-    .world {
-      transition: transform ${_roomTransitionDuration}s;
-    }
-
     .cell,
     .box,
     .player,
@@ -184,8 +180,16 @@ function onLoad(props = {viewport: null}) {
 
   // Make world:
   _world = document.createElement('div');
-  _world.classList.add('world')
+  _world.classList.add(
+    'world',
+    'hidden',
+  )
   _viewport.appendChild(_world);
+
+  // Make visible once the node has been added to DOM:
+  window.requestAnimationFrame(t => {
+    _world.classList.remove('hidden');
+  });
 
   makeEditGrid();
 
@@ -220,6 +224,7 @@ function onLoad(props = {viewport: null}) {
   setEventHandlers();
 
   changeRoom(_startRoomId, 0);
+  _state.level.div.classList.remove('hidden');
 
   _state.player.pos.x = _state.level.startPos.x;
   _state.player.pos.y = _state.level.startPos.y;
@@ -474,10 +479,10 @@ function changeRoom(roomId, animationDuration) {
   // Set the new room as the current room:
   _state.level = _state.levels[roomId];
 
-  // Wait until node has been added to DOM:
-  setTimeout(() => {
+  // Make visible once the node has been added to DOM:
+  window.requestAnimationFrame(t => {
     _state.level.div.classList.remove('hidden');
-  }, 50);
+  });
 
   // Center viewport on the room:
   moveViewPort(_state.level.pos, animationDuration, 'ease');
