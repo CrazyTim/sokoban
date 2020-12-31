@@ -8,7 +8,7 @@ const _state = {
     div: null, // DOM node representing the player.
     face: 'se', // Facing direction (ne|nw|se|sw).
     pos: {x:0, y:0}, // Position (world coordinates).
-    state: '',
+    state: 'idle',
   },
 
   levels: [],
@@ -202,19 +202,23 @@ function onLoad(props = {viewport: null}) {
 
     // Make button to edit room:
     let btn = document.createElement('button');
-    btn.classList.add('btn');
-    btn.classList.add('btn-room');
-    btn.classList.add('btn-room-' + i);
+    btn.classList.add(
+      'btn',
+      'btn-room',
+      'btn-room-' + i,
+    );
     btn.textContent = 'level ' + util.pad(i,2);
-    btn.onclick = e => {
+    btn.onclick = async e => {
 
       changeRoom(i);
 
       // Move player to room:
       const room = _state.levels[i];
-      _state.player.pos.x = room.startPos.x + room.pos.x;
-      _state.player.pos.y = room.startPos.y + room.pos.y;
-      updatePlayer();
+      movePlayer({
+        x: room.startPos.x + room.pos.x,
+        y: room.startPos.y + room.pos.y,
+        duration: _roomTransitionDuration,
+      });
 
     }
     document.querySelector('.buttons').appendChild(btn);
@@ -247,7 +251,9 @@ function makePlayer(id) {
     ],
   );
 
-  updatePlayer();
+  facePlayer(_state.player.face);
+  updatePlayerState(_state.player.state);
+  movePlayer({..._state.player.pos, duration: 0});
 
 }
 
@@ -285,13 +291,12 @@ function makeEditGrid() {
         if(!_mode) return;
 
         if (_mode === 'player') {
-          // Move player:
-          _state.player.pos.x = x + _state.level.pos.x;
-          _state.player.pos.y = y + _state.level.pos.y;
-          updatePlayer();
+          movePlayer({
+            x: x + _state.level.pos.x,
+            y: y + _state.level.pos.y,
+          });
 
         } else if (_mode) {
-          // Change cell:
           changeCell(i, _mode);
         }
 
@@ -365,10 +370,10 @@ function onWinEventFactory(roomId) {
 
 }
 
-async function moveViewPort(pos = {x:0, y:0}, durationSeconds = 1, easing = 'ease-in-out') {
+async function moveViewPort(pos = {x:0, y:0}, durationSeconds = _roomTransitionDuration, easing = 'ease-in-out') {
 
+  // Animate:
   const translate = `translate(${_worldOffset - (pos.x * _squareSize)}px, ${_worldOffset - (pos.y * _squareSize)}px)`;
-
   await _world.animate(
     [
       { transform: translate },
@@ -386,6 +391,29 @@ async function moveViewPort(pos = {x:0, y:0}, durationSeconds = 1, easing = 'eas
 
 }
 
+async function movePlayer(props) {
+
+  if (!props.easing) props.easing = 'ease';
+  if (!props.duration) props.duration = _moveDuration;
+
+  _state.player.pos.x = props.x;
+  _state.player.pos.y = props.y;
+
+  // Animate:
+  const translate = `translate(${props.x * _squareSize}px, ${props.y * _squareSize}px)`;
+  await _state.player.div.animate(
+    [
+      { transform: translate },
+    ],
+    {
+      duration: props.duration * 1000,
+      easing: props.easing,
+      fill: 'forwards',
+    },
+  ).finished;
+
+}
+
 function openDoor(doorId, roomId) {
 
   if (roomId === undefined) roomId = _state.level.id;
@@ -399,8 +427,43 @@ function openDoor(doorId, roomId) {
 }
 
 function facePlayer(direction) {
+
   _state.player.face = direction;
-  updatePlayer();
+
+  const div = _state.player.div;
+
+  if (!div) return;
+
+  div.classList.remove(
+    'face-ne',
+    'face-nw',
+    'face-se',
+    'face-sw',
+  );
+
+  div.classList.add('face-' + direction);
+
+}
+
+function updatePlayerState(playerState) {
+
+  _state.player.state = playerState;
+
+  const div = _state.player.div;
+
+  if (!div) return;
+
+  div.classList.remove(
+    'state-idle',
+    'state-push-up',
+    'state-push-down',
+    'state-push-left',
+    'state-push-right',
+    'state-win',
+  );
+
+  div.classList.add('state-' + playerState);
+
 }
 
 function setEventHandlers() {
@@ -531,19 +594,19 @@ async function onKeyDown(e) {
   if (e.key === 'ArrowUp' || e.key === 'w') {
     dir = 'up';
     y -= 1;
-    _state.player.face = _state.player.face.includes('e') ? 'ne' : 'nw';
+    facePlayer( _state.player.face.includes('e') ? 'ne' : 'nw' );
   } else if (e.key === 'ArrowDown' || e.key === 's') {
     dir = 'down';
     y += 1;
-    _state.player.face = _state.player.face.includes('e') ? 'se' : 'sw';
+    facePlayer( _state.player.face.includes('e') ? 'se' : 'sw' );
   } else if (e.key === 'ArrowLeft' || e.key === 'a') {
     dir = 'left';
     x -= 1;
-    _state.player.face = 'sw';
+    facePlayer('sw');
   } else if (e.key === 'ArrowRight'  || e.key === 'd') {
     dir = 'right';
     x += 1;
-    _state.player.face = 'se';
+    facePlayer('se');
   } else {
     return; // ignore all other keys
   }
@@ -601,24 +664,25 @@ async function onKeyDown(e) {
       adj.x += x;
       adj.y += y;
       updateBox(adj);
-      _state.player.state = 'push-' + dir;
+      updatePlayerState('push-' + dir);
       moveAdjust = _pushFriction;
       moveEasing = 'linear';
+    } else {
+      updatePlayerState('idle');
     }
 
-    // Move player:
-    _state.player.div.style.transition = `transform ${_moveDuration * moveAdjust}s ${moveEasing}`;
-    _state.player.pos.x += x;
-    _state.player.pos.y += y;
-    updatePlayer();
+    _state.isPendingMove = true;
+
+    const movePlayerAnimation = movePlayer({
+      x: _state.player.pos.x + x,
+      y: _state.player.pos.y + y,
+      duration: _moveDuration * moveAdjust,
+      easing: moveEasing,
+    });
 
     checkChangeRoom();
 
-    // Wait for move animation to finish:
-    _state.isPendingMove = true;
-    await wait(_moveDuration * moveAdjust);
-
-    _state.player.div.style.transition = `transform ${_moveDuration}s ease`; // Reset.
+    await movePlayerAnimation;
 
     { // Change state from 'push' to 'idle' if the box can't be pushed any further.
 
@@ -629,8 +693,7 @@ async function onKeyDown(e) {
       });
 
       if (adj.type !== 'box' || !canBePushed(adj, {x, y}) ) {
-        _state.player.state = 'idle';
-        updatePlayer();
+        updatePlayerState('idle');
       }
 
     }
@@ -654,7 +717,6 @@ async function onKeyDown(e) {
 
   }
 
-  updatePlayer(); // We still need to update `player.face` even if we don't move.
   updateGui();
 
 }
@@ -685,7 +747,7 @@ function checkChangeRoom() {
 
     if (r.id === _state.level.id) continue; // Ignore current room.
 
-    changeRoom(r.id);
+    changeRoom(r.id, _roomTransitionDuration);
 
     return;
 
@@ -765,18 +827,16 @@ async function checkWin() {
   input(false);
   _state.history.length = 0; // Clear undo.
 
-  _state.player.state = 'win';
-  updatePlayer();
+  updatePlayerState('win');
 
   // Wait for win animation to finish:
   await wait(_winDuration);
 
   input(true);
-  _state.player.state = 'idle';
+  updatePlayerState('idle');
   _state.level.hasWon = true;
   _state.level.div.classList.add('win');
   updateGui();
-  updatePlayer();
   _inputStack.length = 0; // Truncate input stack.
 
   _state.level.onWin();
@@ -817,11 +877,9 @@ function undoState() {
   });
   updateBoxes();
 
-  // Restore player:
-  _state.player.pos = oldState.player.pos;
-  _state.player.face = oldState.player.face;
-  _state.player.state = oldState.player.state;
-  updatePlayer();
+  movePlayer(oldState.player.pos);
+  facePlayer(oldState.player.face);
+  updatePlayerState(oldState.player.state);
 
   checkChangeRoom();
 
@@ -891,9 +949,11 @@ function makeRoom(room) {
     // This makes it simpler when designing rooms, in particular overlapping elements like doors.
     _world.prepend(room.div);
 
-    room.div.classList.add('room');
-    room.div.classList.add('hidden');
-    room.div.classList.add('level-' + room.id);
+    room.div.classList.add(
+      'room',
+      'hidden',
+      'level-' + room.id,
+    );
     room.div.style.transform = `translate(${room.pos.x * _squareSize}px, ${room.pos.y * _squareSize}px)`
 
     // Make cells:
@@ -985,10 +1045,12 @@ function changeCell(id, entityKey) {
     }
   }
 
-  div.classList.remove('type-0');
-  div.classList.remove('type-1');
-  div.classList.remove('type-2');
-  div.classList.remove('type-3');
+  div.classList.remove(
+    'type-0',
+    'type-1',
+    'type-2',
+    'type-3',
+  );
 
   div.classList.add('type-' + e.id);
 
@@ -1002,46 +1064,10 @@ function clearCell() {
   }
 }
 
-function moveSquare(className, pos) {
-  const d = document.querySelector(className);
-  d.style.transform = `translate(${pos.x * _squareSize}px, ${pos.y * _squareSize}px)`
-}
-
 function updateBoxes() {
   _state.level.boxes.forEach(b => {
     updateBox(b);
   });
-}
-
-function updatePlayer() {
-
-  const div = _state.player.div;
-
-  if (!div) return;
-
-  moveSquare('.player-' + _state.player.id, _state.player.pos);
-
-  div.classList.remove('face-ne');
-  div.classList.remove('face-nw');
-  div.classList.remove('face-se');
-  div.classList.remove('face-sw');
-  div.classList.add('face-' + _state.player.face);
-
-  div.classList.remove('state-idle');
-  div.classList.remove('state-push-up');
-  div.classList.remove('state-push-down');
-  div.classList.remove('state-push-left');
-  div.classList.remove('state-push-right');
-  div.classList.remove('state-win');
-
-  if (_state.player.state.includes('push')) {
-    div.classList.add('state-' + _state.player.state);
-  } else if (_state.player.state === 'win') {
-    div.classList.add('state-win');
-  } else {
-    div.classList.add('state-idle');
-  }
-
 }
 
 function updateGui() {
@@ -1049,9 +1075,9 @@ function updateGui() {
 }
 
 function updateBox(b) {
-  moveSquare('.level-' + _state.level.id + ' .box-' + b.id, b);
 
   const d = document.querySelector('.level-' + _state.level.id + ' .box-' + b.id);
+  d.style.transform = `translate(${b.x * _squareSize}px, ${b.y * _squareSize}px)`
 
   if(isBoxOnCrystal(b)) {
     d.classList.add('state-win');
@@ -1070,8 +1096,11 @@ function makeLabel(label, div) {
   d.style.height = (_squareSize * label.height) + 'px';
   d.style.transform = `translate(${label.pos.x * _squareSize}px, ${label.pos.y * _squareSize}px)`;
   d.style.fontSize = (_squareSize + 10) + 'px';
-  d.classList.add('label');
-  d.classList.add('align-' + label.align);
+
+  d.classList.add(
+    'label',
+    'align-' + label.align,
+  );
 
   // Add individual characters
   label.text.split('').forEach(i => {
@@ -1091,10 +1120,13 @@ function makeDoor(door, div) {
   door.div = d;
 
   d.style.transform = `translate(${door.pos.x * _squareSize}px, ${door.pos.y * _squareSize}px)`
-  d.classList.add('door');
-  d.classList.add('door-' + door.id);
-  d.classList.add('state-' + door.state);
-  d.classList.add('style-' + door.style);
+
+  d.classList.add(
+    'door',
+    'door-' + door.id,
+    'state-' + door.state,
+    'style-' + door.style,
+  );
 
   if (door.horizontal) {
     d.classList.add('horizontal');
@@ -1133,9 +1165,14 @@ function makeDoor(door, div) {
 }
 
 function updateDoor(door) {
-  door.div.classList.remove('state-open');
-  door.div.classList.remove('state-closed');
+
+  door.div.classList.remove(
+    'state-open',
+    'state-closed',
+  );
+
   door.div.classList.add('state-' + door.state);
+
 }
 
 /**
