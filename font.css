@@ -2,10 +2,9 @@
   background-repeat: no-repeat;
   background-position: 0 0;
   background-size: contain;
-  transition: opacity 1s;
 }
 
-.room.win .label span {
+.room.win .label {
   opacity: 0.6;
 }
 
