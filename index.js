@@ -89,12 +89,11 @@ function getGlobalPos(pos, roomId) {
 }
 
 // Clone room data from `level.js` and set default values.
-function roomFactory(i) {
+function roomFactory(id) {
 
-  const l = util.deepCopy(data[i]);
+  const l = util.deepCopy(data[id]);
 
-  // Add id to room:
-  l.id =  i
+  l.id =  id;
 
   // Add id to each box:
   for (let j = 0; j < l.boxes.length; j++) {
@@ -104,11 +103,11 @@ function roomFactory(i) {
 
   // Compose text for first label:
   if (l.labels.length) {
-    l.labels[0].text = util.pad(i + 1, 2);
+    l.labels[0].text = util.pad(id + 1, 2);
   }
 
   // Set onWin event:
-  l.onWin = onWinEventFactory(i);
+  l.onWin = onWinEventFactory(id);
 
   // Create doors if it doesn't exist
   if (!l.doors) l.doors = [];
@@ -826,6 +825,8 @@ async function checkWin() {
   for (let i = 0; i < _state.level.boxes.length; i++) {
     if(!isBoxOnCrystal(_state.level.boxes[i])) return;
   }
+
+  // Room has been won...
 
   input(false);
   _state.history.length = 0; // Clear undo.
