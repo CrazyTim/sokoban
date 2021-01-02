@@ -94,6 +94,8 @@ function roomFactory(id) {
   const l = util.deepCopy(data[id]);
 
   l.id =  id;
+  l.history = [];
+  l.isWon = false;
 
   // Add id to each box:
   for (let j = 0; j < l.boxes.length; j++) {
@@ -233,6 +235,12 @@ function onLoad(props = {viewport: null}) {
   _state.player.pos.y = _state.level.startPos.y;
 
   makePlayer(_state.player.id);
+
+  // save initial undo state
+  saveUndo({
+    x: _state.player.pos.x,
+    y: _state.player.pos.y,
+  });
 
   input(true);
 
@@ -541,6 +549,8 @@ function changeMode(m) {
 
 function changeRoom(roomId, animationDuration) {
 
+  if (roomId === undefined || roomId === null) return;
+
   // Set the new room as the current room:
   _state.level = _state.levels[roomId];
 
@@ -635,29 +645,6 @@ async function onKeyDown(e) {
 
   if (move) {
 
-
-    { // Store history (undo)
-
-      const levelsCopy = [];
-
-      _state.levels.forEach(l => {
-        levelsCopy.push({
-          id: l.id,
-          boxes: util.deepCopy(l.boxes),
-        });
-      });
-
-      _state.history.push({
-        player: {
-          face: _state.player.face,
-          pos: util.deepCopy(_state.player.pos),
-          state: _state.player.state,
-        },
-        levels: levelsCopy,
-      });
-
-    }
-
     let moveAdjust = 1;
     let moveEasing = 'ease';
 
@@ -675,14 +662,19 @@ async function onKeyDown(e) {
 
     _state.isPendingMove = true;
 
-    const movePlayerAnimation = movePlayer({
+    const newPlayerPos = {
       x: _state.player.pos.x + x,
       y: _state.player.pos.y + y,
+    };
+
+    const movePlayerAnimation = movePlayer({
+      ...newPlayerPos,
       duration: _moveDuration * moveAdjust,
       easing: moveEasing,
     });
 
-    checkChangeRoom();
+    const newRoomId = checkChangeRoom(newPlayerPos);
+    changeRoom(newRoomId, _roomTransitionDuration);
 
     await movePlayerAnimation;
 
@@ -698,6 +690,13 @@ async function onKeyDown(e) {
         updatePlayerState('idle');
       }
 
+    }
+
+    // Don't save undo if the player moved out of a different room...
+    // In this case, undoing this move later will cause a room transition,
+    // and we need to ensure that all undo's should keep the player in the same room.
+    if (!_state.level.isWon && newRoomId === undefined) {
+      saveUndo(newPlayerPos);
     }
 
     await checkWin()
@@ -727,9 +726,9 @@ async function onKeyDown(e) {
  * Check if we need to transition into a new room.
  * A transition point is where any 'ground' cell in one room overlaps a 'ground' cell in another room.
  */
-function checkChangeRoom() {
+function checkChangeRoom(globalPos) {
 
-  const currentRooms = getRoomsAtGlobalPos(_state.player.pos);
+  const currentRooms = getRoomsAtGlobalPos(globalPos);
   const currentRoomIds = currentRooms.map(room => room.id);
 
   // Only trigger a room transition if the rooms the player has moved into are different than the last time.
@@ -749,9 +748,7 @@ function checkChangeRoom() {
 
     if (r.id === _state.level.id) continue; // Ignore current room.
 
-    changeRoom(r.id, _roomTransitionDuration);
-
-    return;
+    return r.id;
 
   }
 
@@ -797,7 +794,7 @@ function canBePushed(item, direction = {x:0, y:0}) {
 
   // Prevent boxes from being moved once the level has been won
   // (otherwise player could move boxes out of the level)
-  if (_state.level.hasWon) return false;
+  if (_state.level.isWon) return false;
 
   // Cancel if the box can't be pushed into the next adjacent space...
   const adj = getObject({
@@ -820,7 +817,7 @@ function canBePushed(item, direction = {x:0, y:0}) {
 
 async function checkWin() {
 
-  if (_state.level.hasWon) return;
+  if (_state.level.isWon) return;
 
   for (let i = 0; i < _state.level.boxes.length; i++) {
     if(!isBoxOnCrystal(_state.level.boxes[i])) return;
@@ -829,7 +826,6 @@ async function checkWin() {
   // Room has been won...
 
   input(false);
-  _state.history.length = 0; // Clear undo.
 
   updatePlayerState('win');
 
@@ -838,7 +834,7 @@ async function checkWin() {
 
   input(true);
   updatePlayerState('idle');
-  _state.level.hasWon = true;
+  _state.level.isWon = true;
   _state.level.div.classList.add('win');
   updateGui();
   _inputStack.length = 0; // Truncate input stack.
@@ -853,9 +849,24 @@ function isBoxOnCrystal(box) {
   return _state.level.map[convertPosToMapIndex(box)] === entity.crystal.id;
 }
 
+function saveUndo(pos) {
+
+  _state.level.history.push({
+    player: {
+      face: _state.player.face,
+      pos: pos,
+      state: _state.player.state,
+    },
+    boxes: util.deepCopy(_state.level.boxes),
+  });
+
+}
+
 function undo() {
 
-  if (_state.history.length === 0) return;
+  if (_state.level.isWon) return;
+
+  if (_state.level.history.length <= 1) return;
 
   undoState();
 
@@ -863,9 +874,9 @@ function undo() {
 
 function resetRoom() {
 
-  if (_state.history.length === 0) return;
+  if (_state.level.history.length <= 1) return;
 
-  _state.history = [ _state.history[0] ]; // Reset to the first move.
+  _state.level.history = [ _state.level.history[0] ]; // Reset to the first move.
 
   undoState();
 
@@ -873,19 +884,18 @@ function resetRoom() {
 
 function undoState() {
 
-  const oldState = _state.history.pop();
+  _state.level.history.pop();
+
+  const lastState = util.deepCopy(_state.level.history[_state.level.history.length-1]);
 
   // Restore boxes:
-  oldState.levels.forEach(l => {
-    _state.levels[l.id].boxes = l.boxes;
-  });
+  _state.level.boxes = lastState.boxes;
   updateBoxes();
 
-  movePlayer(oldState.player.pos);
-  facePlayer(oldState.player.face);
-  updatePlayerState(oldState.player.state);
-
-  checkChangeRoom();
+  // Restore player:
+  movePlayer(lastState.player.pos);
+  facePlayer(lastState.player.face);
+  updatePlayerState(lastState.player.state);
 
   updateGui();
 
