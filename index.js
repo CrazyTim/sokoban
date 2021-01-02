@@ -358,8 +358,11 @@ function onWinEventFactory(roomId) {
 
   } else if (roomId === 4) {
 
-    return () => {
-      console.log('end game');
+    return async () => {
+      facePlayer('sw');
+      openDoor(0, 4);
+      await wait(0.1); // Pause for effect.
+      openDoor(1, 4);
     }
 
   } else {
