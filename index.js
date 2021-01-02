@@ -88,35 +88,34 @@ function getGlobalPos(pos, roomId) {
 
 }
 
-// Clone room data from `level.js` and set default values.
-function roomFactory(i) {
+// Clone a room and set default values.
+function roomFactory(roomId) {
 
-  const l = util.deepCopy(data[i]);
+  const room = util.deepCopy(data[roomId]);
 
-  // Add id to room:
-  l.id =  i
+  room.id = roomId;
 
-  // Add id to each box:
-  for (let j = 0; j < l.boxes.length; j++) {
-    l.boxes[j].id = j;
-    l.boxes[j].type = 'box';
+  // Give id to each box:
+  for (let j = 0; j < room.boxes.length; j++) {
+    room.boxes[j].id = j;
+    room.boxes[j].type = 'box';
   }
 
   // Compose text for first label:
-  if (l.labels.length) {
-    l.labels[0].text = util.pad(i + 1, 2);
+  if (room.labels.length) {
+    room.labels[0].text = util.pad(roomId + 1, 2);
   }
 
   // Set onWin event:
-  l.onWin = onWinEventFactory(i);
+  room.onWin = onWinEventFactory(roomId);
 
   // Create doors if it doesn't exist
-  if (!l.doors) l.doors = [];
+  if (!room.doors) room.doors = [];
 
-  // Add id to each door:
-  for (let j = 0; j < l.doors.length; j++) {
+  // Give id to each door:
+  for (let j = 0; j < room.doors.length; j++) {
 
-    const door = l.doors[j];
+    const door = room.doors[j];
     door.id = j;
     door.type = 'door';
 
@@ -126,11 +125,11 @@ function roomFactory(i) {
 
     // Ensure ground is always under a door (for convenience when joining rooms together):
     const cellIndex = convertPosToMapIndex(door.pos)
-    l.map[cellIndex] = entity.ground.id;
+    room.map[cellIndex] = entity.ground.id;
 
   }
 
-  return l;
+  return room;
 
 }
 
@@ -253,7 +252,10 @@ function makePlayer(id) {
 
   facePlayer(_state.player.face);
   updatePlayerState(_state.player.state);
-  movePlayer({..._state.player.pos, duration: 0});
+  movePlayer({
+    ..._state.player.pos,
+    duration: 0
+  });
 
 }
 
@@ -582,7 +584,7 @@ async function onKeyDown(e) {
 
   // Reset room:
   if (e.key === 'Escape') {
-    resetRoom();
+    resetState();
     return;
   }
 
@@ -824,6 +826,8 @@ async function checkWin() {
     if(!isBoxOnCrystal(_state.level.boxes[i])) return;
   }
 
+  // Room has been won...
+
   input(false);
   _state.history.length = 0; // Clear undo.
 
@@ -857,7 +861,7 @@ function undo() {
 
 }
 
-function resetRoom() {
+function resetState() {
 
   if (_state.history.length === 0) return;
 
@@ -1018,7 +1022,7 @@ function makeRoom(room) {
 
 function makeSquare(pos, div, classes) {
 
-  let d = document.createElement('div');
+  const d = document.createElement('div');
   div.appendChild(d);
 
   d.style.transform = `translate(${pos.x * _squareSize}px, ${pos.y * _squareSize}px)`
