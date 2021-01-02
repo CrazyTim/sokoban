@@ -13,7 +13,7 @@ export default {
 
   labels: [
     {
-      pos: { x:4, y:5 },
+      pos: { x:2, y:0 },
       width: 2,
       height: 1,
       align: 'right',

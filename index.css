@@ -85,7 +85,8 @@ body {
   align-items: center;
   color: transparent;
   user-select: none;
-  transition: opacity 1s;
+  filter: brightness(1.1);
+  transition: filter 0.8s;
 }
 
 .viewport.edit .edit-grid {
