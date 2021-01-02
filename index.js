@@ -157,7 +157,7 @@ function onLoad(props = {viewport: null}) {
     }
 
     .label {
-      padding: ${_pixelSize}px;
+      padding: ${2 * _pixelSize}px;
     }
 
     .label span {
