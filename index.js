@@ -402,7 +402,7 @@ async function moveViewPort(pos = {x:0, y:0}, durationSeconds = _roomTransitionD
 
   _world.style.transform = translate; // Preserve the effect after animation has finished.
 
-  hideDistantRooms(); // Todo: test this works.
+  hideDistantRooms();
 
 }
 
