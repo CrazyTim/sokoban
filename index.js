@@ -427,6 +427,8 @@ async function movePlayer(props) {
     },
   ).finished;
 
+  _state.player.div.style.transform = translate; // Preserve the effect after animation has finished.
+
 }
 
 function openDoor(doorId, roomId) {
