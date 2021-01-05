@@ -70,3 +70,13 @@ export function makeSvg(viewbox, classes, html) {
 export async function delay(duration) {
   return new Promise(resolve => setTimeout(resolve, duration));
 }
+
+export function preloadImages(urls) {
+  urls.forEach(i => {
+    const l = document.createElement('link');
+    l.setAttribute('rel', 'preload');
+    l.setAttribute('href', i);
+    l.setAttribute('as', 'image');
+    document.head.appendChild(l);
+  });
+}
