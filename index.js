@@ -262,10 +262,6 @@ function makePlayer(id) {
 
   facePlayer(_state.player.face);
   updatePlayerState(_state.player.state);
-  movePlayer({
-    ..._state.player.pos,
-    duration: 0
-  });
 
 }
 
