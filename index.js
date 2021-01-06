@@ -1,5 +1,6 @@
 import data from './rooms.js';
 import * as util from './util.js';
+import playerState from './player-state.js';
 
 const _state = {
 
@@ -8,7 +9,7 @@ const _state = {
     div: null, // DOM node representing the player.
     face: 'se', // Facing direction (ne|nw|se|sw).
     pos: {x:0, y:0}, // Position (world coordinates).
-    state: 'idle',
+    state: null,
   },
 
   levels: [],
@@ -28,7 +29,7 @@ const _viewportSize = {width: 11, height: 11}
 const _squareSize = 60; // Pixels.
 const _pixelSize = _squareSize / 20;
 const _worldOffset = _squareSize * 1; // Number of squares to offset the world.
-const _moveDuration = .15;
+const _moveDuration = .2;
 const _winDuration = .8;
 const _roomTransitionDuration = 1;
 const _inputStackLength = 1; // number of keyboard presses to store on the stack.
@@ -256,12 +257,17 @@ function makePlayer(id) {
     [
       'player',
       'player-' + id,
-      'state-idle',
     ],
   );
 
+  // Add child div to hold the background image.
+  // We need another div because we apply separate transforms to the background-image.
+  const d = document.createElement('div');
+  _state.player.div.appendChild(d);
+
+  _state.player.state = new playerState(_state.player.div);
+
   facePlayer(_state.player.face);
-  updatePlayerState(_state.player.state);
 
 }
 
@@ -409,6 +415,7 @@ async function movePlayer(props) {
 
   _state.player.pos.x = props.x;
   _state.player.pos.y = props.y;
+  _state.player.state.move(true);
 
   // Animate:
   const translate = `translate(${props.x * _squareSize}px, ${props.y * _squareSize}px)`;
@@ -422,6 +429,8 @@ async function movePlayer(props) {
       fill: 'forwards',
     },
   ).finished;
+
+  _state.player.state.move(false);
 
   _state.player.div.style.transform = translate; // Preserve the effect after animation has finished.
 
@@ -455,27 +464,6 @@ function facePlayer(direction) {
   );
 
   div.classList.add('face-' + direction);
-
-}
-
-function updatePlayerState(playerState) {
-
-  _state.player.state = playerState;
-
-  const div = _state.player.div;
-
-  if (!div) return;
-
-  div.classList.remove(
-    'state-idle',
-    'state-push-up',
-    'state-push-down',
-    'state-push-left',
-    'state-push-right',
-    'state-win',
-  );
-
-  div.classList.add('state-' + playerState);
 
 }
 
@@ -625,7 +613,7 @@ async function onKeyDown(e) {
   }
 
   let move = true;
-  _state.player.state = 'idle';
+  _state.player.state.push(false);
 
   if ( x === 0 && y === 0) move = false; // Cancel if no movement.
 
@@ -662,7 +650,7 @@ async function onKeyDown(e) {
         player: {
           face: _state.player.face,
           pos: util.deepCopy(_state.player.pos),
-          state: _state.player.state,
+          state: _state.player.state.get(),
         },
         levels: levelsCopy,
       });
@@ -677,11 +665,9 @@ async function onKeyDown(e) {
       adj.x += x;
       adj.y += y;
       updateBox(adj);
-      updatePlayerState('push-' + dir);
+      _state.player.state.push(dir);
       moveAdjust = _pushFriction;
       moveEasing = 'linear';
-    } else {
-      updatePlayerState('idle');
     }
 
     _state.isPendingMove = true;
@@ -697,7 +683,7 @@ async function onKeyDown(e) {
 
     await movePlayerAnimation;
 
-    { // Change state from 'push' to 'idle' if the box can't be pushed any further.
+    { // Remove 'push' state if the box can't be pushed any further.
 
       const playerLocalPos = getLocalPos(_state.player.pos);
       let adj = getObject({
@@ -706,7 +692,7 @@ async function onKeyDown(e) {
       });
 
       if (adj.type !== 'box' || !canBePushed(adj, {x, y}) ) {
-        updatePlayerState('idle');
+        _state.player.state.push(false);
       }
 
     }
@@ -842,13 +828,13 @@ async function checkWin() {
   input(false);
   _state.history.length = 0; // Clear undo.
 
-  updatePlayerState('win');
+  _state.player.state.dance(true);
 
   // Wait for win animation to finish:
   await wait(_winDuration);
 
   input(true);
-  updatePlayerState('idle');
+  _state.player.state.dance(false);
   _state.level.hasWon = true;
   _state.level.div.classList.add('win');
   updateGui();
@@ -894,7 +880,7 @@ function undoState() {
 
   movePlayer(oldState.player.pos);
   facePlayer(oldState.player.face);
-  updatePlayerState(oldState.player.state);
+  _state.player.state.set(oldState.player.state);
 
   checkChangeRoom();
 

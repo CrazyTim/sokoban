@@ -2,57 +2,99 @@
   will-change: transform; /* Paint player in a separate render layer */
 }
 
-.player::before {
+.player > div {
   background-repeat: no-repeat;
+  background-position: 0 0;
   background-size: 100%;
-  background-position: center;
-  content:"";
-  width:100%;
-  height:100%;
-  position: absolute;
+  width: 100%;
+  height: 100%;
 }
 
-/* Player idle up */
-.player.face-se::before {
+/* Face up */
+.player.face-se > div {
   background-image: url(./img/player-down.svg);
 }
-.player.face-sw::before {
+.player.face-sw > div {
   background-image: url(./img/player-down.svg);
-  transform: scaleX(-1); /* Face left */
+  transform: scaleX(-1);
 }
 
-/* Player idle down */
-.player.face-ne::before {
+/* Face down */
+.player.face-ne > div {
   background-image: url(./img/player-up.svg);
 }
-.player.face-nw::before {
+.player.face-nw > div {
   background-image: url(./img/player-up.svg);
-  transform: scaleX(-1); /* Face left */
+  transform: scaleX(-1);
 }
 
-/* Player win */
-.player.state-win.face-ne::before,
-.player.state-win.face-se::before {
+/* Dancing */
+.player.state-dancing.face-ne > div,
+.player.state-dancing.face-se > div {
   background-image: url(./img/player-win.svg);
 }
-.player.state-win.face-nw::before,
-.player.state-win.face-sw::before {
+.player.state-dancing.face-nw > div,
+.player.state-dancing.face-sw > div {
   background-image: url(./img/player-win.svg);
-  transform: scaleX(-1); /* Face left */
+  transform: scaleX(-1);
 }
 
-/* Player push */
-.player.state-push-up::before {
+/* Pushing */
+.player.state-push-up > div {
   background-image: url(./img/player-push-up.svg);
 }
-.player.state-push-down::before {
+.player.state-push-down > div {
   background-image: url(./img/player-push-down.svg);
-  transform: scaleX(-1); /* Face left */
+  transform: scaleX(-1);
 }
-.player.state-push-right::before {
+.player.state-push-right > div {
   background-image: url(./img/player-push.svg);
 }
-.player.state-push-left::before {
+.player.state-push-left > div {
   background-image: url(./img/player-push.svg);
-  transform: scaleX(-1); /* Face left */
+  transform: scaleX(-1);
+}
+
+.player.state-moving.face-se > div,
+.player.state-moving.face-sw > div {
+  background-size: 200%;
+  background-image: url(./img/player-walk-down-sprite.svg);
+  animation-name: player-moving;
+  animation-duration: .2s;
+  animation-timing-function: steps(2);
+  animation-iteration-count: infinite;
+}
+
+@keyframes player-moving {
+  to {
+    background-position: -120px 0;
+  }
+}
+
+.player.state-moving.state-push-left > div,
+.player.state-moving.state-push-right > div {
+  background-size: 200%;
+  background-image: url(./img/player-push-sprite.svg);
+  animation-name: player-pushing;
+  animation-duration: .2s;
+  animation-timing-function: steps(2);
+  animation-iteration-count: infinite;
+}
+
+@keyframes player-pushing {
+  to {
+    background-position: -120px 0;
+  }
+}
+
+.player.state-moving.state-push-up > div {
+  background-size: 100%;
+  background-image: url(./img/player-push-up.svg);
+  animation-name: none;
+}
+
+.player.state-moving.state-push-down > div {
+  background-size: 100%;
+  background-image: url(./img/player-push-down.svg);
+  animation-name: none;
 }
