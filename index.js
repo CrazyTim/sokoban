@@ -417,6 +417,8 @@ async function movePlayer(props) {
   _state.player.pos.y = props.y;
   _state.player.state.move(true);
 
+  props.easing = 'steps(3)';
+
   // Animate:
   const translate = `translate(${props.x * _squareSize}px, ${props.y * _squareSize}px)`;
   await _state.player.div.animate(
