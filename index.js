@@ -138,12 +138,14 @@ function onLoad(props = {viewport: null}) {
 
   // Pre-load images to avoid flicker the first time they are used:
   util.preloadImages([
-    './img/player-down.svg',
     './img/player-up.svg',
+    './img/player-down.svg',
+    './img/player-walk-down-sprite.svg',
     './img/player-push.svg',
     './img/player-push-up.svg',
     './img/player-push-down.svg',
-    './img/player-win.svg',
+    './img/player-push-sprite.svg',
+    './img/player-dance.svg',
   ]);
 
   // Add styles for animations:
