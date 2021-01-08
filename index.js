@@ -384,6 +384,21 @@ function onWinEventFactory(roomId) {
       openDoor(1, 4);
     }
 
+  } else if (roomId === 5) {
+
+    return async () => {
+      facePlayer('se');
+      openDoor(0, 5);
+      openDoor(1, 2);
+    }
+
+  } else if (roomId === 6) {
+
+    return async () => {
+      facePlayer('se');
+      openDoor(0, 6);
+    }
+
   } else {
 
     return () => {

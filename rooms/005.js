@@ -23,6 +23,12 @@ export default {
   ],
 
   doors: [
+    {
+      pos: { x:8, y:2 },
+      style: 0,
+      horizontal: true,
+      state: 'closed',
+    },
   ],
 
 };

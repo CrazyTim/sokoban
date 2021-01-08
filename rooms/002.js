@@ -27,6 +27,12 @@ export default {
       horizontal: true,
       state: 'closed',
     },
+    {
+      pos: { x:2, y:5 },
+      style: 0,
+      horizontal: true,
+      state: 'closed',
+    },
   ],
 
 };
