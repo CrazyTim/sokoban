@@ -28,6 +28,24 @@
   transform: scaleX(-1);
 }
 
+/* Bored */
+.player.face-se.state-bored-0 > div,
+.player.face-sw.state-bored-0 > div {
+  background-image: url(./img/player-bored-0.svg);
+}
+.player.face-se.state-bored-1 > div,
+.player.face-sw.state-bored-1 > div {
+  background-image: url(./img/player-bored-1.svg);
+}
+.player.face-se.state-bored-2 > div,
+.player.face-sw.state-bored-2 > div {
+  background-image: url(./img/player-bored-2.svg);
+}
+.player.face-se.state-bored-3 > div,
+.player.face-sw.state-bored-3 > div {
+  background-image: url(./img/player-bored-3.svg);
+}
+
 /* Dancing */
 .player.state-dancing.face-ne > div,
 .player.state-dancing.face-se > div {

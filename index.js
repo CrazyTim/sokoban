@@ -146,6 +146,10 @@ function onLoad(props = {viewport: null}) {
     './img/player-push-down.svg',
     './img/player-push-sprite.svg',
     './img/player-dance.svg',
+    './img/player-bored-0.svg',
+    './img/player-bored-1.svg',
+    './img/player-bored-2.svg',
+    './img/player-bored-3.svg',
   ]);
 
   // Add styles for animations:

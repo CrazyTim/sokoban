@@ -29,12 +29,11 @@ export function downloadFile(content, type, fileName) {
 }
 
 /**
- * Get a random integer between `min` (inclusive) and `max` (exclusive).
+ * Get a random number between `min` (inclusive) and `max` (inclusive).
+ * Control the number of decimal places with `round`.
  */
-export function getRandomInt(min, max) {
-  min = Math.ceil(min);
-  max = Math.floor(max);
-  return Math.floor(Math.random() * (max - min)) + min;
+export function getRandom(min, max, round = 0) {
+  return parseFloat((Math.random() * (max - min) + min).toFixed(round));
 }
 
 /**
