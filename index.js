@@ -40,6 +40,7 @@ const _startRoomId = 0;
 let _world; // The DOM node that holds all the rooms stiched together.
 let _viewport; // The DOM node that holds the world. The world is moved inside the viewport as the player transitions from room-to-room.
 let _mode = null;
+let _viewportOverflow = false;
 const _lastRoomIds  = [];
 const _inputStack = [];
 let _tippy = null;
@@ -508,6 +509,14 @@ function setEventHandlers() {
   const btnMoveRoomRight = document.querySelector('.btn-move-room-right');
   btnMoveRoomRight.onclick = e => moveRoom({x:1, y:0});
 
+  const btnToggleOverflow = document.querySelector('.btn-overflow');
+  btnToggleOverflow.onclick = e => toggleOverflow();
+
+}
+
+function toggleOverflow() {
+  _viewportOverflow = _viewportOverflow ? false : true;
+  _viewport.style.overflow = _viewportOverflow ? 'visible' : 'hidden';
 }
 
 function moveRoom(offset) {
@@ -1190,7 +1199,14 @@ function updateDoor(door) {
  */
 function hideDistantRooms() {
 
-  _state.levels.forEach(r => {
+  for (var i = 0; i < _state.levels.length; i++) {
+
+    const r = _state.levels[i];
+
+    if (_viewportOverflow) {
+      r.div.style.display = '';
+      continue;
+    }
 
     const xOffset = Math.abs(r.pos.x - _state.level.pos.x);
     const yOffset = Math.abs(r.pos.y - _state.level.pos.y);
@@ -1207,7 +1223,7 @@ function hideDistantRooms() {
 
     }
 
-  });
+  };
 
 }
 
