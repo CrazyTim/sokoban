@@ -699,7 +699,9 @@ async function onKeyDown(e) {
 
     }
 
-    await checkWin()
+    if (await checkWin()) {
+      _state.player.state.push(false); // No need to push further if level has been won.
+    }
 
     _state.isPendingMove = false;
 
