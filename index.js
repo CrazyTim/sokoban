@@ -258,7 +258,7 @@ function onLoad(props = {viewport: null}) {
 
 function makePlayer(id) {
 
-  _state.player.div = makeSquare(
+  _state.player.div = makeDiv(
     _state.player.pos,
     _world,
     [
@@ -296,7 +296,7 @@ function makeEditGrid() {
       const i = convertPosToMapIndex({x,y})
 
       // Make cell:
-      const div = makeSquare(
+      const div = makeDiv(
         {x,y},
         editGrid,
         [
@@ -1007,7 +1007,7 @@ function makeRoom(room) {
         }
 
         // Make cell:
-        const div = makeSquare(
+        const div = makeDiv(
           {x,y},
           room.div,
           [
@@ -1023,7 +1023,7 @@ function makeRoom(room) {
     // Make boxes:
     room.boxes.forEach(b => {
 
-      makeSquare(
+      makeDiv(
         b,
         room.div,
         [
@@ -1049,7 +1049,7 @@ function makeRoom(room) {
 
 }
 
-function makeSquare(pos, div, classes) {
+function makeDiv(pos, div, classes) {
 
   const d = document.createElement('div');
   div.appendChild(d);
