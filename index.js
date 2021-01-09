@@ -318,7 +318,7 @@ function makeEditGrid() {
           });
 
         } else if (_mode) {
-          changeCellType(i, _mode);
+          changeCellType(i, _mode, _state.level);
         }
 
       }
@@ -926,6 +926,12 @@ function convertPosToMapIndex(pos) {
   return pos.x + (pos.y * _viewportSize.width);
 }
 
+function convertMapIndexToPos(id) {
+  return {
+    x: id % _viewportSize.width,
+    y: Math.floor(id / _viewportSize.height),
+  };
+}
 
 /**
  * Return the entity object that is located at `pos`
@@ -1006,6 +1012,8 @@ function makeRoom(room) {
           }
         }
 
+        if (e.id === entity.empty.id) continue;
+
         // Make cell:
         const div = makeDiv(
           {x,y},
@@ -1063,9 +1071,7 @@ function makeDiv(pos, div, classes) {
 
 }
 
-function changeCellType(id, entityKey) {
-
-  const div = document.querySelector('.level-' + _state.level.id + ' .cell-' + id);
+function changeCellType(id, entityKey, room) {
 
   // Get entity:
   let e;
@@ -1074,6 +1080,32 @@ function changeCellType(id, entityKey) {
       e = value;
       break;
     }
+  }
+
+  // Get cell:
+  let div = document.querySelector('.level-' + room.id + ' .cell-' + id);
+
+  // Delete cell if it has been changed to empty:
+  if (e.type === 'empty') {
+    if (div !== null) div.parentNode.removeChild(div);
+    return;
+  }
+
+  // Create cell if it doesn't exist:
+  if (div === null) {
+
+    const pos = convertMapIndexToPos(id);
+
+    div = makeDiv(
+      pos,
+      room.div,
+      [
+        'cell',
+        'cell-' + id,
+        'type-' + e.id,
+      ],
+    );
+
   }
 
   div.classList.remove(
@@ -1085,13 +1117,13 @@ function changeCellType(id, entityKey) {
 
   div.classList.add('type-' + e.id);
 
-  _state.level.map[id] = e.id;
+  room.map[id] = e.id;
 
 }
 
 function clearCell() {
   for (let i = 0; i < _state.level.map.length; i++) {
-    changeCellType(i, 'empty');
+    changeCellType(i, 'empty', _state.level);
   }
 }
 
