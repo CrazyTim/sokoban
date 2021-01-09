@@ -318,7 +318,7 @@ function makeEditGrid() {
           });
 
         } else if (_mode) {
-          changeCell(i, _mode);
+          changeCellType(i, _mode);
         }
 
       }
@@ -1063,9 +1063,7 @@ function makeDiv(pos, div, classes) {
 
 }
 
-function changeCell(id, entityKey) {
-
-  //console.log({id,entityKey});
+function changeCellType(id, entityKey) {
 
   const div = document.querySelector('.level-' + _state.level.id + ' .cell-' + id);
 
@@ -1093,7 +1091,7 @@ function changeCell(id, entityKey) {
 
 function clearCell() {
   for (let i = 0; i < _state.level.map.length; i++) {
-    changeCell(i, 'empty');
+    changeCellType(i, 'empty');
   }
 }
 
