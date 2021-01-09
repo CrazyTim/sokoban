@@ -1,5 +1,7 @@
 .player {
+  position: absolute;
   will-change: transform; /* Paint player in a separate render layer */
+  z-index: 999;
 }
 
 .player > div {

@@ -85,6 +85,7 @@ body {
   user-select: none;
   filter: brightness(1.1);
   transition: filter 0.8s;
+  z-index: 1;
 }
 
 .viewport.edit .edit-grid {
@@ -109,45 +110,42 @@ body {
   border-left: 0;
 }
 
-.player,
-.box,
-.label {
-  z-index: 1;
-}
-
 .box {
+  position: absolute;
   background-image: url(./img/box-2.svg);
+  z-index: 1;
 }
 
 .box.state-win{
   /* opacity: 0.7; */
 }
 
+.cell {
+  position: absolute;
+  background-repeat: no-repeat;
+  background-size: 100%;
+  background-position: center;
+}
+
 /* empty */
-.cell.type-0 {
+.room > .cell.type-0 {
   display: none;
 }
 
 /* wall */
-.cell.type-1 {
+.room > .cell.type-1 {
   background-image: url(./img/wall.svg);
 }
 
-/* ground  */
-.cell.type-2 {
+/* ground */
+.room > .cell.type-2 {
   background-image: url(./img/ground.svg);
 }
 
-
-.cell.type-3 { /* crystal  */
+/* storage */
+.room > .cell.type-3 {
   background-image: url(./img/storage.svg), url(./img/ground.svg);
   background-color: #ecd4b8;
-}
-
-.world div {
-  background-repeat: no-repeat;
-  background-size: 100%;
-  background-position: center;
 }
 
 .hidden {
@@ -155,7 +153,9 @@ body {
 }
 
 .room, .world {
+  position: absolute;
   transition: opacity 1s;
+  z-index: 0;
 }
 
 .tippy-box .tippy-content {

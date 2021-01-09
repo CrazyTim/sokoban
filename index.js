@@ -168,7 +168,6 @@ function onLoad(props = {viewport: null}) {
     .box,
     .player,
     .door {
-      position: absolute;
       width: ${_squareSize}px;
       height: ${_squareSize}px;
     }

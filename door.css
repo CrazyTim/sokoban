@@ -5,6 +5,11 @@ use background image on rect if possible
 
 */
 
+.door {
+  position: absolute;
+  z-index: 1;
+}
+
 /*
 --------------------------------
 STYLE 0 - Vertical
