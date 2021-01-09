@@ -125,6 +125,7 @@ body {
 
 /* empty */
 .cell.type-0 {
+  display: none;
 }
 
 /* wall */
