@@ -245,7 +245,6 @@ function onLoad(props = {viewport: null}) {
   setEventHandlers();
 
   changeRoom(_startRoomId, 0);
-  _state.level.div.classList.remove('hidden');
 
   _state.player.pos.x = _state.level.startPos.x;
   _state.player.pos.y = _state.level.startPos.y;
@@ -573,10 +572,7 @@ function changeRoom(roomId, animationDuration) {
   // Set the new room as the current room:
   _state.level = _state.levels[roomId];
 
-  // Make visible once the node has been added to DOM:
-  window.requestAnimationFrame(t => {
-    _state.level.div.classList.remove('hidden');
-  });
+  _state.level.div.classList.remove('hidden');
 
   // Center viewport on the room:
   moveViewPort(_state.level.pos, animationDuration, 'ease');
