@@ -553,9 +553,9 @@ function changeMode(m) {
 
   } else {
 
-    modeButtons.forEach(b => {
-      b.classList.remove('active');
-    });
+    for (const button of modeButtons) {
+      button.classList.remove('active');
+    }
 
     btn.classList.add('active');
     _viewport.classList.add('edit');
@@ -580,9 +580,9 @@ function changeRoom(roomId, animationDuration) {
     const thisButton = document.querySelector('.btn-room-' + roomId);
     const allButtons = document.querySelectorAll('.btn-room');
 
-    allButtons.forEach(b => {
-      b.classList.remove('active');
-    });
+    for (const button of allButtons) {
+      button.classList.remove('active');
+    }
 
     thisButton.classList.add('active');
   }
@@ -664,12 +664,12 @@ async function onKeyDown(e) {
 
       const levelsCopy = [];
 
-      _state.levels.forEach(l => {
+      for (const room of _state.levels) {
         levelsCopy.push({
-          id: l.id,
-          boxes: util.deepCopy(l.boxes),
+          id: room.id,
+          boxes: util.deepCopy(room.boxes),
         });
-      });
+      }
 
       _state.history.push({
         player: {
@@ -762,18 +762,14 @@ function checkChangeRoom() {
 
   // Remember the rooms the player was in for the next time:
   _lastRoomIds.length = 0;
-  currentRoomIds.forEach(id => {
-    _lastRoomIds.push(id);
-  })
+  _lastRoomIds.push(...currentRoomIds);
 
   // Find the first (top-most) room that is not the current room and transition into it.
-  for (let i = 0; i < currentRooms.length; i++) {
+  for (const room of currentRooms) {
 
-    const r = currentRooms[i];
+    if (room.id === _state.level.id) continue; // Ignore current room.
 
-    if (r.id === _state.level.id) continue; // Ignore current room.
-
-    changeRoom(r.id, _roomTransitionDuration);
+    changeRoom(room.id, _roomTransitionDuration);
 
     return;
 
@@ -791,7 +787,7 @@ function getRoomsAtGlobalPos(globalPos) {
 
   const currentRooms = [];
 
-  _state.levels.forEach(room => {
+  for (const room of _state.levels) {
 
     const pos = getLocalPos(globalPos, room.id)
 
@@ -808,7 +804,7 @@ function getRoomsAtGlobalPos(globalPos) {
 
     }
 
-  });
+  }
 
   return currentRooms;
 
@@ -846,8 +842,8 @@ async function checkWin() {
 
   if (_state.level.hasWon) return;
 
-  for (let i = 0; i < _state.level.boxes.length; i++) {
-    if(!isBoxOnCrystal(_state.level.boxes[i])) return;
+  for (const box of _state.level.boxes) {
+    if(!isBoxOnCrystal(box)) return;
   }
 
   // Room has been won...
@@ -900,9 +896,9 @@ function undoState() {
   const oldState = _state.history.pop();
 
   // Restore boxes:
-  oldState.levels.forEach(l => {
-    _state.levels[l.id].boxes = l.boxes;
-  });
+  for (const room of oldState.levels) {
+    _state.levels[room.id].boxes = room.boxes;
+  }
   updateBoxes();
 
   movePlayer(oldState.player.pos);
@@ -929,8 +925,7 @@ function convertPosToMapIndex(pos) {
 function getObject(pos) {
 
   // Check box:
-  for (let i = 0; i < _state.level.boxes.length; i++) {
-    const box = _state.level.boxes[i];
+  for (const box of _state.level.boxes) {
     if(box.x === pos.x &&
        box.y === pos.y) {
       return box;
@@ -939,11 +934,8 @@ function getObject(pos) {
 
   { // Check doors at this position in each room:
     const globalPos = getGlobalPos(pos);
-    const currentRooms = getRoomsAtGlobalPos(globalPos);
-    for (let j = 0; j < currentRooms.length; j++) {
-      const room = currentRooms[j];
-      for (let i = 0; i < room.doors.length; i++) {
-        const door = room.doors[i];
+    for (const room of getRoomsAtGlobalPos(globalPos)) {
+      for (const door of room.doors) {
         const doorGlobalPos = getGlobalPos(door.pos, room.id);
         if(doorGlobalPos.x === globalPos.x &&
            doorGlobalPos.y === globalPos.y) {
@@ -1016,29 +1008,29 @@ function makeRoom(room) {
     }
 
     // Make boxes:
-    room.boxes.forEach(b => {
+    for (const box of room.boxes) {
 
       makeDiv(
-        b,
+        box,
         room.div,
         [
           'box',
-          'box-' + b.id,
+          'box-' + box.id,
           'state-init',
         ],
       );
 
-    });
+    }
 
     // Make labels:
-    room.labels.forEach(i => {
-      makeLabel(i, room.div);
-    });
+    for (const label of room.labels) {
+      makeLabel(label, room.div);
+    }
 
     // Make doors:
-    room.doors.forEach(i => {
-      makeDoor(i, room.div);
-    });
+    for (const door of room.doors) {
+      makeDoor(door, room.div);
+    }
 
   }
 
@@ -1050,9 +1042,8 @@ function makeDiv(pos, div, classes) {
   div.appendChild(d);
 
   d.style.transform = `translate(${pos.x * _squareSize}px, ${pos.y * _squareSize}px)`
-  classes.forEach(c => {
-    d.classList.add(c);
-  });
+
+  d.classList.add(...classes);
 
   return d;
 
@@ -1091,9 +1082,9 @@ function clearCell() {
 }
 
 function updateBoxes() {
-  _state.level.boxes.forEach(b => {
-    updateBox(b);
-  });
+  for (const box of _state.level.boxes) {
+    updateBox(box);
+  }
 }
 
 function updateGui() {
@@ -1129,12 +1120,12 @@ function makeLabel(label, div) {
   );
 
   // Add individual characters
-  label.text.split('').forEach(i => {
+  for (const char of label.text) {
     const span = document.createElement('span');
-    span.classList.add('char-' + i);
-    span.textContent = i;
+    span.classList.add('char-' + char);
+    span.textContent = char;
     d.appendChild(span);
-  });
+  }
 
 }
 
@@ -1207,31 +1198,29 @@ function updateDoor(door) {
  */
 function hideDistantRooms() {
 
-  for (var i = 0; i < _state.levels.length; i++) {
-
-    const r = _state.levels[i];
+  for (const room of _state.levels) {
 
     if (_viewportOverflow) {
-      r.div.style.display = '';
+      room.div.style.display = '';
       continue;
     }
 
-    const xOffset = Math.abs(r.pos.x - _state.level.pos.x);
-    const yOffset = Math.abs(r.pos.y - _state.level.pos.y);
+    const xOffset = Math.abs(room.pos.x - _state.level.pos.x);
+    const yOffset = Math.abs(room.pos.y - _state.level.pos.y);
 
     if (xOffset > (_viewportSize.width + 2) ||
         yOffset > (_viewportSize.height + 2)) {
 
       // This room is definitely outside the viewport
-      r.div.style.display = 'none';
+      room.div.style.display = 'none';
 
     } else {
 
-      r.div.style.display = '';
+      room.div.style.display = '';
 
     }
 
-  };
+  }
 
 }
 
