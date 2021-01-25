@@ -1,0 +1,17 @@
+{
+  "name": "sokoban",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "reload -b"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CrazyTim/sokoban.git"
+  },
+  "author": "CrazyTim",
+  "license": "MIT",
+  "homepage": "https://github.com/CrazyTim/sokoban#readme",
+  "devDependencies": {
+    "reload": "^3.1.1"
+  }
+}
