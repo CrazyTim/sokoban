@@ -134,7 +134,13 @@ function roomFactory(roomId) {
 
 }
 
-function onLoad(props = {viewport: null}) {
+function initalise(props = {viewport: null}) {
+    _viewport = props.viewport;
+    window.onkeydown = game.onKeyDown;
+    window.onload = onLoad();
+}
+
+function onLoad() {
 
   // Pre-load images to avoid flicker the first time they are used:
   util.preloadImages([
@@ -188,8 +194,6 @@ function onLoad(props = {viewport: null}) {
   `;
   document.head.appendChild(style);
 
-  // Make viewport:
-  _viewport = props.viewport;
   _viewport.style.width = (_worldOffset * 2) + (_viewportSize.width * _squareSize) + 'px';
   _viewport.style.height = (_worldOffset * 2) + (_viewportSize.height * _squareSize) + 'px';
 
@@ -200,11 +204,6 @@ function onLoad(props = {viewport: null}) {
     'hidden',
   )
   _viewport.appendChild(_world);
-
-  // Make visible once the node has been added to DOM:
-  window.requestAnimationFrame(t => {
-    _world.classList.remove('hidden');
-  });
 
   makeEditGrid();
 
@@ -250,6 +249,10 @@ function onLoad(props = {viewport: null}) {
   makePlayer(_state.player.id);
 
   input(true);
+
+  window.requestAnimationFrame(t => {
+    _world.classList.remove('hidden'); // Begin fade-in animation once node has been added to DOM.
+  });
 
 }
 
@@ -1228,6 +1231,7 @@ async function wait(seconds) {
 
 // Expose public methods:
 export default {
+  initalise,
   _lastRoomIds,
   _state,
   moveViewPort,

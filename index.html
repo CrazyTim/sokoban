@@ -5,13 +5,11 @@
   <meta http-equiv="content-type" content="text/html; charset=UTF-8">
 
   <script type="module">
-    import Game from './index.js';
+    import game from './index.js';
 
-    window.game = Game;
+    window.game = game;
 
-    window.onkeydown = game.onKeyDown;
-
-    window.onload = () => game.onLoad({
+    game.initalise({
       viewport: document.querySelector('.viewport'),
     });
 
