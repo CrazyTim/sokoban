@@ -97,10 +97,10 @@ function roomFactory(roomId) {
 
   room.id = roomId;
 
-  // Give id to each box:
-  for (let j = 0; j < room.boxes.length; j++) {
-    room.boxes[j].id = j;
-    room.boxes[j].type = 'box';
+  // Initalise boxes:
+  for (const [i, box] of room.boxes.entries()) {
+    box.id = i;
+    box.type = 'box';
   }
 
   // Compose text for first label:
@@ -111,21 +111,20 @@ function roomFactory(roomId) {
   // Set onWin event:
   room.onWin = onWinEventFactory(roomId);
 
-  // Create doors if it doesn't exist
+  // Create doors array if it doesn't exist:
   if (!room.doors) room.doors = [];
 
-  // Give id to each door:
-  for (let j = 0; j < room.doors.length; j++) {
+  // Initalise doors:
+  for (const [i, door] of room.doors.entries()) {
 
-    const door = room.doors[j];
-    door.id = j;
+    door.id = i;
     door.type = 'door';
 
     if (door.state === undefined) door.state = 'open'; // Default value if not specified.
 
     if (door.allowPushThrough === undefined) door.allowPushThrough = false; // Default value if not specified.
 
-    // Ensure ground is always under a door (for convenience when joining rooms together):
+    // Ensure the cell under the door is ground (for convenience when designing rooms and joining them together):
     const cellIndex = convertPosToMapIndex(door.pos)
     room.map[cellIndex] = entity.ground.id;
 
