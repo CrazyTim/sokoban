@@ -743,8 +743,6 @@ async function onKeyDown(e) {
 
   }
 
-  updateGui();
-
 }
 
 /**
@@ -860,7 +858,6 @@ async function checkWin() {
   _state.player.state.dance(false);
   _state.level.hasWon = true;
   _state.level.div.classList.add('win');
-  updateGui();
   _inputStack.length = 0; // Truncate input stack.
 
   _state.level.onWin();
@@ -906,8 +903,6 @@ function undoState() {
   _state.player.state.set(oldState.player.state);
 
   checkChangeRoom();
-
-  updateGui();
 
 }
 
@@ -1085,10 +1080,6 @@ function updateBoxes() {
   for (const box of _state.level.boxes) {
     updateBox(box);
   }
-}
-
-function updateGui() {
-  // ...
 }
 
 function updateBox(b) {
