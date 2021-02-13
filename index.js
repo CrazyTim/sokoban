@@ -493,7 +493,7 @@ function setEventHandlers() {
   btnExport.onclick = e => util.downloadFile(JSON.stringify(_state.level), 'application/json', 'room-' + _state.level.id);
 
   const btnModeClear = document.querySelector('.btn-clear');
-  btnModeClear.onclick = e => clearCell();
+  btnModeClear.onclick = e => clearCells();
 
   const btnModeEmpty = document.querySelector('.btn-mode-empty');
   btnModeEmpty.onclick = e => changeMode('empty');
@@ -1075,7 +1075,7 @@ function changeCellType(id, entityKey) {
 
 }
 
-function clearCell() {
+function clearCells() {
   for (let i = 0; i < _state.level.map.length; i++) {
     changeCellType(i, 'empty');
   }
