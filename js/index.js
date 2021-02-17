@@ -207,37 +207,7 @@ function onLoad() {
 
   makeEditGrid();
 
-  // Make each room:
-  for (let i = 0; i < data.length; i++) {
-
-    const r = roomFactory(i);
-    _state.levels.push(r);
-    makeRoom(r);
-
-    // Make button to edit room:
-    let btn = document.createElement('button');
-    btn.classList.add(
-      'btn',
-      'btn-room',
-      'btn-room-' + i,
-    );
-    btn.textContent = 'level ' + util.pad(i,2);
-    btn.onclick = async e => {
-
-      changeRoom(i);
-
-      // Move player to room:
-      const room = _state.levels[i];
-      movePlayer({
-        x: room.startPos.x + room.pos.x,
-        y: room.startPos.y + room.pos.y,
-        duration: _roomTransitionDuration,
-      });
-
-    }
-    document.querySelector('.buttons').appendChild(btn);
-
-  }
+  makeRooms();
 
   setEventHandlers();
 
@@ -955,9 +925,13 @@ function getObject(pos) {
 
 }
 
-function makeRoom(room) {
+function makeRooms() {
 
-  if (!room.div) {
+  for (let i = 0; i < data.length; i++) {
+
+    const room = roomFactory(i);
+
+    _state.levels.push(room);
 
     // Create div to hold room contents:
     room.div = document.createElement('div');
@@ -977,9 +951,9 @@ function makeRoom(room) {
     for (let y = 0; y < _viewportSize.height; y++) {
       for (let x = 0; x < _viewportSize.width; x++) {
 
-        const i = convertPosToMapIndex({x,y})
+        const index = convertPosToMapIndex({x,y})
 
-        let cell = room.map[i];
+        let cell = room.map[index];
 
         // Get entity type:
         let e;
@@ -996,7 +970,7 @@ function makeRoom(room) {
           room.div,
           [
             'cell',
-            'cell-' + i,
+            'cell-' + index,
             'type-' + e.id,
           ],
         );
@@ -1028,6 +1002,8 @@ function makeRoom(room) {
     for (const door of room.doors) {
       makeDoor(door, room.div);
     }
+
+    makeRoomButton(room);
 
   }
 
@@ -1223,6 +1199,38 @@ function input(canInput = null) {
     _state.canInput = canInput;
   }
   return _state.canInput;
+}
+
+function makeRoomButton(room) {
+
+  let btn = document.createElement('button');
+
+  btn.classList.add(
+    'btn',
+    'btn-room',
+    'btn-room-' + room.id,
+  );
+
+  btn.textContent = 'level ' + util.pad(room.id,2);
+
+  const roomId = room.id;
+
+  btn.onclick = () => {
+
+    const room = _state.levels[roomId];
+
+    changeRoom(room.id);
+
+    movePlayer({
+      x: room.startPos.x + room.pos.x,
+      y: room.startPos.y + room.pos.y,
+      duration: _roomTransitionDuration,
+    });
+
+  }
+
+  document.querySelector('.buttons').appendChild(btn);
+
 }
 
 async function wait(seconds) {
