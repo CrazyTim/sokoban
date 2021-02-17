@@ -1,0 +1,49 @@
+.label span {
+  background-repeat: no-repeat;
+  background-position: 0 0;
+  background-size: contain;
+}
+
+.room.win .label {
+  filter: brightness(1.3) opacity(0.7);
+}
+
+.label .char-0 {
+  background-image: url('../img/font/0.svg');
+}
+
+.label .char-1 {
+  background-image: url('../img/font/1.svg');
+}
+
+.label .char-2 {
+  background-image: url('../img/font/2.svg');
+}
+
+.label .char-3 {
+  background-image: url('../img/font/3.svg');
+}
+
+.label .char-4 {
+  background-image: url('../img/font/4.svg');
+}
+
+.label .char-5 {
+  background-image: url('../img/font/5.svg');
+}
+
+.label .char-6 {
+  background-image: url('../img/font/6.svg');
+}
+
+.label .char-7 {
+  background-image: url('../img/font/7.svg');
+}
+
+.label .char-8 {
+  background-image: url('../img/font/8.svg');
+}
+
+.label .char-9 {
+  background-image: url('../img/font/9.svg');
+}

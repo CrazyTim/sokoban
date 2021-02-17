@@ -112,7 +112,7 @@ body {
 
 .box {
   position: absolute;
-  background-image: url(./img/box-2.svg);
+  background-image: url('../img/box-2.svg');
   z-index: 1;
 }
 
@@ -134,17 +134,17 @@ body {
 
 /* wall */
 .room > .cell.type-1 {
-  background-image: url(./img/wall.svg);
+  background-image: url('../img/wall.svg');
 }
 
 /* ground */
 .room > .cell.type-2 {
-  background-image: url(./img/ground.svg);
+  background-image: url('../img/ground.svg');
 }
 
 /* storage */
 .room > .cell.type-3 {
-  background-image: url(./img/storage.svg), url(./img/ground.svg);
+  background-image: url('../img/storage.svg'), url('../img/ground.svg');
   background-color: #ecd4b8;
 }
 
