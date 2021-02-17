@@ -39,7 +39,7 @@ const _pushFriction = 1.3;
 const _startRoomId = 0;
 let _world; // The DOM node that holds all the rooms stiched together.
 let _viewport; // The DOM node that holds the world. The world is moved inside the viewport as the player transitions from room-to-room.
-let _mode = null;
+let _editMode = null;
 let _viewportOverflow = false;
 const _lastRoomIds  = [];
 const _inputStack = [];
@@ -279,16 +279,16 @@ function makeEditGrid() {
 
         e.stopPropagation();
 
-        if(!_mode) return;
+        if(!_editMode) return;
 
-        if (_mode === 'player') {
+        if (_editMode === 'player') {
           movePlayer({
             x: x + _state.level.pos.x,
             y: y + _state.level.pos.y,
           });
 
-        } else if (_mode) {
-          changeCellType(i, _mode);
+        } else if (_editMode) {
+          changeCellType(i, _editMode);
         }
 
       }
@@ -468,19 +468,19 @@ function setEventHandlers() {
   btnModeClear.onclick = e => clearCells();
 
   const btnModeEmpty = document.querySelector('.btn-mode-empty');
-  btnModeEmpty.onclick = e => changeMode('empty');
+  btnModeEmpty.onclick = e => toggleEditMode('empty');
 
   const btnModeWall = document.querySelector('.btn-mode-wall');
-  btnModeWall.onclick = e => changeMode('wall');
+  btnModeWall.onclick = e => toggleEditMode('wall');
 
   const btnModeGround = document.querySelector('.btn-mode-ground');
-  btnModeGround.onclick = e => changeMode('ground');
+  btnModeGround.onclick = e => toggleEditMode('ground');
 
   const btnModeCrystal = document.querySelector('.btn-mode-crystal');
-  btnModeCrystal.onclick = e => changeMode('crystal');
+  btnModeCrystal.onclick = e => toggleEditMode('crystal');
 
   const btnModePlayer = document.querySelector('.btn-mode-player');
-  btnModePlayer.onclick = e => changeMode('player');
+  btnModePlayer.onclick = e => toggleEditMode('player');
 
   const btnMoveRoomUp = document.querySelector('.btn-move-room-up');
   btnMoveRoomUp.onclick = e => moveRoom({x:0, y:-1});
@@ -511,16 +511,16 @@ function moveRoom(offset) {
   room.div.style.transform = `translate(${room.pos.x * _squareSize}px, ${room.pos.y * _squareSize}px)`
 }
 
-function changeMode(m) {
+function toggleEditMode(mode) {
 
-  const btn = document.querySelector('.btn-mode-' + m); // Button that was clicked on
+  const btn = document.querySelector('.btn-mode-' + mode); // Button that was clicked on
   const modeButtons = document.querySelectorAll('.btn-mode');
 
   if (btn.classList.contains('active')) {
 
     btn.classList.remove('active');
     _viewport.classList.remove('edit');
-    _mode = null;
+    _editMode = null;
     _tippy.disable();
 
   } else {
@@ -531,7 +531,7 @@ function changeMode(m) {
 
     btn.classList.add('active');
     _viewport.classList.add('edit');
-    _mode = m;
+    _editMode = mode;
     _tippy.enable();
 
   }
@@ -1003,7 +1003,7 @@ function makeRooms() {
       makeDoor(door, room.div);
     }
 
-    makeRoomButton(room);
+    makeGotoRoomButton(room);
 
   }
 
@@ -1201,7 +1201,7 @@ function input(canInput = null) {
   return _state.canInput;
 }
 
-function makeRoomButton(room) {
+function makeGotoRoomButton(room) {
 
   let btn = document.createElement('button');
 
