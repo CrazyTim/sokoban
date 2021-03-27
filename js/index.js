@@ -134,10 +134,27 @@ function roomFactory(roomId) {
 
 }
 
-function initalise(props = {viewport: null}) {
-    _viewport = props.viewport;
-    window.onkeydown = game.onKeyDown;
-    window.onload = onLoad();
+function init() {
+
+  _viewport = document.querySelector('.viewport');
+
+  window.onkeydown = onKeyDown;
+  window.onload = onLoad;
+
+  // Expose public methods:
+  window.game = {
+    _lastRoomIds,
+    _state,
+    moveViewPort,
+    getRoomsAtGlobalPos,
+    onLoad,
+    onKeyDown,
+    openDoor,
+    getLocalPos,
+    getGlobalPos,
+    hideDistantRooms,
+  }
+
 }
 
 function onLoad() {
@@ -1237,17 +1254,4 @@ async function wait(seconds) {
   await util.delay(seconds * 1000);
 }
 
-// Expose public methods:
-export default {
-  initalise,
-  _lastRoomIds,
-  _state,
-  moveViewPort,
-  getRoomsAtGlobalPos,
-  onLoad,
-  onKeyDown,
-  openDoor,
-  getLocalPos,
-  getGlobalPos,
-  hideDistantRooms,
-}
+init();
