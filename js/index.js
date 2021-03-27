@@ -68,72 +68,6 @@ const entity = { // These entity types are stateless in the world and do not cha
 
 }
 
-function getLocalPos(globalPos, roomId) {
-
-  if (roomId === undefined) roomId = _state.level.id;
-
-  return {
-    x: globalPos.x - _state.levels[roomId].pos.x,
-    y: globalPos.y - _state.levels[roomId].pos.y,
-  };
-
-}
-
-function getGlobalPos(pos, roomId) {
-
-  if (roomId === undefined) roomId = _state.level.id;
-
-  return {
-    x: pos.x + _state.levels[roomId].pos.x,
-    y: pos.y + _state.levels[roomId].pos.y,
-  };
-
-}
-
-// Clone a room and set default values.
-function roomFactory(roomId) {
-
-  const room = util.deepCopy(data[roomId]);
-
-  room.id = roomId;
-
-  // Initalise boxes:
-  for (const [i, box] of room.boxes.entries()) {
-    box.id = i;
-    box.type = 'box';
-  }
-
-  // Compose text for first label:
-  if (room.labels.length) {
-    room.labels[0].text = util.pad(roomId + 1, 2);
-  }
-
-  // Set onWin event:
-  room.onWin = onWinEventFactory(roomId);
-
-  // Create doors array if it doesn't exist:
-  if (!room.doors) room.doors = [];
-
-  // Initalise doors:
-  for (const [i, door] of room.doors.entries()) {
-
-    door.id = i;
-    door.type = 'door';
-
-    if (door.state === undefined) door.state = 'open'; // Default value if not specified.
-
-    if (door.allowPushThrough === undefined) door.allowPushThrough = false; // Default value if not specified.
-
-    // Ensure the cell under the door is ground (for convenience when designing rooms and joining them together):
-    const cellIndex = convertPosToMapIndex(door.pos)
-    room.map[cellIndex] = entity.ground.id;
-
-  }
-
-  return room;
-
-}
-
 function init() {
 
   _viewport = document.querySelector('.viewport');
@@ -240,6 +174,72 @@ function onLoad() {
   window.requestAnimationFrame(t => {
     _world.classList.remove('hidden'); // Begin fade-in animation once node has been added to DOM.
   });
+
+}
+
+function getLocalPos(globalPos, roomId) {
+
+  if (roomId === undefined) roomId = _state.level.id;
+
+  return {
+    x: globalPos.x - _state.levels[roomId].pos.x,
+    y: globalPos.y - _state.levels[roomId].pos.y,
+  };
+
+}
+
+function getGlobalPos(pos, roomId) {
+
+  if (roomId === undefined) roomId = _state.level.id;
+
+  return {
+    x: pos.x + _state.levels[roomId].pos.x,
+    y: pos.y + _state.levels[roomId].pos.y,
+  };
+
+}
+
+// Clone a room and set default values.
+function roomFactory(roomId) {
+
+  const room = util.deepCopy(data[roomId]);
+
+  room.id = roomId;
+
+  // Initalise boxes:
+  for (const [i, box] of room.boxes.entries()) {
+    box.id = i;
+    box.type = 'box';
+  }
+
+  // Compose text for first label:
+  if (room.labels.length) {
+    room.labels[0].text = util.pad(roomId + 1, 2);
+  }
+
+  // Set onWin event:
+  room.onWin = onWinEventFactory(roomId);
+
+  // Create doors array if it doesn't exist:
+  if (!room.doors) room.doors = [];
+
+  // Initalise doors:
+  for (const [i, door] of room.doors.entries()) {
+
+    door.id = i;
+    door.type = 'door';
+
+    if (door.state === undefined) door.state = 'open'; // Default value if not specified.
+
+    if (door.allowPushThrough === undefined) door.allowPushThrough = false; // Default value if not specified.
+
+    // Ensure the cell under the door is ground (for convenience when designing rooms and joining them together):
+    const cellIndex = convertPosToMapIndex(door.pos)
+    room.map[cellIndex] = entity.ground.id;
+
+  }
+
+  return room;
 
 }
 
