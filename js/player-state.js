@@ -9,7 +9,7 @@ const _boredCheckDuration = .3;
 let _boredDelay = 1500;
 let _lastBoredType = -1;
 
-export default class playerState {
+export class PlayerState {
 
   constructor(div) {
 

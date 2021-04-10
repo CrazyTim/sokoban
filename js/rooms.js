@@ -9,7 +9,7 @@ import r007 from './rooms/007.js';
 import r008 from './rooms/008.js';
 import r009 from './rooms/009.js';
 
-export default [
+export const rooms = [
   r000,
   r001,
   r002,

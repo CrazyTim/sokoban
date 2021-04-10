@@ -1,6 +1,6 @@
-import data from './rooms.js';
+import {rooms as data} from './rooms.js';
 import * as util from './util.js';
-import playerState from './player-state.js';
+import {PlayerState} from './player-state.js';
 
 const _state = {
 
@@ -259,7 +259,7 @@ function makePlayer(id) {
   const d = document.createElement('div');
   _state.player.div.appendChild(d);
 
-  _state.player.state = new playerState(_state.player.div);
+  _state.player.state = new PlayerState(_state.player.div);
 
   facePlayer(_state.player.face);
 
