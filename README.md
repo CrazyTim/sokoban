@@ -2,15 +2,15 @@
 
 ## Motivation
 
-My kids found a Sokoban variant on their digital cameras. Annoyingly the game would reset when the device turned off after inactivity, so it was a fun challenge to finish it. Finally we reached the last level and it just gliched and restarted back at the beginning! Not the best ending, so I thought it would be fun to put my own spin on Sokoban and involve the kids in the process.
+My kids found a Sokoban variant on their digital cameras. We were determined to finish it, and even more when we discovered that the game would restart if the device went to sleep due to inactivity. Finally we reached the last level, but it just gliched and restarted back at the beginning! Not the best ending, so I thought it would be fun to make my own Sokoban game and involve the kids in the process.
 
-## Getting started
+## Getting Started
 
-Clone the repo, install node, then run:
+Host the files on a web server, or if you have Node.js run:
 
 ```sh
 npm init
-npm run start
+npm start
 ```
 
 ## Notes
