@@ -1,4 +1,4 @@
-import {rooms as data} from './rooms.js';
+import {rooms} from './rooms.js';
 import * as util from './util.js';
 import {PlayerState} from './player-state.js';
 
@@ -202,7 +202,7 @@ function getGlobalPos(pos, roomId) {
 // Clone a room and set default values.
 function roomFactory(roomId) {
 
-  const room = util.deepCopy(data[roomId]);
+  const room = util.deepCopy(rooms[roomId]);
 
   room.id = roomId;
 
@@ -944,7 +944,7 @@ function getObject(pos) {
 
 function makeRooms() {
 
-  for (let i = 0; i < data.length; i++) {
+  for (let i = 0; i < rooms.length; i++) {
 
     const room = roomFactory(i);
 
