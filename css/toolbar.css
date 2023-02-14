@@ -1,0 +1,41 @@
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  background-color: white;
+  grid-column-start: 1;
+  grid-column-end: 3;
+  padding: 0 10px 10px 0;
+  z-index: 1;
+}
+
+.toggle-btn-group {
+  padding: 10px 0 0 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.toggle-btn-group:first-child {
+  border-left: 0;
+}
+
+.btn.active {
+  border: solid 2px #5a5a5a;
+  border-radius: 3px;
+  background-color: #bfbfbf;
+}
+
+.btn-mode.active:focus-visible {
+  border-width: 3px;
+}
+
+.buttons {
+  display: flex;
+  gap: 10px;
+  flex-direction: column;
+  padding: 10px;
+  background-color: white;
+  overflow-y: scroll;
+  grid-column-start: 2;
+  z-index: 1;
+}

@@ -8,10 +8,9 @@
   <title>Sokoban</title>
 
   <link rel="icon" href="data:image/x-icon;," type="image/x-icon">
+  <link rel="stylesheet" href="https://unpkg.com/microtip/microtip.css"></link>
   <link rel="stylesheet" href="css/index.css"></link>
 
-  <script src="https://unpkg.com/@popperjs/core@2"></script>
-  <script src="https://unpkg.com/tippy.js@6"></script>
   <script src="js/index.js" type="module"></script>
 
 </head>
@@ -31,10 +30,10 @@
 
     <div class="toggle-btn-group">
       <label>Room:</label>
-      <button class="btn btn-move-room-up">▲</button>
-      <button class="btn btn-move-room-down">▼</button>
-      <button class="btn btn-move-room-left">◄</button>
-      <button class="btn btn-move-room-right">►</button>
+      <button class="btn btn-move-room-up" aria-label="Move Up" data-microtip-position="bottom" role="tooltip">▲</button>
+      <button class="btn btn-move-room-down" aria-label="Move Down" data-microtip-position="bottom" role="tooltip">▼</button>
+      <button class="btn btn-move-room-left" aria-label="Move Left" data-microtip-position="bottom" role="tooltip">◄</button>
+      <button class="btn btn-move-room-right" aria-label="Move Right" data-microtip-position="bottom" role="tooltip">►</button>
       <button class="btn btn-clear">Clear</button>
       <button class="btn btn-export">Export</button>
     </div>

@@ -43,7 +43,6 @@ let _editMode = null;
 let _viewportOverflow = false;
 const _lastRoomIds  = [];
 const _inputStack = [];
-let _tippy = null;
 const entity = { // These entity types are stateless in the world and do not change.
 
   empty: {
@@ -310,19 +309,11 @@ function makeEditGrid() {
 
       }
 
-      div.dataset.tippyContent = `${x},${y}`;
-
+      div.setAttribute('aria-label', `${x},${y}`);
+      div.setAttribute('role', 'tooltip');
+      div.dataset.microtipPosition = 'bottom';
     }
   }
-
-  _tippy = tippy.createSingleton(tippy('[data-tippy-content]'), {
-    placement: 'bottom',
-    arrow: false,
-    hideOnClick: false,
-    offset: [0, -2],
-  });
-
-  _tippy.disable();
 
 }
 
@@ -538,7 +529,6 @@ function toggleEditMode(mode) {
     btn.classList.remove('active');
     _viewport.classList.remove('edit');
     _editMode = null;
-    _tippy.disable();
 
   } else {
 
@@ -549,7 +539,6 @@ function toggleEditMode(mode) {
     btn.classList.add('active');
     _viewport.classList.add('edit');
     _editMode = mode;
-    _tippy.enable();
 
   }
 
