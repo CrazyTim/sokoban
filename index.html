@@ -9,9 +9,8 @@
 
   <link rel="icon" href="data:image/x-icon;," type="image/x-icon">
   <link rel="stylesheet" href="css/index.css"></link>
+  <link rel="stylesheet" href="https://unpkg.com/microtip/microtip.css"></link>
 
-  <script src="https://unpkg.com/@popperjs/core@2"></script>
-  <script src="https://unpkg.com/tippy.js@6"></script>
   <script src="js/index.js" type="module"></script>
 
 </head>
@@ -31,10 +30,10 @@
 
     <div class="toggle-btn-group">
       <label>Room:</label>
-      <button class="btn btn-move-room-up">▲</button>
-      <button class="btn btn-move-room-down">▼</button>
-      <button class="btn btn-move-room-left">◄</button>
-      <button class="btn btn-move-room-right">►</button>
+      <button class="btn btn-move-room-up" data-tooltip="Up">▲</button>
+      <button class="btn btn-move-room-down" data-tooltip="Down">▼</button>
+      <button class="btn btn-move-room-left" data-tooltip="Left">◄</button>
+      <button class="btn btn-move-room-right" data-tooltip="Right">►</button>
       <button class="btn btn-clear">Clear</button>
       <button class="btn btn-export">Export</button>
     </div>

@@ -1,6 +1,7 @@
 import {rooms} from './rooms.js';
 import * as util from './util.js';
 import {PlayerState} from './player-state.js';
+import * as popper from 'https://unpkg.com/@popperjs/core@2.11.6/dist/esm/popper-lite.js'
 
 const _state = {
 
@@ -43,7 +44,7 @@ let _editMode = null;
 let _viewportOverflow = false;
 const _lastRoomIds  = [];
 const _inputStack = [];
-let _tippy = null;
+let _tooltips = null;
 const entity = { // These entity types are stateless in the world and do not change.
 
   empty: {
@@ -310,19 +311,77 @@ function makeEditGrid() {
 
       }
 
-      div.dataset.tippyContent = `${x},${y}`;
+      div.dataset.tooltip = `${x},${y}`;
 
     }
   }
 
-  _tippy = tippy.createSingleton(tippy('[data-tippy-content]'), {
-    placement: 'bottom',
-    arrow: false,
-    hideOnClick: false,
-    offset: [0, -2],
-  });
+  _tooltips = createToolTips('.btn');
 
-  _tippy.disable();
+  _tooltips.disable();
+
+}
+
+function createToolTips(selector = '') {
+
+  let tooltips = [];
+
+  function initalise(selector = '') {
+
+    tooltips.forEach(instance => {
+      instance.destroy();
+    });
+
+    tooltips = []; // clear
+
+    const elements = document.querySelectorAll(selector);
+    elements.forEach(element => {
+
+      const tip = document.createElement('div');
+      tip.textContent = element.dataset.tooltip;
+      element.after(tip);
+      const p = popper.createPopper(element, tip, {
+        placement: element.dataset.placement ?? 'bottom',
+        arrow: false,
+        hideOnClick: false,
+        offset: [0, -2],
+      });
+      tooltips.push(p);
+    });
+
+  }
+
+  function enable() {
+    tooltips.forEach(instance => {
+
+      // instance.setOptions(options => ({
+      //   ...options,
+      //   modifiers: [
+      //     ...options.modifiers,
+      //     { name: 'eventListeners', enabled: true }
+      //   ]
+      // }));
+
+    });
+  }
+
+  function disable() {
+    tooltips.forEach(instance => {
+
+      // instance.setOptions(options => ({
+      //   ...options,
+      //   modifiers: [
+      //     ...options.modifiers,
+      //     { name: 'eventListeners', enabled: false }
+      //   ]
+      // }));
+
+    });
+  }
+
+  initalise(selector);
+
+  return {enable, disable, initalise};
 
 }
 
@@ -538,7 +597,7 @@ function toggleEditMode(mode) {
     btn.classList.remove('active');
     _viewport.classList.remove('edit');
     _editMode = null;
-    _tippy.disable();
+    _tooltips.disable();
 
   } else {
 
@@ -549,7 +608,7 @@ function toggleEditMode(mode) {
     btn.classList.add('active');
     _viewport.classList.add('edit');
     _editMode = mode;
-    _tippy.enable();
+    _tooltips.enable();
 
   }
 
