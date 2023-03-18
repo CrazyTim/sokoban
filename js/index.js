@@ -616,7 +616,6 @@ async function onKeyDown(e) {
   }
 
   let move = true;
-  _state.player.state.push(false);
 
   if ( x === 0 && y === 0) move = false; // Cancel if no movement.
 
@@ -636,7 +635,6 @@ async function onKeyDown(e) {
   }
 
   if (move) {
-
 
     { // Store history (undo)
 
@@ -671,6 +669,8 @@ async function onKeyDown(e) {
       _state.player.state.push(dir);
       moveAdjust = _pushFriction;
       moveEasing = 'linear';
+    } else {
+      _state.player.state.push(false);
     }
 
     _state.isPendingMove = true;
