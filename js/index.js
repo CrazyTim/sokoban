@@ -670,7 +670,7 @@ async function onKeyDown(e) {
       moveAdjust = _pushFriction;
       moveEasing = 'linear';
     } else {
-      _state.player.state.push(false);
+      _state.player.state.push(null);
     }
 
     _state.isPendingMove = true;
@@ -695,13 +695,13 @@ async function onKeyDown(e) {
       });
 
       if (adj.type !== 'box' || !canBePushed(adj, {x, y}) ) {
-        _state.player.state.push(false);
+        _state.player.state.push(null);
       }
 
     }
 
     if (await checkWin()) {
-      _state.player.state.push(false); // No need to push further if level has been won.
+      _state.player.state.push(null); // No need to push further if level has been won.
     }
 
     _state.isPendingMove = false;
