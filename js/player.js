@@ -1,13 +1,9 @@
 import * as util from './util.js';
 
-let _lastActionTimestamp = 0;
-
-let _boredTimeout = null;
-const _boredDuration = 1;
-const _boredDelayRange = [3, 6];
-const _boredCheckDuration = .3;
-let _boredDelay = 1500;
-let _lastBoredType = -1;
+const BORED_DURATION = 1000;
+const BORED_DELAY_RANGE = [3000, 6000];
+const BORED_CHECK_DURATION = .3;
+const INITIAL_BORED_DELAY = 5000;
 
 export class Player {
 
@@ -19,6 +15,10 @@ export class Player {
     this.pushDirection = null; // null|up|down|left|right
     this.isDancing = false;
     this.isBored = false;
+    this.boredInterval = null;
+    this.lastBoredType = -1;
+    this.boredDelay = 1500;
+    this.lastActionTimestamp = INITIAL_BORED_DELAY * -1;
     this.startBoredTimer();
   }
 
@@ -113,38 +113,40 @@ export class Player {
   }
 
   startBoredTimer() {
-    _boredTimeout = setInterval(t => {
+    this.boredInterval = setInterval(t => {
       this.checkBored();
-    }, _boredCheckDuration * 1000);
+    }, BORED_CHECK_DURATION * 1000);
   }
 
   resetBoredTimer() {
     this.isBored = false;
-    _lastActionTimestamp = performance.now();
-    _boredDelay = util.getRandom(_boredDelayRange[0] * 1000, _boredDelayRange[1] * 1000);
+    this.lastActionTimestamp = performance.now();
+    this.boredDelay = util.getRandom(BORED_DELAY_RANGE[0], BORED_DELAY_RANGE[1]);
   }
 
   getRandomBoredType() {
     let boredType;
     do {
       boredType = util.getRandom(0, 3);
-    } while (boredType === _lastBoredType); // Ensure different than last time.
-    return _lastBoredType = boredType;
+    } while (boredType === this.lastBoredType); // Ensure different than last time.
+    return this.lastBoredType = boredType;
   }
 
   checkBored() {
 
-    const elapsed = performance.now() - _lastActionTimestamp;
+    const elapsed = performance.now() - this.lastActionTimestamp;
 
-    if (elapsed < _boredDelay) return;
+    if (elapsed < this.boredDelay) return;
 
-    if (elapsed > _boredDelay && !this.isBored) { // Start being bored.
+    if (elapsed > this.boredDelay && !this.isBored) {
+      // Player is bored.
       window.requestAnimationFrame(t => {
         this.bored(true);
       });
     }
 
-    if (elapsed > (_boredDelay) + (_boredDuration * 1000)) { // Finish being bored.
+    if (elapsed > (this.boredDelay) + (BORED_DURATION)) {
+      // Player has been bored for long enough - stop being bored.
       window.requestAnimationFrame(t => {
         this.bored(false);
         this.resetBoredTimer();
