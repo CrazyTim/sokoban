@@ -13,48 +13,48 @@
 }
 
 /* Face up */
-.player.face-se > div {
+.player.state-face-se > div {
   background-image: url('../img/player-down.svg');
 }
-.player.face-sw > div {
+.player.state-face-sw > div {
   background-image: url('../img/player-down.svg');
   transform: scaleX(-1);
 }
 
 /* Face down */
-.player.face-ne > div {
+.player.state-face-ne > div {
   background-image: url('../img/player-up.svg');
 }
-.player.face-nw > div {
+.player.state-face-nw > div {
   background-image: url('../img/player-up.svg');
   transform: scaleX(-1);
 }
 
 /* Bored */
-.player.face-se.state-bored-0 > div,
-.player.face-sw.state-bored-0 > div {
+.player.state-face-se.state-bored-0 > div,
+.player.state-face-sw.state-bored-0 > div {
   background-image: url('../img/player-bored-0.svg');
 }
-.player.face-se.state-bored-1 > div,
-.player.face-sw.state-bored-1 > div {
+.player.state-face-se.state-bored-1 > div,
+.player.state-face-sw.state-bored-1 > div {
   background-image: url('../img/player-bored-1.svg');
 }
-.player.face-se.state-bored-2 > div,
-.player.face-sw.state-bored-2 > div {
+.player.state-face-se.state-bored-2 > div,
+.player.state-face-sw.state-bored-2 > div {
   background-image: url('../img/player-bored-2.svg');
 }
-.player.face-se.state-bored-3 > div,
-.player.face-sw.state-bored-3 > div {
+.player.state-face-se.state-bored-3 > div,
+.player.state-face-sw.state-bored-3 > div {
   background-image: url('../img/player-bored-3.svg');
 }
 
 /* Dancing */
-.player.state-dancing.face-ne > div,
-.player.state-dancing.face-se > div {
+.player.state-dancing.state-face-ne > div,
+.player.state-dancing.state-face-se > div {
   background-image: url('../img/player-dance.svg');
 }
-.player.state-dancing.face-nw > div,
-.player.state-dancing.face-sw > div {
+.player.state-dancing.state-face-nw > div,
+.player.state-dancing.state-face-sw > div {
   background-image: url('../img/player-dance.svg');
   transform: scaleX(-1);
 }
@@ -75,8 +75,8 @@
   transform: scaleX(-1);
 }
 
-.player.state-moving.face-se > div,
-.player.state-moving.face-sw > div {
+.player.state-moving.state-face-se > div,
+.player.state-moving.state-face-sw > div {
   background-size: 200%;
   background-image: url('../img/player-walk-down-sprite.svg');
   animation-name: player-moving;

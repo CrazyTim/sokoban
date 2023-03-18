@@ -7,7 +7,6 @@ const _state = {
   player: {
     id: 0,
     div: null, // DOM node representing the player.
-    face: 'se', // Facing direction (ne|nw|se|sw).
     pos: {x:0, y:0}, // Position (world coordinates).
     state: null,
   },
@@ -260,8 +259,6 @@ function makePlayer(id) {
 
   _state.player.state = new PlayerState(_state.player.div);
 
-  facePlayer(_state.player.face);
-
 }
 
 function makeEditGrid() {
@@ -331,7 +328,7 @@ function onWinEventFactory(roomId) {
     return async () => {
       // Move viewport back to level 0 to see the door opening:
       input(false);
-      facePlayer('sw');
+      _state.player.state.face('sw');
       await moveViewPort(_state.levels[0].pos);
       openDoor(1, 0);
       await wait(1);
@@ -342,21 +339,21 @@ function onWinEventFactory(roomId) {
   } else if (roomId === 2) {
 
     return () => {
-      facePlayer('se');
+      _state.player.state.face('se');
       openDoor(0, 2);
     }
 
   } else if (roomId === 3) {
 
     return () => {
-      facePlayer('sw');
+      _state.player.state.face('sw');
       openDoor(0, 3);
     }
 
   } else if (roomId === 4) {
 
     return async () => {
-      facePlayer('sw');
+      _state.player.state.face('sw');
       openDoor(0, 4);
       await wait(0.1); // Pause for effect.
       openDoor(1, 4);
@@ -365,7 +362,7 @@ function onWinEventFactory(roomId) {
   } else if (roomId === 5) {
 
     return async () => {
-      facePlayer('se');
+      _state.player.state.face('se');
       openDoor(0, 5);
       openDoor(1, 2);
     }
@@ -373,7 +370,7 @@ function onWinEventFactory(roomId) {
   } else if (roomId === 6) {
 
     return async () => {
-      facePlayer('se');
+      _state.player.state.face('se');
       openDoor(0, 6);
     }
 
@@ -445,25 +442,6 @@ function openDoor(doorId, roomId) {
 
   door.state = 'open';
   updateDoor(door);
-
-}
-
-function facePlayer(direction) {
-
-  _state.player.face = direction;
-
-  const div = _state.player.div;
-
-  if (!div) return;
-
-  div.classList.remove(
-    'face-ne',
-    'face-nw',
-    'face-se',
-    'face-sw',
-  );
-
-  div.classList.add('face-' + direction);
 
 }
 
@@ -595,22 +573,23 @@ async function onKeyDown(e) {
   let dir;
 
   // Determine pos offset
+  const oldFaceState = _state.player.state.faceDirection;
   if (e.key === 'ArrowUp' || e.key === 'w') {
     dir = 'up';
     y -= 1;
-    facePlayer( _state.player.face.includes('e') ? 'ne' : 'nw' );
+    _state.player.state.face( oldFaceState.includes('e') ? 'ne' : 'nw' );
   } else if (e.key === 'ArrowDown' || e.key === 's') {
     dir = 'down';
     y += 1;
-    facePlayer( _state.player.face.includes('e') ? 'se' : 'sw' );
+    _state.player.state.face( oldFaceState.includes('e') ? 'se' : 'sw' );
   } else if (e.key === 'ArrowLeft' || e.key === 'a') {
     dir = 'left';
     x -= 1;
-    facePlayer('sw');
+    _state.player.state.face('sw');
   } else if (e.key === 'ArrowRight'  || e.key === 'd') {
     dir = 'right';
     x += 1;
-    facePlayer('se');
+    _state.player.state.face('se');
   } else {
     return; // ignore all other keys
   }
@@ -877,7 +856,6 @@ function undoState() {
   updateBoxes();
 
   movePlayer(oldState.player.pos);
-  facePlayer(oldState.player.face);
   _state.player.state.set(oldState.player.state);
 
   checkChangeRoom();

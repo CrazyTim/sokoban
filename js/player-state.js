@@ -12,16 +12,13 @@ let _lastBoredType = -1;
 export class PlayerState {
 
   constructor(div) {
-
     this.div = div;
-
     this.isMoving = false;
-    this.pushDirection = null;
+    this.faceDirection = 'se'; // ne|nw|se|sw.
+    this.pushDirection = null; // null|up|down|left|right
     this.isDancing = false;
     this.isBored = false;
-
     this.startBoredTimer();
-
   }
 
   move(state = true) {
@@ -30,7 +27,13 @@ export class PlayerState {
     this.updateHtmlClassList();
   }
 
-  push(direction = 'up') {
+  face(direction = 'se') {
+    this.faceDirection = direction;
+    this.resetBoredTimer();
+    this.updateHtmlClassList();
+  }
+
+  push(direction = null) {
     this.pushDirection = direction;
     this.resetBoredTimer();
     this.updateHtmlClassList();
@@ -52,10 +55,11 @@ export class PlayerState {
     let state = [];
 
     if (this.isMoving) state.push('state-moving');
+    if (this.faceDirection) state.push('state-face-' + this.faceDirection);
     if (this.pushDirection) state.push('state-push-' + this.pushDirection);
     if (this.isDancing) state.push('state-dancing');
 
-    if (state.length === 0 && this.isBored) {
+    if (this.isBored && !this.isMoving && !this.pushDirection && !this.isDancing) {
       state.push('state-bored-' + this.getRandomBoredType());
     }
 
@@ -70,6 +74,10 @@ export class PlayerState {
     this.isDancing = false
 
     if (state.includes('state-moving')) this.isMoving = true;
+    if (state.includes('state-face-ne')) this.faceDirection = 'ne';
+    if (state.includes('state-face-nw')) this.faceDirection = 'nw';
+    if (state.includes('state-face-se')) this.faceDirection = 'se';
+    if (state.includes('state-face-sw')) this.faceDirection = 'sw';
     if (state.includes('state-push-up')) this.pushDirection = 'up';
     if (state.includes('state-push-down')) this.pushDirection = 'down';
     if (state.includes('state-push-left')) this.pushDirection = 'left';
@@ -83,6 +91,10 @@ export class PlayerState {
   updateHtmlClassList() {
 
     this.div.classList.remove(
+      'state-face-ne',
+      'state-face-nw',
+      'state-face-se',
+      'state-face-sw',
       'state-moving',
       'state-push-up',
       'state-push-down',
