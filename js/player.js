@@ -9,10 +9,12 @@ const _boredCheckDuration = .3;
 let _boredDelay = 1500;
 let _lastBoredType = -1;
 
-export class PlayerState {
+export class Player {
 
-  constructor(div) {
-    this.div = div;
+  constructor(id, div) {
+    this.id = id;
+    this.pos = {x:0, y:0}; // Position (world coordinates).
+    this.div = div; // DOM node representing the player.
     this.isMoving = false;
     this.faceDirection = 'se'; // ne|nw|se|sw.
     this.pushDirection = null; // null|up|down|left|right

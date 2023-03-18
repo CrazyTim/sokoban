@@ -1,15 +1,10 @@
 import {rooms} from './rooms.js';
 import * as util from './util.js';
-import {PlayerState} from './player-state.js';
+import {Player} from './player.js';
 
 const _state = {
 
-  player: {
-    id: 0,
-    div: null, // DOM node representing the player.
-    pos: {x:0, y:0}, // Position (world coordinates).
-    state: null,
-  },
+  player: new Player(),
 
   levels: [],
 
@@ -165,7 +160,7 @@ function onLoad() {
   _state.player.pos.x = _state.level.startPos.x;
   _state.player.pos.y = _state.level.startPos.y;
 
-  makePlayer(_state.player.id);
+  makePlayer(0);
 
   input(true);
 
@@ -243,6 +238,8 @@ function roomFactory(roomId) {
 
 function makePlayer(id) {
 
+  _state.player.id = id;
+
   _state.player.div = makeDiv(
     _state.player.pos,
     _world,
@@ -256,8 +253,6 @@ function makePlayer(id) {
   // We need another div because we apply separate transforms to the background-image.
   const d = document.createElement('div');
   _state.player.div.appendChild(d);
-
-  _state.player.state = new PlayerState(_state.player.div);
 
 }
 
@@ -328,7 +323,7 @@ function onWinEventFactory(roomId) {
     return async () => {
       // Move viewport back to level 0 to see the door opening:
       input(false);
-      _state.player.state.face('sw');
+      _state.player.face('sw');
       await moveViewPort(_state.levels[0].pos);
       openDoor(1, 0);
       await wait(1);
@@ -339,21 +334,21 @@ function onWinEventFactory(roomId) {
   } else if (roomId === 2) {
 
     return () => {
-      _state.player.state.face('se');
+      _state.player.face('se');
       openDoor(0, 2);
     }
 
   } else if (roomId === 3) {
 
     return () => {
-      _state.player.state.face('sw');
+      _state.player.face('sw');
       openDoor(0, 3);
     }
 
   } else if (roomId === 4) {
 
     return async () => {
-      _state.player.state.face('sw');
+      _state.player.face('sw');
       openDoor(0, 4);
       await wait(0.1); // Pause for effect.
       openDoor(1, 4);
@@ -362,7 +357,7 @@ function onWinEventFactory(roomId) {
   } else if (roomId === 5) {
 
     return async () => {
-      _state.player.state.face('se');
+      _state.player.face('se');
       openDoor(0, 5);
       openDoor(1, 2);
     }
@@ -370,7 +365,7 @@ function onWinEventFactory(roomId) {
   } else if (roomId === 6) {
 
     return async () => {
-      _state.player.state.face('se');
+      _state.player.face('se');
       openDoor(0, 6);
     }
 
@@ -412,7 +407,7 @@ async function movePlayer(props) {
 
   _state.player.pos.x = props.x;
   _state.player.pos.y = props.y;
-  _state.player.state.move(true);
+  _state.player.move(true);
 
   // Animate:
   const translate = `translate(${props.x * _squareSize}px, ${props.y * _squareSize}px)`;
@@ -427,7 +422,7 @@ async function movePlayer(props) {
     },
   ).finished;
 
-  _state.player.state.move(false);
+  _state.player.move(false);
 
   _state.player.div.style.transform = translate; // Preserve the effect after animation has finished.
 
@@ -573,23 +568,23 @@ async function onKeyDown(e) {
   let dir;
 
   // Determine pos offset
-  const oldFaceState = _state.player.state.faceDirection;
+  const oldPlayerFaceDirection = _state.player.faceDirection;
   if (e.key === 'ArrowUp' || e.key === 'w') {
     dir = 'up';
     y -= 1;
-    _state.player.state.face( oldFaceState.includes('e') ? 'ne' : 'nw' );
+    _state.player.face( oldPlayerFaceDirection.includes('e') ? 'ne' : 'nw' );
   } else if (e.key === 'ArrowDown' || e.key === 's') {
     dir = 'down';
     y += 1;
-    _state.player.state.face( oldFaceState.includes('e') ? 'se' : 'sw' );
+    _state.player.face( oldPlayerFaceDirection.includes('e') ? 'se' : 'sw' );
   } else if (e.key === 'ArrowLeft' || e.key === 'a') {
     dir = 'left';
     x -= 1;
-    _state.player.state.face('sw');
+    _state.player.face('sw');
   } else if (e.key === 'ArrowRight'  || e.key === 'd') {
     dir = 'right';
     x += 1;
-    _state.player.state.face('se');
+    _state.player.face('se');
   } else {
     return; // ignore all other keys
   }
@@ -628,9 +623,10 @@ async function onKeyDown(e) {
 
       _state.history.push({
         player: {
-          face: _state.player.face,
           pos: util.deepCopy(_state.player.pos),
-          state: _state.player.state.get(),
+          faceDirection: oldPlayerFaceDirection,
+          isMoving: _state.player.isMoving,
+          pushDirection: _state.player.pushDirection,
         },
         levels: levelsCopy,
       });
@@ -645,11 +641,11 @@ async function onKeyDown(e) {
       adj.x += x;
       adj.y += y;
       updateBox(adj);
-      _state.player.state.push(dir);
+      _state.player.push(dir);
       moveAdjust = _pushFriction;
       moveEasing = 'linear';
     } else {
-      _state.player.state.push(null);
+      _state.player.push(null);
     }
 
     _state.isPendingMove = true;
@@ -674,13 +670,13 @@ async function onKeyDown(e) {
       });
 
       if (adj.type !== 'box' || !canBePushed(adj, {x, y}) ) {
-        _state.player.state.push(null);
+        _state.player.push(null);
       }
 
     }
 
     if (await checkWin()) {
-      _state.player.state.push(null); // No need to push further if level has been won.
+      _state.player.push(null); // No need to push further if level has been won.
     }
 
     _state.isPendingMove = false;
@@ -806,13 +802,13 @@ async function checkWin() {
   input(false);
   _state.history.length = 0; // Clear undo.
 
-  _state.player.state.dance(true);
+  _state.player.dance(true);
 
   // Wait for win animation to finish:
   await wait(_winDuration);
 
   input(true);
-  _state.player.state.dance(false);
+  _state.player.dance(false);
   _state.level.hasWon = true;
   _state.level.div.classList.add('win');
   _inputStack.length = 0; // Truncate input stack.
@@ -854,9 +850,11 @@ function undoState() {
     _state.levels[room.id].boxes = room.boxes;
   }
   updateBoxes();
-
+  console.log(oldState.player);
   movePlayer(oldState.player.pos);
-  _state.player.state.set(oldState.player.state);
+  _state.player.move(oldState.player.isMoving);
+  _state.player.face(oldState.player.faceDirection);
+  _state.player.push(oldState.player.pushDirection);
 
   checkChangeRoom();
 
