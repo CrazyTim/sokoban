@@ -160,7 +160,7 @@ function onLoad() {
   _state.player.pos.x = _state.level.startPos.x;
   _state.player.pos.y = _state.level.startPos.y;
 
-  makePlayer(0);
+  initPlayer(0);
 
   input(true);
 
@@ -236,17 +236,12 @@ function roomFactory(roomId) {
 
 }
 
-function makePlayer(id) {
-
-  _state.player.id = id;
+function initPlayer() {
 
   _state.player.div = makeDiv(
     _state.player.pos,
     _world,
-    [
-      'player',
-      'player-' + id,
-    ],
+    ['player'],
   );
 
   // Add child div to hold the background image.

@@ -11,8 +11,7 @@ let _lastBoredType = -1;
 
 export class Player {
 
-  constructor(id, div) {
-    this.id = id;
+  constructor(div) {
     this.pos = {x:0, y:0}; // Position (world coordinates).
     this.div = div; // DOM node representing the player.
     this.isMoving = false;
