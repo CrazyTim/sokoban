@@ -51,15 +51,15 @@ const _state = {
 
   player: new Player(),
 
-  rooms: [],
+  rooms: [], // All the rooms.
+
+  currentRoom: {}, // The room the player is currently in.
 
   canInput: false,
 
   isPendingMove: false, // Keypress mutex.
 
   history: [], // Undo stack.
-
-  level: {}, // The current room.
 
 }
 
@@ -170,8 +170,8 @@ function onLoad() {
 
   changeRoom(0);
 
-  _state.player.pos.x = _state.level.startPos.x;
-  _state.player.pos.y = _state.level.startPos.y;
+  _state.player.pos.x = _state.currentRoom.startPos.x;
+  _state.player.pos.y = _state.currentRoom.startPos.y;
 
   initPlayer(0);
 
@@ -185,7 +185,7 @@ function onLoad() {
 
 function getLocalPos(globalPos, roomId) {
 
-  if (roomId === undefined) roomId = _state.level.id;
+  if (roomId === undefined) roomId = _state.currentRoom.id;
 
   return {
     x: globalPos.x - _state.rooms[roomId].pos.x,
@@ -196,7 +196,7 @@ function getLocalPos(globalPos, roomId) {
 
 function getGlobalPos(pos, roomId) {
 
-  if (roomId === undefined) roomId = _state.level.id;
+  if (roomId === undefined) roomId = _state.currentRoom.id;
 
   return {
     x: pos.x + _state.rooms[roomId].pos.x,
@@ -299,8 +299,8 @@ function makeEditGrid() {
 
         if (_editMode === 'player') {
           movePlayer({
-            x: x + _state.level.pos.x,
-            y: y + _state.level.pos.y,
+            x: x + _state.currentRoom.pos.x,
+            y: y + _state.currentRoom.pos.y,
           });
 
         } else if (_editMode) {
@@ -438,7 +438,7 @@ async function movePlayer(props) {
 
 function openDoor(doorId, roomId) {
 
-  if (roomId === undefined) roomId = _state.level.id;
+  if (roomId === undefined) roomId = _state.currentRoom.id;
 
   const room = _state.rooms[roomId];
   const door = room.doors[doorId];
@@ -451,7 +451,7 @@ function openDoor(doorId, roomId) {
 function setEventHandlers() {
 
   const btnExport = document.querySelector('.btn-export');
-  btnExport.onclick = e => util.downloadFile(JSON.stringify(_state.level), 'application/json', 'room-' + _state.level.id);
+  btnExport.onclick = e => util.downloadFile(JSON.stringify(_state.currentRoom), 'application/json', 'room-' + _state.currentRoom.id);
 
   const btnModeClear = document.querySelector('.btn-clear');
   btnModeClear.onclick = e => clearCells();
@@ -494,7 +494,7 @@ function toggleOverflow() {
 }
 
 function moveRoom(offset) {
-  const room = _state.level
+  const room = _state.currentRoom
   room.pos.x += offset.x;
   room.pos.y += offset.y;
   room.div.style.transform = `translate(${room.pos.x * SQUARE_SIZE}px, ${room.pos.y * SQUARE_SIZE}px)`
@@ -528,12 +528,12 @@ function toggleEditMode(mode) {
 function changeRoom(roomId, animationDuration = 0) {
 
   // Set the new room as the current room:
-  _state.level = _state.rooms[roomId];
+  _state.currentRoom = _state.rooms[roomId];
 
-  _state.level.div.classList.remove('hidden');
+  _state.currentRoom.div.classList.remove('hidden');
 
   // Center viewport on the room:
-  moveViewPort(_state.level.pos, animationDuration, 'ease');
+  moveViewPort(_state.currentRoom.pos, animationDuration, 'ease');
 
   { // Edit mode - activate button for this level:
     const thisButton = document.querySelector('.btn-room-' + roomId);
@@ -725,7 +725,7 @@ function checkChangeRoom() {
   // Find the first (top-most) room that is not the current room and transition into it.
   for (const room of currentRooms) {
 
-    if (room.id === _state.level.id) continue; // Ignore current room.
+    if (room.id === _state.currentRoom.id) continue; // Ignore current room.
 
     changeRoom(room.id, _roomTransitionDuration);
 
@@ -775,7 +775,7 @@ function canBePushed(item, direction = {x:0, y:0}) {
 
   // Prevent boxes from being moved once the level has been won
   // (otherwise player could move boxes out of the level)
-  if (_state.level.hasWon) return false;
+  if (_state.currentRoom.hasWon) return false;
 
   // Cancel if the box can't be pushed into the next adjacent space...
   const adj = getObject({
@@ -798,9 +798,9 @@ function canBePushed(item, direction = {x:0, y:0}) {
 
 async function checkWin() {
 
-  if (_state.level.hasWon) return;
+  if (_state.currentRoom.hasWon) return;
 
-  for (const box of _state.level.boxes) {
+  for (const box of _state.currentRoom.boxes) {
     if(!isBoxOnCrystal(box)) return;
   }
 
@@ -816,18 +816,18 @@ async function checkWin() {
 
   input(true);
   _state.player.dance(false);
-  _state.level.hasWon = true;
-  _state.level.div.classList.add('win');
+  _state.currentRoom.hasWon = true;
+  _state.currentRoom.div.classList.add('win');
   _inputStack.length = 0; // Truncate input stack.
 
-  _state.level.onWin();
+  _state.currentRoom.onWin();
 
   return true;
 
 }
 
 function isBoxOnCrystal(box) {
-  return _state.level.map[convertPosToMapIndex(box)] === ENTITY_TYPE.crystal.id;
+  return _state.currentRoom.map[convertPosToMapIndex(box)] === ENTITY_TYPE.crystal.id;
 }
 
 function resetState() {
@@ -880,7 +880,7 @@ function convertPosToMapIndex(pos) {
 function getObject(pos) {
 
   // Check box:
-  for (const box of _state.level.boxes) {
+  for (const box of _state.currentRoom.boxes) {
     if(box.x === pos.x &&
        box.y === pos.y) {
       return box;
@@ -903,7 +903,7 @@ function getObject(pos) {
   // Check wall:
   let i = convertPosToMapIndex(pos);
   for (const value of Object.values(ENTITY_TYPE)) {
-    if (value.id === _state.level.map[i]) return value;
+    if (value.id === _state.currentRoom.map[i]) return value;
   }
 
   // Player ran off the edge of board...
@@ -1012,7 +1012,7 @@ function makeDiv(pos, div, classes) {
 
 function changeCellType(id, entityKey) {
 
-  const div = document.querySelector('.level-' + _state.level.id + ' .cell-' + id);
+  const div = document.querySelector('.level-' + _state.currentRoom.id + ' .cell-' + id);
 
   // Get entity:
   let e;
@@ -1032,25 +1032,25 @@ function changeCellType(id, entityKey) {
 
   div.classList.add('type-' + e.id);
 
-  _state.level.map[id] = e.id;
+  _state.currentRoom.map[id] = e.id;
 
 }
 
 function clearCells() {
-  for (let i = 0; i < _state.level.map.length; i++) {
+  for (let i = 0; i < _state.currentRoom.map.length; i++) {
     changeCellType(i, 'empty');
   }
 }
 
 function updateBoxes() {
-  for (const box of _state.level.boxes) {
+  for (const box of _state.currentRoom.boxes) {
     updateBox(box);
   }
 }
 
 function updateBox(b) {
 
-  const d = document.querySelector('.level-' + _state.level.id + ' .box-' + b.id);
+  const d = document.querySelector('.level-' + _state.currentRoom.id + ' .box-' + b.id);
   d.style.transform = `translate(${b.x * SQUARE_SIZE}px, ${b.y * SQUARE_SIZE}px)`
 
   if(isBoxOnCrystal(b)) {
@@ -1162,8 +1162,8 @@ function hideDistantRooms() {
       continue;
     }
 
-    const xOffset = Math.abs(room.pos.x - _state.level.pos.x);
-    const yOffset = Math.abs(room.pos.y - _state.level.pos.y);
+    const xOffset = Math.abs(room.pos.x - _state.currentRoom.pos.x);
+    const yOffset = Math.abs(room.pos.y - _state.currentRoom.pos.y);
 
     if (xOffset > (VIEWPORT_SIZE.width + 2) ||
         yOffset > (VIEWPORT_SIZE.height + 2)) {
