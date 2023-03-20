@@ -9,7 +9,7 @@ const VIEWPORT_SIZE = {
 };
 
 const SQUARE_SIZE = 60; // Pixels.
-const _pixelSize = SQUARE_SIZE / 20;
+const PIXEL_SIZE = SQUARE_SIZE / 20;
 const _worldOffset = SQUARE_SIZE * 1; // Number of squares to offset the world.
 const _winDuration = .8;
 const _roomTransitionDuration = 1;
@@ -139,17 +139,17 @@ function onLoad() {
     }
 
     .label {
-      padding: ${2 * _pixelSize}px;
+      padding: ${2 * PIXEL_SIZE}px;
     }
 
     .label span {
-      width: ${12 * _pixelSize}px;
-      height: ${16 * _pixelSize}px;
-      margin-right: ${_pixelSize}px;
+      width: ${12 * PIXEL_SIZE}px;
+      height: ${16 * PIXEL_SIZE}px;
+      margin-right: ${PIXEL_SIZE}px;
     }
 
     .label .char-1 {
-      width: ${8 * _pixelSize};
+      width: ${8 * PIXEL_SIZE};
     }
 
   `;
