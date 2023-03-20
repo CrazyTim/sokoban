@@ -560,24 +560,24 @@ async function onKeyDown(e) {
 
   let x = 0;
   let y = 0;
-  let dir;
+  let pushDirection;
 
   // Determine pos offset
   const oldPlayerFaceDirection = _state.player.faceDirection;
   if (e.key === 'ArrowUp' || e.key === 'w') {
-    dir = 'up';
+    pushDirection = 'up';
     y -= 1;
     _state.player.face( oldPlayerFaceDirection.includes('e') ? 'ne' : 'nw' );
   } else if (e.key === 'ArrowDown' || e.key === 's') {
-    dir = 'down';
+    pushDirection = 'down';
     y += 1;
     _state.player.face( oldPlayerFaceDirection.includes('e') ? 'se' : 'sw' );
   } else if (e.key === 'ArrowLeft' || e.key === 'a') {
-    dir = 'left';
+    pushDirection = 'left';
     x -= 1;
     _state.player.face('sw');
   } else if (e.key === 'ArrowRight'  || e.key === 'd') {
-    dir = 'right';
+    pushDirection = 'right';
     x += 1;
     _state.player.face('se');
   } else {
@@ -636,7 +636,7 @@ async function onKeyDown(e) {
       adj.x += x;
       adj.y += y;
       updateBox(adj);
-      _state.player.push(dir);
+      _state.player.push(pushDirection);
       moveAdjust = _pushFriction;
       moveEasing = 'linear';
     } else {
