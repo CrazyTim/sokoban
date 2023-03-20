@@ -10,7 +10,7 @@ const VIEWPORT_SIZE = {
 
 const SQUARE_SIZE = 60; // Pixels.
 const PIXEL_SIZE = SQUARE_SIZE / 20;
-const _worldOffset = SQUARE_SIZE * 1; // Number of squares to offset the world.
+const WORLD_OFFSET = SQUARE_SIZE * 1; // Number of squares to offset the world.
 const _winDuration = .8;
 const _roomTransitionDuration = 1;
 const _inputStackLength = 1; // number of keyboard presses to store on the stack.
@@ -151,8 +151,8 @@ function onLoad() {
   `;
   document.head.appendChild(style);
 
-  _viewport.style.width = (_worldOffset * 2) + (VIEWPORT_SIZE.width * SQUARE_SIZE) + 'px';
-  _viewport.style.height = (_worldOffset * 2) + (VIEWPORT_SIZE.height * SQUARE_SIZE) + 'px';
+  _viewport.style.width = (WORLD_OFFSET * 2) + (VIEWPORT_SIZE.width * SQUARE_SIZE) + 'px';
+  _viewport.style.height = (WORLD_OFFSET * 2) + (VIEWPORT_SIZE.height * SQUARE_SIZE) + 'px';
 
   // Make world:
   _world = document.createElement('div');
@@ -272,7 +272,7 @@ function makeEditGrid() {
   editGrid.classList.add('edit-grid')
   editGrid.style.width = (VIEWPORT_SIZE.width * SQUARE_SIZE) + 'px';
   editGrid.style.height = (VIEWPORT_SIZE.height * SQUARE_SIZE) + 'px';
-  editGrid.style.transform = `translate(${_worldOffset}px, ${_worldOffset}px)`
+  editGrid.style.transform = `translate(${WORLD_OFFSET}px, ${WORLD_OFFSET}px)`
   _viewport.appendChild(editGrid);
 
   // Make cells:
@@ -390,7 +390,7 @@ function onWinEventFactory(roomId) {
 async function moveViewPort(pos = {x:0, y:0}, durationSeconds = _roomTransitionDuration, easing = 'ease-in-out') {
 
   // Animate:
-  const translate = `translate(${_worldOffset - (pos.x * SQUARE_SIZE)}px, ${_worldOffset - (pos.y * SQUARE_SIZE)}px)`;
+  const translate = `translate(${WORLD_OFFSET - (pos.x * SQUARE_SIZE)}px, ${WORLD_OFFSET - (pos.y * SQUARE_SIZE)}px)`;
   await _world.animate(
     [
       { transform: translate },
