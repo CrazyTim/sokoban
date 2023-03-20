@@ -2,22 +2,6 @@ import {rooms} from './rooms.js';
 import * as util from './util.js';
 import {Player} from './player.js';
 
-const _state = {
-
-  player: new Player(),
-
-  levels: [],
-
-  canInput: false,
-
-  isPendingMove: false, // Keypress mutex.
-
-  history: [], // Undo stack.
-
-  level: {}, // The current room.
-
-}
-
 // Settings:
 const VIEWPORT_SIZE = {
   width: 11,
@@ -42,8 +26,24 @@ const ANIMATION_PROP = {
   },
 };
 
-// Constants:
-const _startRoomId = 0;
+// Globals:
+
+const _state = {
+
+  player: new Player(),
+
+  levels: [],
+
+  canInput: false,
+
+  isPendingMove: false, // Keypress mutex.
+
+  history: [], // Undo stack.
+
+  level: {}, // The current room.
+
+}
+
 let _world; // The DOM node that holds all the rooms stiched together.
 let _viewport; // The DOM node that holds the world. The world is moved inside the viewport as the player transitions from room-to-room.
 let _editMode = null;
@@ -172,7 +172,7 @@ function onLoad() {
 
   setEventHandlers();
 
-  changeRoom(_startRoomId, 0);
+  changeRoom(0);
 
   _state.player.pos.x = _state.level.startPos.x;
   _state.player.pos.y = _state.level.startPos.y;
@@ -529,7 +529,7 @@ function toggleEditMode(mode) {
 
 }
 
-function changeRoom(roomId, animationDuration) {
+function changeRoom(roomId, animationDuration = 0) {
 
   // Set the new room as the current room:
   _state.level = _state.levels[roomId];
