@@ -11,9 +11,9 @@ const VIEWPORT_SIZE = {
 const SQUARE_SIZE = 60; // Pixels.
 const PIXEL_SIZE = SQUARE_SIZE / 20;
 const WORLD_OFFSET = SQUARE_SIZE * 1; // Number of squares to offset the world.
-const _winDuration = .8;
-const _roomTransitionDuration = 1;
-const _inputStackLength = 1; // number of keyboard presses to store on the stack.
+const WIN_DURATION = .8;
+const ROOM_TRANSITION_DURATION = 1;
+const INPUT_STACK_LENGTH = 1; // number of keyboard presses to store on the stack.
 
 const ANIMATION_PROP = {
   move: {
@@ -387,7 +387,7 @@ function onWinEventFactory(roomId) {
 
 }
 
-async function moveViewPort(pos = {x:0, y:0}, durationSeconds = _roomTransitionDuration, easing = 'ease-in-out') {
+async function moveViewPort(pos = {x:0, y:0}, durationSeconds = ROOM_TRANSITION_DURATION, easing = 'ease-in-out') {
 
   // Animate:
   const translate = `translate(${WORLD_OFFSET - (pos.x * SQUARE_SIZE)}px, ${WORLD_OFFSET - (pos.y * SQUARE_SIZE)}px)`;
@@ -691,8 +691,8 @@ async function onKeyDown(e) {
     { // Send queued input:
 
       // Truncate stack if its too long.
-      if (_inputStack.length > _inputStackLength) {
-        _inputStack.length = _inputStackLength;
+      if (_inputStack.length > INPUT_STACK_LENGTH) {
+        _inputStack.length = INPUT_STACK_LENGTH;
       }
 
       if (_inputStack.length > 0) {
@@ -727,7 +727,7 @@ function checkChangeRoom() {
 
     if (room.id === _state.currentRoom.id) continue; // Ignore current room.
 
-    changeRoom(room.id, _roomTransitionDuration);
+    changeRoom(room.id, ROOM_TRANSITION_DURATION);
 
     return;
 
@@ -812,7 +812,7 @@ async function checkWin() {
   _state.player.dance(true);
 
   // Wait for win animation to finish:
-  await wait(_winDuration);
+  await wait(WIN_DURATION);
 
   input(true);
   _state.player.dance(false);
@@ -1199,7 +1199,7 @@ function makeGotoRoomButton(room) {
     'btn-room-' + room.id,
   );
 
-  btn.textContent = 'level ' + util.pad(room.id,2);
+  btn.textContent = 'level ' + util.pad(room.id, 2);
 
   const roomId = room.id;
 
@@ -1212,7 +1212,7 @@ function makeGotoRoomButton(room) {
     movePlayer({
       x: room.startPos.x + room.pos.x,
       y: room.startPos.y + room.pos.y,
-      duration: _roomTransitionDuration,
+      duration: ROOM_TRANSITION_DURATION,
     });
 
   }
