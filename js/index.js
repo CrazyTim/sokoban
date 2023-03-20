@@ -51,7 +51,7 @@ const _state = {
 
   player: new Player(),
 
-  levels: [],
+  rooms: [],
 
   canInput: false,
 
@@ -188,8 +188,8 @@ function getLocalPos(globalPos, roomId) {
   if (roomId === undefined) roomId = _state.level.id;
 
   return {
-    x: globalPos.x - _state.levels[roomId].pos.x,
-    y: globalPos.y - _state.levels[roomId].pos.y,
+    x: globalPos.x - _state.rooms[roomId].pos.x,
+    y: globalPos.y - _state.rooms[roomId].pos.y,
   };
 
 }
@@ -199,8 +199,8 @@ function getGlobalPos(pos, roomId) {
   if (roomId === undefined) roomId = _state.level.id;
 
   return {
-    x: pos.x + _state.levels[roomId].pos.x,
-    y: pos.y + _state.levels[roomId].pos.y,
+    x: pos.x + _state.rooms[roomId].pos.x,
+    y: pos.y + _state.rooms[roomId].pos.y,
   };
 
 }
@@ -332,10 +332,10 @@ function onWinEventFactory(roomId) {
       // Move viewport back to level 0 to see the door opening:
       input(false);
       _state.player.face('sw');
-      await moveViewPort(_state.levels[0].pos);
+      await moveViewPort(_state.rooms[0].pos);
       openDoor(1, 0);
       await wait(1);
-      await moveViewPort(_state.levels[1].pos, .8);
+      await moveViewPort(_state.rooms[1].pos, .8);
       input(true);
     }
 
@@ -440,7 +440,7 @@ function openDoor(doorId, roomId) {
 
   if (roomId === undefined) roomId = _state.level.id;
 
-  const room = _state.levels[roomId];
+  const room = _state.rooms[roomId];
   const door = room.doors[doorId];
 
   door.state = 'open';
@@ -528,7 +528,7 @@ function toggleEditMode(mode) {
 function changeRoom(roomId, animationDuration = 0) {
 
   // Set the new room as the current room:
-  _state.level = _state.levels[roomId];
+  _state.level = _state.rooms[roomId];
 
   _state.level.div.classList.remove('hidden');
 
@@ -622,7 +622,7 @@ async function onKeyDown(e) {
 
       const levelsCopy = [];
 
-      for (const room of _state.levels) {
+      for (const room of _state.rooms) {
         levelsCopy.push({
           id: room.id,
           boxes: util.deepCopy(room.boxes),
@@ -745,7 +745,7 @@ function getRoomsAtGlobalPos(globalPos) {
 
   const currentRooms = [];
 
-  for (const room of _state.levels) {
+  for (const room of _state.rooms) {
 
     const pos = getLocalPos(globalPos, room.id)
 
@@ -848,7 +848,7 @@ function undoState() {
 
   // Restore boxes:
   for (const room of oldState.levels) {
-    _state.levels[room.id].boxes = room.boxes;
+    _state.rooms[room.id].boxes = room.boxes;
   }
   updateBoxes();
 
@@ -919,7 +919,7 @@ function makeRooms() {
 
     const room = roomFactory(i);
 
-    _state.levels.push(room);
+    _state.rooms.push(room);
 
     // Create div to hold room contents:
     room.div = document.createElement('div');
@@ -1155,7 +1155,7 @@ function updateDoor(door) {
  */
 function hideDistantRooms() {
 
-  for (const room of _state.levels) {
+  for (const room of _state.rooms) {
 
     if (_viewportOverflow) {
       room.div.style.display = '';
@@ -1205,7 +1205,7 @@ function makeGotoRoomButton(room) {
 
   btn.onclick = () => {
 
-    const room = _state.levels[roomId];
+    const room = _state.rooms[roomId];
 
     changeRoom(room.id);
 
