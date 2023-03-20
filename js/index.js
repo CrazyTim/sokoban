@@ -24,9 +24,9 @@ const VIEWPORT_SIZE = {
   height: 11,
 };
 
-const _squareSize = 60; // Pixels.
-const _pixelSize = _squareSize / 20;
-const _worldOffset = _squareSize * 1; // Number of squares to offset the world.
+const SQUARE_SIZE = 60; // Pixels.
+const _pixelSize = SQUARE_SIZE / 20;
+const _worldOffset = SQUARE_SIZE * 1; // Number of squares to offset the world.
 const _winDuration = .8;
 const _roomTransitionDuration = 1;
 const _inputStackLength = 1; // number of keyboard presses to store on the stack.
@@ -134,8 +134,8 @@ function onLoad() {
     .box,
     .player,
     .door {
-      width: ${_squareSize}px;
-      height: ${_squareSize}px;
+      width: ${SQUARE_SIZE}px;
+      height: ${SQUARE_SIZE}px;
     }
 
     .label {
@@ -155,8 +155,8 @@ function onLoad() {
   `;
   document.head.appendChild(style);
 
-  _viewport.style.width = (_worldOffset * 2) + (VIEWPORT_SIZE.width * _squareSize) + 'px';
-  _viewport.style.height = (_worldOffset * 2) + (VIEWPORT_SIZE.height * _squareSize) + 'px';
+  _viewport.style.width = (_worldOffset * 2) + (VIEWPORT_SIZE.width * SQUARE_SIZE) + 'px';
+  _viewport.style.height = (_worldOffset * 2) + (VIEWPORT_SIZE.height * SQUARE_SIZE) + 'px';
 
   // Make world:
   _world = document.createElement('div');
@@ -274,8 +274,8 @@ function makeEditGrid() {
   // Make viewport edge:
   const editGrid = document.createElement('div');
   editGrid.classList.add('edit-grid')
-  editGrid.style.width = (VIEWPORT_SIZE.width * _squareSize) + 'px';
-  editGrid.style.height = (VIEWPORT_SIZE.height * _squareSize) + 'px';
+  editGrid.style.width = (VIEWPORT_SIZE.width * SQUARE_SIZE) + 'px';
+  editGrid.style.height = (VIEWPORT_SIZE.height * SQUARE_SIZE) + 'px';
   editGrid.style.transform = `translate(${_worldOffset}px, ${_worldOffset}px)`
   _viewport.appendChild(editGrid);
 
@@ -394,7 +394,7 @@ function onWinEventFactory(roomId) {
 async function moveViewPort(pos = {x:0, y:0}, durationSeconds = _roomTransitionDuration, easing = 'ease-in-out') {
 
   // Animate:
-  const translate = `translate(${_worldOffset - (pos.x * _squareSize)}px, ${_worldOffset - (pos.y * _squareSize)}px)`;
+  const translate = `translate(${_worldOffset - (pos.x * SQUARE_SIZE)}px, ${_worldOffset - (pos.y * SQUARE_SIZE)}px)`;
   await _world.animate(
     [
       { transform: translate },
@@ -422,7 +422,7 @@ async function movePlayer(props) {
   _state.player.move(true);
 
   // Animate:
-  const translate = `translate(${props.x * _squareSize}px, ${props.y * _squareSize}px)`;
+  const translate = `translate(${props.x * SQUARE_SIZE}px, ${props.y * SQUARE_SIZE}px)`;
   await _state.player.div.animate(
     [
       { transform: translate },
@@ -501,7 +501,7 @@ function moveRoom(offset) {
   const room = _state.level
   room.pos.x += offset.x;
   room.pos.y += offset.y;
-  room.div.style.transform = `translate(${room.pos.x * _squareSize}px, ${room.pos.y * _squareSize}px)`
+  room.div.style.transform = `translate(${room.pos.x * SQUARE_SIZE}px, ${room.pos.y * SQUARE_SIZE}px)`
 }
 
 function toggleEditMode(mode) {
@@ -937,7 +937,7 @@ function makeRooms() {
       'hidden',
       'level-' + room.id,
     );
-    room.div.style.transform = `translate(${room.pos.x * _squareSize}px, ${room.pos.y * _squareSize}px)`
+    room.div.style.transform = `translate(${room.pos.x * SQUARE_SIZE}px, ${room.pos.y * SQUARE_SIZE}px)`
 
     // Make cells:
     for (let y = 0; y < VIEWPORT_SIZE.height; y++) {
@@ -1006,7 +1006,7 @@ function makeDiv(pos, div, classes) {
   const d = document.createElement('div');
   div.appendChild(d);
 
-  d.style.transform = `translate(${pos.x * _squareSize}px, ${pos.y * _squareSize}px)`
+  d.style.transform = `translate(${pos.x * SQUARE_SIZE}px, ${pos.y * SQUARE_SIZE}px)`
 
   d.classList.add(...classes);
 
@@ -1055,7 +1055,7 @@ function updateBoxes() {
 function updateBox(b) {
 
   const d = document.querySelector('.level-' + _state.level.id + ' .box-' + b.id);
-  d.style.transform = `translate(${b.x * _squareSize}px, ${b.y * _squareSize}px)`
+  d.style.transform = `translate(${b.x * SQUARE_SIZE}px, ${b.y * SQUARE_SIZE}px)`
 
   if(isBoxOnCrystal(b)) {
     d.classList.add('state-win');
@@ -1070,10 +1070,10 @@ function makeLabel(label, div) {
   let d = document.createElement('div');
   div.appendChild(d);
 
-  d.style.width = (_squareSize * label.width) + 'px';
-  d.style.height = (_squareSize * label.height) + 'px';
-  d.style.transform = `translate(${label.pos.x * _squareSize}px, ${label.pos.y * _squareSize}px)`;
-  d.style.fontSize = (_squareSize + 10) + 'px';
+  d.style.width = (SQUARE_SIZE * label.width) + 'px';
+  d.style.height = (SQUARE_SIZE * label.height) + 'px';
+  d.style.transform = `translate(${label.pos.x * SQUARE_SIZE}px, ${label.pos.y * SQUARE_SIZE}px)`;
+  d.style.fontSize = (SQUARE_SIZE + 10) + 'px';
 
   d.classList.add(
     'label',
@@ -1097,7 +1097,7 @@ function makeDoor(door, div) {
 
   door.div = d;
 
-  d.style.transform = `translate(${door.pos.x * _squareSize}px, ${door.pos.y * _squareSize}px)`
+  d.style.transform = `translate(${door.pos.x * SQUARE_SIZE}px, ${door.pos.y * SQUARE_SIZE}px)`
 
   d.classList.add(
     'door',
