@@ -34,7 +34,7 @@ export class Player {
     this.updateHtmlClassList();
   }
 
-  push(direction = null) {
+  pushBox(direction = null) {
     this.pushDirection = direction;
     this.resetBoredTimer();
     this.updateHtmlClassList();

@@ -636,11 +636,11 @@ async function onKeyDown(e) {
       adj.x += x;
       adj.y += y;
       updateBox(adj);
-      _state.player.push(pushDirection);
+      _state.player.pushBox(pushDirection);
       moveAdjust = _pushFriction;
       moveEasing = 'linear';
     } else {
-      _state.player.push(null);
+      _state.player.pushBox(null);
     }
 
     _state.isPendingMove = true;
@@ -665,13 +665,13 @@ async function onKeyDown(e) {
       });
 
       if (adj.type !== 'box' || !canBePushed(adj, {x, y}) ) {
-        _state.player.push(null);
+        _state.player.pushBox(null);
       }
 
     }
 
     if (await checkWin()) {
-      _state.player.push(null); // No need to push further if level has been won.
+      _state.player.pushBox(null); // No need to push further if level has been won.
     }
 
     _state.isPendingMove = false;
@@ -849,7 +849,7 @@ function undoState() {
   movePlayer(oldState.player.pos);
   _state.player.move(oldState.player.isMoving);
   _state.player.face(oldState.player.faceDirection);
-  _state.player.push(oldState.player.pushDirection);
+  _state.player.pushBox(oldState.player.pushDirection);
 
   checkChangeRoom();
 
