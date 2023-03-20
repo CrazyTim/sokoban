@@ -26,6 +26,25 @@ const ANIMATION_PROP = {
   },
 };
 
+const ENTITY_TYPE = { // These entity types are stateless in the world and do not change.
+  empty: {
+    id: 0,
+    type: 'empty',
+  },
+  wall: {
+    id: 1,
+    type: 'wall',
+  },
+  ground: {
+    id: 2,
+    type: 'ground',
+  },
+  crystal: {
+    id: 3,
+    type: 'crystal',
+  },
+};
+
 // Globals:
 
 const _state = {
@@ -50,29 +69,6 @@ let _editMode = null;
 let _viewportOverflow = false;
 const _lastRoomIds  = [];
 const _inputStack = [];
-const entity = { // These entity types are stateless in the world and do not change.
-
-  empty: {
-    id: 0,
-    type: 'empty',
-  },
-
-  wall: {
-    id: 1,
-    type: 'wall',
-  },
-
-  ground: {
-    id: 2,
-    type: 'ground',
-  },
-
-  crystal: {
-    id: 3,
-    type: 'crystal',
-  },
-
-}
 
 function init() {
 
@@ -245,7 +241,7 @@ function roomFactory(roomId) {
 
     // Ensure the cell under the door is ground (for convenience when designing rooms and joining them together):
     const cellIndex = convertPosToMapIndex(door.pos)
-    room.map[cellIndex] = entity.ground.id;
+    room.map[cellIndex] = ENTITY_TYPE.ground.id;
 
   }
 
@@ -760,7 +756,7 @@ function getRoomsAtGlobalPos(globalPos) {
       const cell = room.map[ convertPosToMapIndex(pos) ];
 
       // Ensure cell is not empty
-      if (cell !== entity.empty.id) {
+      if (cell !== ENTITY_TYPE.empty.id) {
         currentRooms.push(room);
       }
 
@@ -831,7 +827,7 @@ async function checkWin() {
 }
 
 function isBoxOnCrystal(box) {
-  return _state.level.map[convertPosToMapIndex(box)] === entity.crystal.id;
+  return _state.level.map[convertPosToMapIndex(box)] === ENTITY_TYPE.crystal.id;
 }
 
 function resetState() {
@@ -906,7 +902,7 @@ function getObject(pos) {
 
   // Check wall:
   let i = convertPosToMapIndex(pos);
-  for (const value of Object.values(entity)) {
+  for (const value of Object.values(ENTITY_TYPE)) {
     if (value.id === _state.level.map[i]) return value;
   }
 
@@ -949,7 +945,7 @@ function makeRooms() {
 
         // Get entity type:
         let e;
-        for (const value of Object.values(entity)) {
+        for (const value of Object.values(ENTITY_TYPE)) {
           if (cell === value.id) {
             e = value;
             break;
@@ -1020,7 +1016,7 @@ function changeCellType(id, entityKey) {
 
   // Get entity:
   let e;
-  for (const [key, value] of Object.entries(entity)) {
+  for (const [key, value] of Object.entries(ENTITY_TYPE)) {
     if (entityKey === key) {
       e = value;
       break;
