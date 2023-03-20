@@ -19,7 +19,11 @@ const _state = {
 }
 
 // Settings:
-const _viewportSize = {width: 11, height: 11}
+const VIEWPORT_SIZE = {
+  width: 11,
+  height: 11,
+};
+
 const _squareSize = 60; // Pixels.
 const _pixelSize = _squareSize / 20;
 const _worldOffset = _squareSize * 1; // Number of squares to offset the world.
@@ -151,8 +155,8 @@ function onLoad() {
   `;
   document.head.appendChild(style);
 
-  _viewport.style.width = (_worldOffset * 2) + (_viewportSize.width * _squareSize) + 'px';
-  _viewport.style.height = (_worldOffset * 2) + (_viewportSize.height * _squareSize) + 'px';
+  _viewport.style.width = (_worldOffset * 2) + (VIEWPORT_SIZE.width * _squareSize) + 'px';
+  _viewport.style.height = (_worldOffset * 2) + (VIEWPORT_SIZE.height * _squareSize) + 'px';
 
   // Make world:
   _world = document.createElement('div');
@@ -270,14 +274,14 @@ function makeEditGrid() {
   // Make viewport edge:
   const editGrid = document.createElement('div');
   editGrid.classList.add('edit-grid')
-  editGrid.style.width = (_viewportSize.width * _squareSize) + 'px';
-  editGrid.style.height = (_viewportSize.height * _squareSize) + 'px';
+  editGrid.style.width = (VIEWPORT_SIZE.width * _squareSize) + 'px';
+  editGrid.style.height = (VIEWPORT_SIZE.height * _squareSize) + 'px';
   editGrid.style.transform = `translate(${_worldOffset}px, ${_worldOffset}px)`
   _viewport.appendChild(editGrid);
 
   // Make cells:
-  for (let y = 0; y < _viewportSize.height; y++) {
-    for (let x = 0; x < _viewportSize.width; x++) {
+  for (let y = 0; y < VIEWPORT_SIZE.height; y++) {
+    for (let x = 0; x < VIEWPORT_SIZE.width; x++) {
 
       const i = convertPosToMapIndex({x,y})
 
@@ -750,8 +754,8 @@ function getRoomsAtGlobalPos(globalPos) {
     const pos = getLocalPos(globalPos, room.id)
 
     // check out of bounds
-    if (pos.x >= 0 && pos.x < _viewportSize.width &&
-        pos.y >= 0 && pos.y < _viewportSize.height) {
+    if (pos.x >= 0 && pos.x < VIEWPORT_SIZE.width &&
+        pos.y >= 0 && pos.y < VIEWPORT_SIZE.height) {
 
       const cell = room.map[ convertPosToMapIndex(pos) ];
 
@@ -869,7 +873,7 @@ function undoState() {
 // Return the map index for the given position.
 // local coords.
 function convertPosToMapIndex(pos) {
-  return pos.x + (pos.y * _viewportSize.width);
+  return pos.x + (pos.y * VIEWPORT_SIZE.width);
 }
 
 
@@ -936,8 +940,8 @@ function makeRooms() {
     room.div.style.transform = `translate(${room.pos.x * _squareSize}px, ${room.pos.y * _squareSize}px)`
 
     // Make cells:
-    for (let y = 0; y < _viewportSize.height; y++) {
-      for (let x = 0; x < _viewportSize.width; x++) {
+    for (let y = 0; y < VIEWPORT_SIZE.height; y++) {
+      for (let x = 0; x < VIEWPORT_SIZE.width; x++) {
 
         const index = convertPosToMapIndex({x,y})
 
@@ -1165,8 +1169,8 @@ function hideDistantRooms() {
     const xOffset = Math.abs(room.pos.x - _state.level.pos.x);
     const yOffset = Math.abs(room.pos.y - _state.level.pos.y);
 
-    if (xOffset > (_viewportSize.width + 2) ||
-        yOffset > (_viewportSize.height + 2)) {
+    if (xOffset > (VIEWPORT_SIZE.width + 2) ||
+        yOffset > (VIEWPORT_SIZE.height + 2)) {
 
       // This room is definitely outside the viewport
       room.div.style.display = 'none';
