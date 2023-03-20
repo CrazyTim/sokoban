@@ -26,7 +26,8 @@ const ANIMATION_PROP = {
   },
 };
 
-const ENTITY_TYPE = { // These entity types are stateless in the world and do not change.
+const ENTITY_TYPE = {
+  // Background entities (part of the room map):
   empty: {
     id: 0,
     type: 'empty',
@@ -42,6 +43,16 @@ const ENTITY_TYPE = { // These entity types are stateless in the world and do no
   crystal: {
     id: 3,
     type: 'crystal',
+  },
+
+  // Foreground entities:
+  box: {
+    id: -1,
+    type: 'box',
+  },
+  door: {
+    id: -1,
+    type: 'door',
   },
 };
 
@@ -215,7 +226,7 @@ function roomFactory(roomId) {
   // Initalise boxes:
   for (const [i, box] of room.boxes.entries()) {
     box.id = i;
-    box.type = 'box';
+    box.type = ENTITY_TYPE.box.type;
   }
 
   // Compose text for first label:
@@ -233,7 +244,7 @@ function roomFactory(roomId) {
   for (const [i, door] of room.doors.entries()) {
 
     door.id = i;
-    door.type = 'door';
+    door.type = ENTITY_TYPE.door.type;
 
     if (door.state === undefined) door.state = 'open'; // Default value if not specified.
 
@@ -457,16 +468,16 @@ function setEventHandlers() {
   btnModeClear.onclick = e => clearCells();
 
   const btnModeEmpty = document.querySelector('.btn-mode-empty');
-  btnModeEmpty.onclick = e => toggleEditMode('empty');
+  btnModeEmpty.onclick = e => toggleEditMode(ENTITY_TYPE.empty.type);
 
   const btnModeWall = document.querySelector('.btn-mode-wall');
-  btnModeWall.onclick = e => toggleEditMode('wall');
+  btnModeWall.onclick = e => toggleEditMode(ENTITY_TYPE.wall.type);
 
   const btnModeGround = document.querySelector('.btn-mode-ground');
-  btnModeGround.onclick = e => toggleEditMode('ground');
+  btnModeGround.onclick = e => toggleEditMode(ENTITY_TYPE.ground.type);
 
   const btnModeCrystal = document.querySelector('.btn-mode-crystal');
-  btnModeCrystal.onclick = e => toggleEditMode('crystal');
+  btnModeCrystal.onclick = e => toggleEditMode(ENTITY_TYPE.crystal.type);
 
   const btnModePlayer = document.querySelector('.btn-mode-player');
   btnModePlayer.onclick = e => toggleEditMode('player');
@@ -608,11 +619,11 @@ async function onKeyDown(e) {
     y: playerLocalPos.y + y,
   });
 
-  if (adj.type === 'door' && adj.state === 'closed') {
+  if (adj.type === ENTITY_TYPE.door.type && adj.state === 'closed') {
     move = false;
   }
 
-  if (adj.type === 'box' || adj.type === 'wall') {
+  if (adj.type === ENTITY_TYPE.box.type || adj.type === ENTITY_TYPE.wall.type) {
     move = canBePushed(adj, {x, y});
   }
 
@@ -643,7 +654,7 @@ async function onKeyDown(e) {
 
     let animationProps = ANIMATION_PROP.move;
 
-    if (adj.type === 'box') {
+    if (adj.type === ENTITY_TYPE.box.type) {
       // Move box:
       adj.x += x;
       adj.y += y;
@@ -676,7 +687,7 @@ async function onKeyDown(e) {
         y: playerLocalPos.y + y,
       });
 
-      if (adj.type !== 'box' || !canBePushed(adj, {x, y}) ) {
+      if (adj.type !== ENTITY_TYPE.box.type || !canBePushed(adj, {x, y}) ) {
         _state.player.pushBox(null);
       }
 
@@ -771,7 +782,7 @@ function getRoomsAtGlobalPos(globalPos) {
 function canBePushed(item, direction = {x:0, y:0}) {
 
   // Cancel if its a wall:
-  if (item.type === 'wall') return false;
+  if (item.type === ENTITY_TYPE.wall.type) return false;
 
   // Prevent boxes from being moved once the level has been won
   // (otherwise player could move boxes out of the level)
@@ -783,11 +794,11 @@ function canBePushed(item, direction = {x:0, y:0}) {
     y: item.y + direction.y,
   });
 
-  if (adj.type === 'box' || adj.type === 'empty' || adj.type === 'wall') {
+  if (adj.type === ENTITY_TYPE.box.type || adj.type === ENTITY_TYPE.empty.type || adj.type === ENTITY_TYPE.wall.type) {
     return false;
   }
 
-  if (adj.type === 'door') {
+  if (adj.type === ENTITY_TYPE.door.type) {
     if (adj.state === 'closed') return;
     if (!adj.allowPushThrough) return;
   }
@@ -1038,7 +1049,7 @@ function changeCellType(id, entityKey) {
 
 function clearCells() {
   for (let i = 0; i < _state.currentRoom.map.length; i++) {
-    changeCellType(i, 'empty');
+    changeCellType(i, ENTITY_TYPE.empty.type);
   }
 }
 
