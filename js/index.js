@@ -23,11 +23,20 @@ const _viewportSize = {width: 11, height: 11}
 const _squareSize = 60; // Pixels.
 const _pixelSize = _squareSize / 20;
 const _worldOffset = _squareSize * 1; // Number of squares to offset the world.
-const _moveDuration = .2;
 const _winDuration = .8;
 const _roomTransitionDuration = 1;
 const _inputStackLength = 1; // number of keyboard presses to store on the stack.
-const _pushFriction = 1.3;
+
+const ANIMATION_PROP = {
+  move: {
+    duration: .2,
+    easing: 'ease',
+  },
+  moveSlow: {
+    duration: .26,
+    easing: 'linear',
+  },
+};
 
 // Constants:
 const _startRoomId = 0;
@@ -106,11 +115,15 @@ function onLoad() {
   var style = document.createElement('style');
   style.innerHTML = `
     .player {
-      transition: transform ${_moveDuration}s ease;
+      transition: transform ${ANIMATION_PROP.move.duration}s ease;
     }
 
-    .box {
-      transition: transform ${_moveDuration * _pushFriction}s linear;
+    .box,
+    .player.state-push-up,
+    .player.state-push-down,
+    .player.state-push-left,
+    .player.state-push-right {
+      transition: transform ${ANIMATION_PROP.moveSlow.duration}s linear;
     }
 
     .cell,
@@ -397,8 +410,8 @@ async function moveViewPort(pos = {x:0, y:0}, durationSeconds = _roomTransitionD
 
 async function movePlayer(props) {
 
-  if (!props.easing) props.easing = 'ease';
-  if (!props.duration) props.duration = _moveDuration;
+  if (!props.easing) props.easing = ANIMATION_PROP.move.easing;
+  if (!props.duration) props.duration = ANIMATION_PROP.move.duration;
 
   _state.player.pos.x = props.x;
   _state.player.pos.y = props.y;
@@ -628,8 +641,7 @@ async function onKeyDown(e) {
 
     }
 
-    let moveAdjust = 1;
-    let moveEasing = 'ease';
+    let animationProps = ANIMATION_PROP.move;
 
     if (adj.type === 'box') {
       // Move box:
@@ -637,10 +649,11 @@ async function onKeyDown(e) {
       adj.y += y;
       updateBox(adj);
       _state.player.pushBox(pushDirection);
-      moveAdjust = _pushFriction;
-      moveEasing = 'linear';
+      _state.player.didPushBox = true; // We save this for the undo animation.
+      animationProps = ANIMATION_PROP.moveSlow;
     } else {
       _state.player.pushBox(null);
+      _state.player.didPushBox = false;
     }
 
     _state.isPendingMove = true;
@@ -648,8 +661,7 @@ async function onKeyDown(e) {
     const movePlayerAnimation = movePlayer({
       x: _state.player.pos.x + x,
       y: _state.player.pos.y + y,
-      duration: _moveDuration * moveAdjust,
-      easing: moveEasing,
+      ...animationProps,
     });
 
     checkChangeRoom();
@@ -839,8 +851,13 @@ function undoState() {
     _state.levels[room.id].boxes = room.boxes;
   }
   updateBoxes();
-  console.log(oldState.player);
-  movePlayer(oldState.player.pos);
+
+  const animationProps = (_state.player.didPushBox === true) ? ANIMATION_PROP.moveSlow : ANIMATION_PROP.move;
+  movePlayer({
+    ...oldState.player.pos,
+    ...animationProps,
+  });
+
   _state.player.move(oldState.player.isMoving);
   _state.player.face(oldState.player.faceDirection);
   _state.player.pushBox(oldState.player.pushDirection);
