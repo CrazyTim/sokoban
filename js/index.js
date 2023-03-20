@@ -548,7 +548,7 @@ async function onKeyDown(e) {
 
   // Undo:
   if (e.key === 'Delete' || e.key === 'z' || (e.key === 'z' && e.ctrlKey)) {
-    undo();
+    undoState();
     return;
   }
 
@@ -818,14 +818,6 @@ function isBoxOnCrystal(box) {
   return _state.level.map[convertPosToMapIndex(box)] === entity.crystal.id;
 }
 
-function undo() {
-
-  if (_state.history.length === 0) return;
-
-  undoState();
-
-}
-
 function resetState() {
 
   if (_state.history.length === 0) return;
@@ -837,6 +829,8 @@ function resetState() {
 }
 
 function undoState() {
+
+  if (_state.history.length === 0) return;
 
   const oldState = _state.history.pop();
 
