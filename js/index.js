@@ -570,45 +570,51 @@ async function onKeyDown(e) {
 
   // Undo:
   if (e.key === 'Delete' || e.key === 'z' || (e.key === 'z' && e.ctrlKey)) {
-    undoState();
+    await undoState();
     return;
   }
 
   // Reset room:
   if (e.key === 'Escape') {
-    resetState();
+    await resetState();
     return;
   }
 
+  if (e.key === 'ArrowUp' || e.key === 'w') {
+    await checkMovePlayer('up');
+  } else if (e.key === 'ArrowDown' || e.key === 's') {
+    await checkMovePlayer('down');
+  } else if (e.key === 'ArrowLeft' || e.key === 'a') {
+    await checkMovePlayer('left');
+  } else if (e.key === 'ArrowRight'  || e.key === 'd') {
+    await checkMovePlayer('right');
+  }
+
+}
+
+async function checkMovePlayer(pushDirection) {
+
   let x = 0;
   let y = 0;
-  let pushDirection;
-
-  // Determine pos offset
   const oldPlayerFaceDirection = _state.player.faceDirection;
-  if (e.key === 'ArrowUp' || e.key === 'w') {
-    pushDirection = 'up';
+
+  if (pushDirection === 'up') {
     y -= 1;
     _state.player.face( oldPlayerFaceDirection.includes('e') ? 'ne' : 'nw' );
-  } else if (e.key === 'ArrowDown' || e.key === 's') {
-    pushDirection = 'down';
+  } else if (pushDirection === 'down') {
     y += 1;
     _state.player.face( oldPlayerFaceDirection.includes('e') ? 'se' : 'sw' );
-  } else if (e.key === 'ArrowLeft' || e.key === 'a') {
-    pushDirection = 'left';
+  } else if (pushDirection === 'left') {
     x -= 1;
     _state.player.face('sw');
-  } else if (e.key === 'ArrowRight'  || e.key === 'd') {
-    pushDirection = 'right';
+  } else if (pushDirection === 'right') {
     x += 1;
     _state.player.face('se');
   } else {
-    return; // ignore all other keys
+    return;
   }
 
   let move = true;
-
-  if ( x === 0 && y === 0) move = false; // Cancel if no movement.
 
   // Check movement is valid:
   const playerLocalPos = getLocalPos(_state.player.pos);
@@ -834,17 +840,17 @@ function isBoxOnCrystal(box) {
   return _state.currentRoom.map[convertPosToMapIndex(box)] === ENTITY_TYPE.crystal.id;
 }
 
-function resetState() {
+async function resetState() {
 
   if (_state.history.length === 0) return;
 
   _state.history = [ _state.history[0] ]; // Reset to the first move.
 
-  undoState();
+  await undoState();
 
 }
 
-function undoState() {
+async function undoState() {
 
   if (_state.history.length === 0) return;
 
@@ -861,7 +867,7 @@ function undoState() {
   _state.player.pushBox(oldState.player.pushDirection);
 
   const animationProps = (_state.player.didPushBox === true) ? ANIMATION_PROP.moveSlow : ANIMATION_PROP.move;
-  movePlayer({
+  await movePlayer({
     ...oldState.player.pos,
     ...animationProps,
   });
