@@ -11,7 +11,7 @@ const VIEWPORT_SIZE = {
 const SQUARE_SIZE = 60; // Pixels.
 const PIXEL_SIZE = SQUARE_SIZE / 20;
 const WORLD_OFFSET = SQUARE_SIZE * 1; // Number of squares to offset the world.
-const WIN_DURATION = .8;
+const PLAYER_DANCE_DURATION = .8;
 const ROOM_TRANSITION_DURATION = 1;
 const INPUT_STACK_LENGTH = 1; // number of keyboard presses to store on the stack.
 
@@ -816,7 +816,7 @@ async function checkWin() {
   _state.player.dance(true);
 
   // Wait for win animation to finish:
-  await wait(WIN_DURATION);
+  await wait(PLAYER_DANCE_DURATION);
 
   input(true);
   _state.player.dance(false);
