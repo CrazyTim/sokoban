@@ -68,8 +68,6 @@ const _state = {
 
   canInput: false,
 
-  isPendingMove: false, // Keypress mutex.
-
   history: [], // Undo stack.
 
 }
@@ -567,7 +565,7 @@ async function onKeyDown(e) {
 
   // Wait for prev input to finish:
   _inputStack.push(e);
-  if (_state.isPendingMove) return;
+  if (_state.player.isMoving || _state.player.isDancing) return;
   _inputStack.shift();
 
   // Undo:
@@ -666,8 +664,6 @@ async function onKeyDown(e) {
       state.player.didPushBox = false; // Note: this is used for the undo animation.
     }
 
-    _state.isPendingMove = true;
-
     const movePlayerAnimation = movePlayer({
       x: _state.player.pos.x + x,
       y: _state.player.pos.y + y,
@@ -695,8 +691,6 @@ async function onKeyDown(e) {
     if (await checkWin()) {
       _state.player.pushBox(null); // No need to push further if level has been won.
     }
-
-    _state.isPendingMove = false;
 
     { // Send queued input:
 
