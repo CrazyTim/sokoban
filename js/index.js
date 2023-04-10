@@ -629,28 +629,27 @@ async function onKeyDown(e) {
 
   if (move) {
 
-    { // Store history (undo)
+    // Store history (undo)
 
-      const levelsCopy = [];
-
-      for (const room of _state.rooms) {
-        levelsCopy.push({
-          id: room.id,
-          boxes: util.deepCopy(room.boxes),
-        });
-      }
-
-      _state.history.push({
-        player: {
-          pos: util.deepCopy(_state.player.pos),
-          faceDirection: oldPlayerFaceDirection,
-          isMoving: _state.player.isMoving,
-          pushDirection: _state.player.pushDirection,
-        },
-        levels: levelsCopy,
+    const levelsCopy = [];
+    for (const room of _state.rooms) {
+      levelsCopy.push({
+        id: room.id,
+        boxes: util.deepCopy(room.boxes),
       });
-
     }
+
+    const state = {
+      player: {
+        pos: util.deepCopy(_state.player.pos),
+        faceDirection: oldPlayerFaceDirection,
+        pushDirection: _state.player.pushDirection,
+      },
+      levels: levelsCopy,
+    }
+
+    _state.history.push(state);
+
 
     let animationProps = ANIMATION_PROP.move;
 
@@ -660,11 +659,11 @@ async function onKeyDown(e) {
       adj.y += y;
       updateBox(adj);
       _state.player.pushBox(pushDirection);
-      _state.player.didPushBox = true; // We save this for the undo animation.
+      state.player.didPushBox = true; // Note: this is used for the undo animation.
       animationProps = ANIMATION_PROP.moveSlow;
     } else {
       _state.player.pushBox(null);
-      _state.player.didPushBox = false;
+      state.player.didPushBox = false; // Note: this is used for the undo animation.
     }
 
     _state.isPendingMove = true;
@@ -863,15 +862,15 @@ function undoState() {
   }
   updateBoxes();
 
+  _state.player.didPushBox = oldState.player.didPushBox;
+  _state.player.face(oldState.player.faceDirection);
+  _state.player.pushBox(oldState.player.pushDirection);
+
   const animationProps = (_state.player.didPushBox === true) ? ANIMATION_PROP.moveSlow : ANIMATION_PROP.move;
   movePlayer({
     ...oldState.player.pos,
     ...animationProps,
   });
-
-  _state.player.move(oldState.player.isMoving);
-  _state.player.face(oldState.player.faceDirection);
-  _state.player.pushBox(oldState.player.pushDirection);
 
   checkChangeRoom();
 
