@@ -217,7 +217,7 @@ function getGlobalPos(pos, roomId) {
 // Clone a room and set default values.
 function roomFactory(roomId) {
 
-  const room = util.deepCopy(rooms[roomId]);
+  const room = window.structuredClone(rooms[roomId]);
 
   room.id = roomId;
 
@@ -639,13 +639,13 @@ async function checkMovePlayer(pushDirection) {
     for (const room of _state.rooms) {
       levelsCopy.push({
         id: room.id,
-        boxes: util.deepCopy(room.boxes),
+        boxes: window.structuredClone(room.boxes),
       });
     }
 
     const state = {
       player: {
-        pos: util.deepCopy(_state.player.pos),
+        pos: window.structuredClone(_state.player.pos),
         faceDirection: oldPlayerFaceDirection,
         pushDirection: _state.player.pushDirection,
       },
